@@ -1,18 +1,35 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <ul>
+      <li v-for="el in contents" :key="el">
+        <router-link :to="`/posts/${el.title}`">
+          <h3>{{ el.title }}</h3>
+          <p>
+            {{ el.content }}
+          </p>
+        </router-link>
+      </li>
+    </ul>
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import Post from "@/components/Post.vue";
+import obj from "@/assets/data.js";
 
 export default {
-  name: 'Home',
+  name: "Home",
   components: {
-    HelloWorld
-  }
-}
+    Post,
+  },
+  data() {
+    return {
+      contents: obj
+    };
+  },
+  mounted() {
+  },
+};
 </script>
