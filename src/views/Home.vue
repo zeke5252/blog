@@ -1,15 +1,13 @@
 <template>
   <div class="home">
-    <ul>
-      <li v-for="el in contents" :key="el">
-        <router-link :to="`/posts/${el.title}`">
-          <h3>{{ el.title }}</h3>
-          <p>
-            {{ el.content }}
-          </p>
-        </router-link>
-      </li>
-    </ul>
+    <div class="list-group">
+      <router-link :to="`/posts/${el.title}`" v-for="el in contents" :key="el" class="list-group-item list-group-item-action">
+        <h3>{{ el.title }}</h3>
+        <p>
+          {{ el.content }}
+        </p>
+      </router-link>
+    </div>
     <router-view></router-view>
   </div>
 </template>

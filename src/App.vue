@@ -1,9 +1,17 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+<div class="container-xxl">
+  <div class="row">
+    <div class="col-2">
+      <ul class="list-group list-group-flush">
+        <router-link to="/" class="list-group-item list-group-item-action">Home</router-link>
+        <router-link to="/about" class="list-group-item list-group-item-action">About</router-link>
+      </ul>
+    </div>
+    <div class="col-10">
+      <router-view/>
+    </div>
   </div>
-  <router-view/>
+</div>
 </template>
 
 <style lang="scss">
@@ -15,16 +23,4 @@
   color: #2c3e50;
 }
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
-}
 </style>
