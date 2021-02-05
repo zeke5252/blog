@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="list-group">
-      <router-link :to="`/posts/${el.title}`" v-for="el in contents" :key="el" class="list-group-item list-group-item-action">
+      <router-link :to="`/posts/${el.title}`" v-for="el in getDB" :key="el" class="list-group-item list-group-item-action">
         <h3>{{ el.title }}</h3>
         <p>
           {{ el.content }}
@@ -27,7 +27,13 @@ export default {
       contents: obj
     };
   },
+  computed:{
+    getDB(){
+      return this.$store.getters.getDB
+    }
+  },
   mounted() {
+    this.$store.dispatch('getFirestoreDB')
   },
 };
 </script>

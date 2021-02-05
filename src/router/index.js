@@ -12,9 +12,8 @@ const routes = [
   },
   {
     path: "/posts/:title",
-    name: "Posts",
-    component: Home,
-    children: [{ path: "", component: Post, props: true }],
+    name: "Post",
+    component: Post,
     beforeEnter(to, from, next) {
       let result = obj.find((el) => el["title"] === to.params.title);
       if (!result) {
