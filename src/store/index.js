@@ -1,5 +1,6 @@
 import { createStore } from "vuex";
 import { db } from "@/firebaseDB.js";
+import { storage } from "../firebaseDB.js";
 
 export default createStore({
   state: {
@@ -28,6 +29,15 @@ export default createStore({
           dbData.push(doc.data());
         });
       });
+      let urlPromises=[];
+      dbData.forEach((post,i)=>{
+         let t = storage.refFromURL(post.imageSrc).getDownloadURL()
+        .then(res=>{
+          post.imageSrc = res
+        });
+        urlPromises.push(t);
+      });
+      await Promise.all(urlPromises)
       commit("updateDB", dbData);
     },
   },

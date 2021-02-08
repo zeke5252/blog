@@ -21,24 +21,27 @@ export default {
   props: {
     title: String,
   },
-  methods: {
-    setContents(title) {
-      this.contents = this.$store.getters.getDB(title);
-    },
-  },
   watch: {
-    title: function(val) {
-      this.setContents(val);
+    title: function() {
+      this.init();
     },
   },
   mounted() {
-    if (!this.$store.state.dbData2) {
+    if (!this.$store.state.dbData2 || this.$store.state.dbData2.length<1) {
       this.$store.dispatch("getFirestoreDB").then((res) => {
-        this.setContents(this.$props.title);
+        this.init();
       });
     } else {
-      this.setContents(this.$props.title);
+            console.log('with data')
+      this.init();
     }
+  },
+  methods: {
+    init() {
+      if(this.$store.getters.getDB(this.title)){
+        this.contents = this.$store.getters.getDB(this.title);}
+      
+    },
   },
 };
 </script>

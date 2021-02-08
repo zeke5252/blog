@@ -16,3 +16,4 @@ createApp(App).use(store).use(router).mount('#app')
 // auth login
 // hide api key
 // firestore storage
+// form validator
