@@ -1,44 +1,46 @@
 <template>
-  <div class="hello">
-    <h3>{{title}}</h3>
+  <div v-if="contents" class="hello">
+    <h3>{{ title }}</h3>
+    <img :src="contents.imageSrc" />
     <p>
-      {{content}}
+      {{ contents.content }}
     </p>
-    <button type="button" class="btn btn-primary">Primary</button>
+    <span>{{ contents.category }}</span
+    >, <span>{{ contents.created.seconds }}</span>
   </div>
 </template>
 
 <script>
-import obj from "@/assets/data.js";
-
 export default {
-  name: 'Post',
+  name: "Post",
   data() {
     return {
-      content: null
-    }
+      contents: null,
+    };
   },
   props: {
-    title: String
+    title: String,
+  },
+  methods: {
+    setContents(title) {
+      this.contents = this.$store.getters.getDB(title);
+    },
   },
   watch: {
     title: function(val) {
-      console.log('changed')
-      obj.forEach(el=>{
-        if(el['title']=== val){
-      this.content = el['content'];
-      } 
-    })
+      this.setContents(val);
+    },
+  },
+  mounted() {
+    if (!this.$store.state.dbData2) {
+      this.$store.dispatch("getFirestoreDB").then((res) => {
+        this.setContents(this.$props.title);
+      });
+    } else {
+      this.setContents(this.$props.title);
     }
   },
-  created() {
-          obj.forEach(el=>{
-        if(el['title']=== this.$props.title){
-      this.content = el['content'];
-      } 
-    })
-  },
-}
+};
 </script>
 
 <style scoped lang="scss">

@@ -9,19 +9,22 @@ const routes = [
     path: "/",
     name: "Home",
     component: Home,
-  },
-  {
-    path: "/posts/:title",
-    name: "Post",
-    component: Post,
-    beforeEnter(to, from, next) {
-      let result = obj.find((el) => el["title"] === to.params.title);
-      if (!result) {
-        next({name:"NotFound"})
-      } else {
-        next();
-      }
-    },
+    children: [
+      {
+        path: "posts/:title",
+        name: "Post",
+        component: Post,
+        props: true,
+        beforeEnter(to, from, next) {
+          let result = obj.find((el) => el["title"] === to.params.title);
+          if (!result) {
+            next({name:"NotFound"})
+          } else {
+            next();
+          }
+        },
+      },
+    ]
   },
   {
     path: "/about",
