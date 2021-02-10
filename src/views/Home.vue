@@ -27,6 +27,7 @@ export default {
     }
   },
   mounted() {
+    console.log('App mount')
     this.$store.dispatch('getFirestoreDB')
   },
 };

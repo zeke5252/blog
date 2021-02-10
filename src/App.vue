@@ -5,6 +5,7 @@
       <ul class="list-group list-group-flush">
         <router-link to="/" class="list-group-item list-group-item-action">Home</router-link>
         <router-link to="/about" class="list-group-item list-group-item-action">About</router-link>
+        <router-link to="/form" class="list-group-item list-group-item-action">Form</router-link>
       </ul>
     </div>
     <div class="col-10">
@@ -13,6 +14,12 @@
   </div>
 </div>
 </template>
+
+<script>
+export default {
+
+}
+</script>
 
 <style lang="scss">
 #app {

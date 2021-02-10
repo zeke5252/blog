@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import Post from "../components/Post.vue";
-import obj from "../assets/data.js";
+import store from '../store/'
 import NotFound from "../components/NotFound.vue";
 
 const routes = [
@@ -12,14 +12,21 @@ const routes = [
     children: [
       {
         path: "posts/:title",
-        name: "Post",
         component: Post,
         props: true,
-        beforeEnter(to, from, next) {
-          let result = obj.find((el) => el["title"] === to.params.title);
+        async beforeEnter(to, from, next) {
+          // Refreshing will erase store state. 
+          if(!allPosts){
+            await store.dispatch('getFirestoreDB')
+          }
+          let allPosts = store.getters.getDB();
+          let result = allPosts.find((el) => {
+            return el["title"] === to.params.title 
+          })
           if (!result) {
             next({name:"NotFound"})
           } else {
+           
             next();
           }
         },
@@ -34,6 +41,12 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/About.vue"),
+  },
+  {
+    path: "/form",
+    name: "Form",
+    component: () =>
+      import("../views/Form.vue"),
   },
   {
     path: '/:pathMatch(.*)*',

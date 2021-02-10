@@ -8,12 +8,12 @@ createApp(App).use(store).use(router).mount('#app')
 // <!--study--!>
 
 // different version of vue study
-// submit page
+// submit page (done)
 // Firestore crud(done)
 // BootstrapVue(done)
 // 404(done)
 // infinite scrolling
 // auth login
 // hide api key
-// firestore storage
+// firestore storage (done)
 // form validator
