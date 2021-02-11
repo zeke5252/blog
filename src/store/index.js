@@ -23,7 +23,7 @@ export default createStore({
   actions: {
     async getFirestoreDB({ commit }) {
       let dbData = [];
-      let postsRef = db.collection("posts");
+      let postsRef = db.collection("posts").orderBy("created", "desc");
       await postsRef.get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
           dbData.push(doc.data());

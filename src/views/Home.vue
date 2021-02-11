@@ -1,11 +1,17 @@
 <template>
   <div class="home">
-    <div v-show="isBrowseShow" class="list-group">
+    <div v-if="!getDB" class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <div v-else class="list-group">
       <router-link :to="`/posts/${el.title}`" v-for="el in getDB" :key="el" class="list-group-item list-group-item-action">
-        <h3>{{ el.title }}</h3>
-        <p>
-          {{ el.content }}
-        </p>
+        <template class="d-flex flex-column align-items-start">
+          <h5>{{ el.title }}</h5>
+          <img :src="el.imageSrc" style="width: 900px; height:auto"/>
+          <p>
+            {{ el.content }}
+          </p>
+        </template>
       </router-link>
     </div>
     <router-view/>
@@ -18,7 +24,7 @@ export default {
   name: "Home",
   data() {
     return {
-      isBrowseShow: true
+
     }
   },
   computed:{
@@ -27,7 +33,6 @@ export default {
     }
   },
   mounted() {
-    console.log('App mount')
     this.$store.dispatch('getFirestoreDB')
   },
 };

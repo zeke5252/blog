@@ -1,12 +1,12 @@
 <template>
   <div v-if="contents" class="hello">
     <h3>{{ title }}</h3>
-    <img :src="contents.imageSrc" />
+    <img :src="contents.imageSrc" style="width: 800px; height:auto"/>
     <p>
       {{ contents.content }}
     </p>
     <span>{{ contents.category }}</span
-    >, <span>{{ contents.created.seconds }}</span>
+    >, <span>{{ contents.created }}</span>
   </div>
 </template>
 
@@ -38,9 +38,13 @@ export default {
   },
   methods: {
     init() {
-      if(this.$store.getters.getDB(this.title)){
-        this.contents = this.$store.getters.getDB(this.title);}
-      
+      let content = this.$store.getters.getDB(this.title)
+      let time = content.created; 
+      let date = time.toDate(); 
+      let shortDate = date.toDateString(); 
+      let shortTime = date.toLocaleTimeString();
+      content.created = `${shortDate}, ${shortTime}`
+      this.contents = content;
     },
   },
 };

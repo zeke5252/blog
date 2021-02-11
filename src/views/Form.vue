@@ -20,7 +20,7 @@
       />
     </div>
     <div v-else>
-      <img :src="image" />
+      <img :src="image" style="width: 400px; height:auto"/>
       <button @click="removeImage">Remove image</button>
     </div>
     <div class="mb-3">
@@ -45,6 +45,7 @@
         rows="3"
       ></textarea>
     </div>
+    <span v-show="progress>0">{{progress}}</span>
     <button type="submit" class="btn btn-primary" v-on:click="submitHandler">
       Submit
     </button>
@@ -65,7 +66,8 @@ export default {
       content: "",
       created: "",
       image: "",
-      file: null
+      file: null,
+      progress: 0
     };
   },
   computed: {},
@@ -74,7 +76,13 @@ export default {
   },
   methods: {
     init() {
-
+      this.title= "",
+      this.imageSrc= "",
+      this.category= "photography",
+      this.content= "",
+      this.image= "",
+      this.file= null,
+      this.progress= 0
     },
     submitHandler() {
       // do validation
@@ -90,8 +98,7 @@ export default {
       uploadTask.on(
         firebase.storage.TaskEvent.STATE_CHANGED,
         (snapshot) => {
-          var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
+          this.progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           switch (snapshot.state) {
             case firebase.storage.TaskState.PAUSED: // or 'paused'
               console.log("Upload is paused");
@@ -118,22 +125,20 @@ export default {
         () => {
           // Upload completed successfully, now we can get the download URL
           uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-            console.log("File available at", downloadURL);
 
             // get created, title, category, and content.
             this.imageSrc = downloadURL;
-            const dateTime = new Date().getTime();
-            this.created = Math.floor(dateTime / 1000);
 
             db.collection("posts").add({
               title: this.title,
               category: this.category,
-              created: this.created,
+              created: firebase.firestore.FieldValue.serverTimestamp(),
               imageSrc: this.imageSrc,
               content: this.content
               })
               .then((docRef) => {
-                  console.log("Document written with ID: ", docRef.id);
+                alert("Upload is successful!");
+                this.init();
               })
               .catch((error) => {
                   console.error("Error adding document: ", error);
