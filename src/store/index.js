@@ -7,11 +7,13 @@ export default createStore({
     dbData2: null,
   },
   getters: {
-    getDB: (state) => (title) => {
+    getDB: (state) => (title, amount= 5) => {
       if (title && title !== "") {
         return state.dbData2.find( post => post["title"] === title );
       } else {
-        return state.dbData2;
+        return state.dbData2 && state.dbData2.filter( ( post, index ) => {
+          if(index < amount) return post
+        });
       }
     },
   },
