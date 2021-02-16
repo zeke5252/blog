@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    length{{getDB&&getDB.length}}
     <div v-if="!getDB" class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
@@ -14,7 +15,7 @@
         </template>
       </router-link>
     </div>
-    <router-view/>
+    <div v-show="loading">Loading content...</div>
   </div>
 </template>
 
@@ -35,12 +36,10 @@ export default {
   },
   methods: {
     loadMore(e) {
-      const documentScrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
       const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
       const scrollHeight = document.documentElement.scrollHeight
 			if (!this.loading && scrollTop + getWindowHeight >= scrollHeight*4/5) {
-        console.log('gotit')
 				this.loading = true;
 				setTimeout(() => {
 					this.items+=5;
@@ -53,5 +52,15 @@ export default {
     document.addEventListener('scroll', this.loadMore, true)
     this.$store.dispatch('getFirestoreDB')
   },
+  beforeUnmount() {
+    document.removeEventListener('scroll', this.loadMore, true)
+  },
+  watch: {
+    getDB(val, pre){
+      if(this.$store.getters.getDB().length === val.length){
+        document.removeEventListener('scroll', this.loadMore, true)
+      }
+    }
+  }
 };
 </script>

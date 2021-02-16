@@ -43,6 +43,7 @@
         class="form-control"
         id="area-content"
         rows="3"
+        style="white-space: pre"
       ></textarea>
     </div>
     <span v-show="progress>0">{{progress}}</span>
