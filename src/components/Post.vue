@@ -7,11 +7,11 @@
       Back
     </button>
     <h3>{{ title }}</h3>
-    <button type="button" class="btn btn-secondary" v-on:click="doPrev">
+    <button v-show="isPrevDisplay" type="button" class="btn btn-secondary" v-on:click="doPrev">
       previous
     </button>
     <img :src="contents.imageSrc" style="width: 800px; height:auto" />
-    <button type="button" class="btn btn-secondary" v-on:click="doNext">
+    <button v-show="isNextDisplay" type="button" class="btn btn-secondary" v-on:click="doNext">
       Next
     </button>
     <p>
@@ -30,6 +30,8 @@ export default {
   data() {
     return {
       contents: null,
+      isPrevDisplay: null,
+      isNextDisplay: null
     };
   },
   props: {
@@ -51,15 +53,19 @@ export default {
   },
   methods: {
     init() {
-      let content = this.$store.getters.getDB(this.title);
-      if(typeof content.created !== "string"){
-        let time = content.created;
+      let {post, isPrevDisplay, isNextDisplay} = this.$store.getters.getDB(this.title);
+      console.log('prev=', isPrevDisplay)
+      console.log('next=', isNextDisplay)
+      this.isPrevDisplay = isPrevDisplay;
+      this.isNextDisplay = isNextDisplay;
+      if(typeof post.created !== "string"){
+        let time = post.created;
         let date = time.toDate();
         let shortDate = date.toDateString();
         let shortTime = date.toLocaleTimeString();
-        content.created = `${shortDate}, ${shortTime}`;
+        post.created = `${shortDate}, ${shortTime}`;
       }
-      this.contents = content;
+      this.contents = post;
     },
     doBack(){
       router.go(-1);
@@ -77,14 +83,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-a {
-  color: #42b983;
-}
+  h3 {
+    margin: 40px 0 0;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  a {
+    color: #42b983;
+  }
 </style>

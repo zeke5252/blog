@@ -9,7 +9,15 @@ export default createStore({
   getters: {
     getDB: (state) => (title, amount) => {
       if (title && title !== "") {
-        return state.dbData2.find( post => post["title"] === title );
+        let result;
+        let post;
+        state.dbData2.forEach( (post,index) => { 
+          if(post["title"] === title){
+            let isPrevDisplay =  index !== 0  ? true : false;
+            let isNextDisplay =  index !== state.dbData2.length-1 ? true : false;
+            result = {post, isPrevDisplay, isNextDisplay};
+          } })
+        return result
       } else if(amount) {
         return state.dbData2 && state.dbData2.filter( ( post, index ) => {
           if(index < amount) return post
@@ -17,9 +25,6 @@ export default createStore({
       } else {
         return state.dbData2
       }
-    },
-    getTodoById: (state) => (id) => {
-      return state.todos.find(todo => todo.id === id)
     },
     getPost: (state) => (title, isNext = false) => {
       let result;
