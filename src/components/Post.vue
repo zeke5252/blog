@@ -20,10 +20,34 @@
     <span>{{ contents.category }}</span
     >, <span>{{ contents.created }}</span>
   </div>
+  <div class="row">
+    <input
+      v-model="msgTitle"
+      type="text"
+      class="form-control"
+      id="formTitle"
+      aria-label="Title"
+      placeholder="Name"
+    />
+    <textarea
+      v-model="msg"
+      class="form-control"
+      style="white-space: pre"
+      placeholder="Comment"
+    ></textarea>
+    <button type="button" class="btn btn-secondary" v-on:click="doPostMsg">
+      Post message
+    </button>
+    <ul v-if="contents ">
+      <li v-for="msg in contents.msgs" :key="msg">{{msg.name}} - {{msg.comment}}</li>
+    </ul>
+  </div>
 </template>
 
 <script>
+import { firebase } from "@firebase/app";
 import router from '../router/';
+import { db } from "@/firebaseDB.js";
 
 export default {
   name: "Post",
@@ -31,7 +55,9 @@ export default {
     return {
       contents: null,
       isPrevDisplay: null,
-      isNextDisplay: null
+      isNextDisplay: null,
+      msgTitle: '',
+      msg: ''
     };
   },
   props: {
@@ -54,10 +80,10 @@ export default {
   methods: {
     init() {
       let {post, isPrevDisplay, isNextDisplay} = this.$store.getters.getDB(this.title);
-      console.log('prev=', isPrevDisplay)
-      console.log('next=', isNextDisplay)
       this.isPrevDisplay = isPrevDisplay;
       this.isNextDisplay = isNextDisplay;
+      this.msgTitle= '';
+      this.msg= '';
       if(typeof post.created !== "string"){
         let time = post.created;
         let date = time.toDate();
@@ -68,7 +94,7 @@ export default {
       this.contents = post;
     },
     doBack(){
-      router.go(-1);
+      router.push("/");;
     },
     doPrev(){
       let toTitle = this.$store.getters.getPost(this.$route.params.title, false);
@@ -77,6 +103,25 @@ export default {
     doNext(){
       let toTitle = this.$store.getters.getPost(this.$route.params.title, true);
       router.push(toTitle);
+    },
+    doPostMsg(){
+      db.collection("posts").where("title", "==", this.contents.title).get()
+      .then( posts => {
+        posts.forEach(async (post) => {
+          const postRef = db.collection("posts").doc(post.id);
+          postRef.update({msgs:firebase.firestore.FieldValue.arrayUnion({name: this.msgTitle, comment: this.msg})})
+          .then(async res=>{ 
+            let postGet = await postRef.get();
+            let postData = postGet.data()
+            this.contents.msgs = postData.msgs;
+            alert('留言成功！')
+            this.init();
+          })
+        })
+      })
+      .catch((error) => {
+        console.log("Error getting documents: ", error);
+      });
     }
   },
 };

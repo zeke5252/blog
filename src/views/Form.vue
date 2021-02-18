@@ -50,6 +50,9 @@
     <button type="submit" class="btn btn-primary" v-on:click="submitHandler">
       Submit
     </button>
+    <button type="button" class="btn btn-secondary" v-on:click="signoutHandler">
+      登出
+    </button>
   </form>
 </template>
 
@@ -57,6 +60,8 @@
 import { firebase } from "@firebase/app";
 import { db } from "@/firebaseDB.js";
 import { storage } from "../firebaseDB.js";
+import router from '../router/';
+
 export default {
   name: "Form",
   data() {
@@ -77,12 +82,12 @@ export default {
   },
   methods: {
     init() {
-      this.title= "",
-      this.imageSrc= "",
-      this.category= "photography",
-      this.content= "",
-      this.image= "",
-      this.file= null,
+      this.title= "";
+      this.imageSrc= "";
+      this.category= "photography";
+      this.content= "";
+      this.image= "";
+      this.file= null;
       this.progress= 0
     },
     submitHandler() {
@@ -166,6 +171,16 @@ export default {
     removeImage: function(e) {
       this.image = "";
     },
+    signoutHandler(){
+      firebase.auth().signOut().then(() => {
+        // Sign-out successful.
+        console.log('sign out')
+        alert("Log out!");
+        router.push("Admin");
+      }).catch((error) => {
+        // An error happened.
+      });
+    }
   },
 };
 </script>

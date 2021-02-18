@@ -1,38 +1,45 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "../views/Home.vue";
-import Post from "../components/Post.vue";
-import store from "../store/";
-import NotFound from "../components/NotFound.vue";
+import { firebase } from "@firebase/app";
+require('firebase/auth');
 
 const routes = [
   {
     path: "/posts/:title",
-    component: Post,
     props: true,
+    component: () => import("../components/Post.vue"),
   },
   {
     path: "/",
     name: "Home",
-    component: Home,
+    component: () => import("../views/Home.vue"),
   },
   {
     path: "/about",
     name: "About",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue"),
+    component: () => import("../views/About.vue"),
+  },
+  {
+    path: "/admin",
+    name: "Admin",
+    component: () => import("../views/Admin.vue"),
   },
   {
     path: "/form",
     name: "Form",
     component: () => import("../views/Form.vue"),
+    beforeEnter: (to, from, next) => {
+      var user = firebase.auth().currentUser;
+      if (user) {
+        next();
+      } else {
+        next({name: "Admin"})
+      }
+    }
   },
   {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
-    component: NotFound,
+    component: () => import("../components/NotFound.vue"),
   },
 ];
 

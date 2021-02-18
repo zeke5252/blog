@@ -12,9 +12,9 @@ createApp(App).use(store).use(router).mount('#app')
 // Firestore crud (half)
 // BootstrapVue(done)
 // 404(done)
-// infinite scrolling
+// infinite scrolling(done)
 // auth login
 // hide api key
 // firestore storage (done)
 // form validator
-// order by created time
+// order by created time(done)

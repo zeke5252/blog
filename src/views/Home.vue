@@ -1,6 +1,5 @@
 <template>
   <div class="home">
-    length{{getDB&&getDB.length}}
     <div v-if="!getDB" class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
