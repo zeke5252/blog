@@ -11,6 +11,9 @@
       previous
     </button>
     <img :src="contents.imageSrc" style="width: 800px; height:auto" />
+    <ul>
+      <li v-for="info in Object.entries(photoExif())" :key="info">{{info[0]}} : {{info[1]}}</li>
+    </ul>
     <button v-show="isNextDisplay" type="button" class="btn btn-secondary" v-on:click="doNext">
       Next
     </button>
@@ -68,6 +71,9 @@ export default {
       this.init();
     },
   },
+  computed: {
+
+  },
   mounted() {
     if (!this.$store.state.dbData2) {
       this.$store.dispatch("getFirestoreDB").then((res) => {
@@ -122,6 +128,10 @@ export default {
       .catch((error) => {
         console.log("Error getting documents: ", error);
       });
+    },
+    photoExif(){
+      const { ApertureValue, DateTime, ExposureBias, ExposureTime, ISOSpeedRatings, Model } = this.contents.exif && JSON.parse(this.contents.exif)
+      return {ApertureValue, DateTime, ExposureBias, ExposureTime, ISOSpeedRatings, Model };
     }
   },
 };

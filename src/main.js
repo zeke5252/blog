@@ -13,8 +13,10 @@ createApp(App).use(store).use(router).mount('#app')
 // BootstrapVue(done)
 // 404(done)
 // infinite scrolling(done)
-// auth login
+// auth login(done)
 // hide api key
 // firestore storage (done)
 // form validator
 // order by created time(done)
+// post search
+// fullscreen image

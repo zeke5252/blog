@@ -28,12 +28,13 @@ const routes = [
     name: "Form",
     component: () => import("../views/Form.vue"),
     beforeEnter: (to, from, next) => {
-      var user = firebase.auth().currentUser;
-      if (user) {
-        next();
-      } else {
-        next({name: "Admin"})
-      }
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          next();
+        } else {
+          next({name: "Admin"})
+        }
+      });
     }
   },
   {

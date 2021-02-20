@@ -20,7 +20,7 @@
       />
     </div>
     <div v-else>
-      <img :src="image" style="width: 400px; height:auto"/>
+      <img :src="image" style="width: 400px; height:auto" @load="onImgExif"/>
       <button @click="removeImage">Remove image</button>
     </div>
     <div class="mb-3">
@@ -87,6 +87,7 @@ export default {
       this.category= "photography";
       this.content= "";
       this.image= "";
+      this.exif="";
       this.file= null;
       this.progress= 0
     },
@@ -134,13 +135,13 @@ export default {
 
             // get created, title, category, and content.
             this.imageSrc = downloadURL;
-
             db.collection("posts").add({
               title: this.title,
               category: this.category,
               created: firebase.firestore.FieldValue.serverTimestamp(),
               imageSrc: this.imageSrc,
-              content: this.content
+              content: this.content,
+              exif: this.exif
               })
               .then((docRef) => {
                 alert("Upload is successful!");
@@ -180,6 +181,14 @@ export default {
       }).catch((error) => {
         // An error happened.
       });
+    },
+    onImgExif(){
+      let vuIns = this
+      EXIF.getData(event.target, function() {
+      let allMetaData = JSON.stringify(EXIF.getAllTags(this));
+      vuIns.exif = allMetaData;
+    });
+
     }
   },
 };
