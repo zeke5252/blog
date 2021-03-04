@@ -141,7 +141,8 @@ export default {
               created: firebase.firestore.FieldValue.serverTimestamp(),
               imageSrc: this.imageSrc,
               content: this.content,
-              exif: this.exif
+              exif: this.exif,
+              resolution: this.resolution
               })
               .then((docRef) => {
                 alert("Upload is successful!");
@@ -183,10 +184,29 @@ export default {
       });
     },
     onImgExif(){
+// ApertureValue : 7.400879
+// DateTime : 2018:12:19 21:00:44
+// ExposureBias : -1
+// ExposureTime : 0.004
+// ISOSpeedRatings : 100
+// Model : Canon EOS M
       let vuIns = this
       EXIF.getData(event.target, function() {
-      let allMetaData = JSON.stringify(EXIF.getAllTags(this));
+        let rawData = EXIF.getAllTags(this);
+        let {ApertureValue, DateTime, ExposureBias, ExposureTime, ISOSpeedRatings, Model} = rawData;
+        let formattedData = new Map();
+        formattedData.set("Aperture", ApertureValue);
+        formattedData.set("Date / Time", DateTime);
+        formattedData.set("Exposure bias", ExposureBias);
+        formattedData.set("Exposure time", ExposureTime);
+        formattedData.set("ISO", ISOSpeedRatings);
+        formattedData.set("Model", Model);
+        // (Array.from(map.entries())
+        //  JSON.stringify(Object.fromEntries(map.entries()))
+        let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
+      console.log("all=",  allMetaData)
       vuIns.exif = allMetaData;
+      vuIns.resolution = [this.naturalWidth, this.naturalHeight]
     });
 
     }

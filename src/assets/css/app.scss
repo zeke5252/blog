@@ -1,3 +1,15 @@
 @import "./variables";
-
 @import "./views/home";
+
+body {
+    background-color: $color-bg;
+}
+
+a {
+    color: white !important;
+    background-color: $color-bg !important;
+}
+
+input, textarea, button {
+    border-radius: 0;
+}

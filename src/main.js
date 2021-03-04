@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 
-createApp(App).use(store).use(router).mount('#app')
+createApp(App).use(store).use(router).use(BootstrapIconsVue).mount('#app')
 
 // <!--study--!>
 
@@ -20,3 +20,4 @@ createApp(App).use(store).use(router).mount('#app')
 // order by created time(done)
 // post search
 // fullscreen image
+// sitemap for seo

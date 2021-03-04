@@ -3,22 +3,24 @@
     <div v-if="!getDB" class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
-    <div v-else class="list-group" @scroll="loadMore">
-      <router-link :to="`/posts/${el.title}`" v-for="el in getDB" :key="el" class="list-group-item list-group-item-action">
-        <template class="d-flex flex-column align-items-start">
-          <h5>{{ el.title }}</h5>
-          <img :src="el.imageSrc" style="width: 900px; height:auto"/>
-          <p>
-            {{ el.content }}
-          </p>
-        </template>
-      </router-link>
+    <div v-else class="row" @scroll="loadMore">
+      <div class="card col-sm-6 m-2 p-3 text-white cardStyle border-0 " style="width: 18rem; background-color: #232323" v-for="el in getDB" :key="el">
+        <router-link :to="`/posts/${el.title}`">
+          <img :src="`https://via.placeholder.com/${el.resolution[0]}x${el.resolution[1]}/333/111?Text=Zeke+blog`" @load="onImgLoad($event, el)" class="card-img-top" :style="getRatio(el.resolution[0], el.resolution[1])" alt="...">
+          <div class="card-body">
+            <div class="createdDate">{{getConvertTime(el.created)}}</div>
+            <h5 class="card-title">{{ el.title }}</h5>
+            <p class="card-text" >{{ el.content }}</p>
+          </div>
+          </router-link>
+      </div>
     </div>
     <div v-show="loading">Loading content...</div>
   </div>
 </template>
 
 <script>
+import convertTime from "../utils/common.js"
 
 export default {
   name: "Home",
@@ -34,6 +36,11 @@ export default {
     }
   },
   methods: {
+    getRatio(w, h){
+      if( w < h ){
+        return "object-fit: cover"
+      }
+    },
     loadMore(e) {
       const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
@@ -45,9 +52,16 @@ export default {
 					this.loading = false;
 				}, 1000);                
       }
-		}
+		},
+    onImgLoad(e, el){
+     e.target.src = el.imageSrc;
+    },
+    getConvertTime(time){
+      return convertTime(time, false)
+    }
   },
   mounted() {
+    this.loadMore();
     document.addEventListener('scroll', this.loadMore, true)
     this.$store.dispatch('getFirestoreDB')
   },
@@ -63,3 +77,71 @@ export default {
   }
 };
 </script>
+
+<style lang="scss">
+@import "../assets/css/app.scss";
+
+.home {
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: $color-bg;
+  color: rgb(196, 196, 196);
+  a {
+    color: rgb(179, 179, 179);
+    text-decoration: none;
+    font-weight: 100;
+  }
+  h5 {
+    letter-spacing: 1px;
+    font-size: 19px;
+    font-weight: 500;
+    color: rgb(255, 255, 255);
+  }
+  .createdDate {
+    width: 100px;
+    height: auto;
+    background-color: $color-card-bg;
+    position: absolute;
+    right: 0;
+    top: -18px;
+    border-radius: 10px 0 0 0;
+    text-align: center;
+    padding-top: 6px;
+    font-size: 8px;
+    font-weight: 300;
+    color: $color-primary-yellow;
+}
+}
+.cardStyle {
+  background-color: #313131;
+}
+.card-img-top {
+    width: 100%;
+    height: 22vh;
+    object-fit: cover;
+}
+.card-body {
+  background-color: $color-card-bg;
+  position: relative;
+  padding: 20px 20px 40px 20px;
+}
+.card-text {
+    width: 100%;
+    height: 20vh;
+    line-height: 2.2;
+    overflow:hidden;
+    color: #bbb;
+    padding: 5px 10px 80px 10px !important;
+    &::before {
+    content: "";
+    background-color: $color-primary-yellow;
+    position: absolute;
+    margin-top: 7px;
+    margin-left:-8px;
+    width: 3px;
+    height: 12px
+}
+
+}
+</style>
