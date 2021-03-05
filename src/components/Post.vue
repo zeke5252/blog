@@ -3,7 +3,7 @@
     <span class="visually-hidden">Loading...</span>
   </div>
   <div v-else>
-    <header style="display:flex; align-items: center; margin-top: 40px">
+    <header style="display:flex; align-items: center;">
       <BIconChevronLeft class= "u-btn" v-on:click="doBack"/>
       <h4>{{ title }}</h4>
       <span style="color:white; font-size:14px; margin-left: 10px; color: #777 ;transform: translateY(20%); font-weight: 600" >{{ contents.category }}</span>
@@ -106,13 +106,19 @@ export default {
   },
   methods: {
     init() {
-      let {post, isPrevDisplay, isNextDisplay} = this.$store.getters.getDB(this.title);
-      this.isPrevDisplay = isPrevDisplay;
-      this.isNextDisplay = isNextDisplay;
-      this.msgTitle= '';
-      this.msg= '';
-      post.created = convertTime(post.created);
-      this.contents = post;
+      let postData = this.$store.getters.getDB(this.title);
+      if(postData){
+        let {post, isPrevDisplay, isNextDisplay} = postData;
+        this.isPrevDisplay = isPrevDisplay;
+        this.isNextDisplay = isNextDisplay;
+        this.msgTitle= '';
+        this.msg= '';
+        post.created = convertTime(post.created);
+        this.contents = post;
+      } else {
+        this.$router.push('/components/NotFound.vue')
+      }
+
     },
     doBack(){
       router.push("/");;
