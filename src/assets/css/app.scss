@@ -1,16 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 @import "./variables";
 @import "./views/home";
 
 body {
+    color: white;
     padding-top: 50px;
-    background-color: $color-bg;
-}
-
-a {
-    color: white !important;
     background-color: $color-bg !important;
+    font-family: Roboto, Noto Sans TC, sans-serif;
+    font-size: 13px;
 }
 
 input, textarea, button {
     border-radius: 0;
 }
+
+h6, h5, h4 {
+    letter-spacing: 1px;
+    font-weight: 300;
+}
+
+a {
+    color: white !important;
+    text-decoration: none;
+}
+
+ul {
+    list-style-type: none;
+  }
+
+  ::-webkit-input-placeholder {
+    font-size: 14px;
+    opacity: .7;
+ }
+ 
+ :-moz-placeholder { /* Firefox 18- */
+    font-size: 14px;
+    opacity: .3;
+ }
+ 
+ ::-moz-placeholder {  /* Firefox 19+ */
+    font-size: 14px;
+    opacity: .3;
+ }

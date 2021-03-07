@@ -3,36 +3,36 @@
     <span class="visually-hidden">Loading...</span>
   </div>
   <div v-else>
-    <header style="display:flex; align-items: center;">
-      <BIconChevronLeft class= "u-btn" v-on:click="doBack"/>
+    <header>
+      <BIconChevronLeft class= "u-btn__back" v-on:click="doBack"/>
       <h4>{{ title }}</h4>
-      <span style="color:white; font-size:14px; margin-left: 10px; color: #777 ;transform: translateY(20%); font-weight: 600" >{{ contents.category }}</span>
-      <span style="color:white; font-size:14px; margin-left: 10px; color: #777 ;transform: translateY(20%); font-weight: 600" >  /  </span>
-      <span style="color:white; font-size:14px; margin-left: 10px; color: #777 ;transform: translateY(20%); font-weight: 600">{{ contents.created }}</span>
+      <span>{{ contents.category }}</span>
+      <span>  /  </span>
+      <span>{{ contents.created }}</span>
     </header>
     <main>
-      <BIconChevronLeft v-show="isPrevDisplay" class= "u-btn__prev" v-on:click="doPrev"/>
-      <img :src="contents.imageSrc" class="main--img" />
-      <BIconChevronRight v-show="isNextDisplay" class= "u-btn__next" v-on:click="doNext"/>
+      <BIconChevronRight v-if="isNextDisplay" class= "u-btn u-btn__next" @click="doNext"/>
+      <BIconChevronLeft v-if="isPrevDisplay" class= "u-btn u-btn__prev" @click="doPrev"/>
+      <img :src="contents.imageSrc" class="main--img"/>
       <ul>
         <li v-for="info in Object.entries(contents.exif && JSON.parse(contents.exif))" :key="info">
-          <span style="font-weight:600">{{info[0]}}</span> : <span style="color:#999">{{info[1]}}</span>
+          <span style="font-weight:400">{{info[0]}}</span> : <span style="color:#999">{{info[1]}}</span>
         </li>
       </ul>
     </main>
-      <p class="main--p__text">
+      <p class="main--p__text my-3">
         {{ contents.content }}
       </p>
   </div>
   <div class="row">
     <div class="col-sm-4">
-      <label class="form-label h5 mb-3" for="formTitle">
+      <label class="form-label h6 mb-3 mt-5 " for="formTitle">
       留言
       </label>
       <input
         v-model="msgTitle"
         type="text"
-        class="form-control mb-3 border-0"
+        class="form-control mb-2 border-0"
         id="formTitle"
         aria-label="Title"
         placeholder="大名"
@@ -40,7 +40,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-sm-4 mb-3">
+    <div class="col-sm-4 mb-2">
       <textarea
         v-model="msg"
         class="form-control border-0"
@@ -50,20 +50,20 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-sm-4 mb-3">
+    <div class="col-sm-4">
       <button type="button" class="btn mb-5 msg--btn__submit" v-on:click="doPostMsg">
         Post message
       </button>
     </div>
   </div>
-    <ul v-if="contents ">
+    <ul class="px-0" v-if="contents ">
       <li v-for="msg in contents.msgs" :key="msg">
-        <div class="h5 msg--div__title">{{msg.name}}</div>
-        <p class="msg--p__text">{{msg.comment}}</p>
-        <hr class="mb-4" style="height:1px;border:none;border-top:1px dashed #ffffff;opacity:.4"/>
+        <div class="h6 msg--div__title mb-0">{{msg.name}}</div>
+        <p class="msg--p__text mb-2">{{msg.comment}}</p>
+        <hr/>
       </li>
     </ul>
-    <footer class="m-5 "></footer>
+    <footer class="my-5"></footer>
 </template>
 
 <script>
@@ -81,7 +81,7 @@ export default {
       isPrevDisplay: null,
       isNextDisplay: null,
       msgTitle: '',
-      msg: ''
+      msg: '',
     };
   },
   props: {
@@ -149,96 +149,109 @@ export default {
       .catch((error) => {
         console.log("Error getting documents: ", error);
       });
-    }
+    },
   },
 };
 </script>
 
 <style scoped lang="scss">
-@import "../assets/css/app.scss";
-  h4 {
-    letter-spacing: 1px;
-    font-weight: 500;
-    color: white;
-    line-height: 40px;
-    margin: 0;
+  
+  @import "../assets/css/app.scss";
+
+  header {
+    display:flex; 
+    align-items: center;
+    margin-bottom: 10px;
+
+    h4 {
+      margin-bottom: 0;
+    }
+
+    span {
+      color:white; 
+      font-size:15px; 
+      margin-left: 10px; 
+      color: #777;
+      transform: translateY(20%); font-weight: 400
+    }
   }
 
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  a {
-    color: #42b983;
-  }
   .u-btn {
     color:white; 
-    width: 40px; 
-    height: 40px;
-    padding: 10px;
-    margin: 0;
+    width: 60px; 
+    height: 60px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    
+    &__back {
+      color:white; 
+      width: 40px; 
+      height: 40px;
+      padding: 10px;
+    }
+    &__prev {
+      opacity: 0;
+      left: 0;
+      &:hover {
+        opacity: 1 !important;
+      }
+    }
+    &__next {
+      opacity: 0;
+      right: 0;
+      &:hover {
+        opacity: 1 !important;
+      }
+    }
   }
+
   main {
     position: relative;
     display: flex;
     flex-direction: column;
-    .u-btn__prev {
-    color:white; 
-    width: 60px; 
-    height: 60px;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 100;
-  }
-    .u-btn__next {
-    color:white; 
-    width: 60px; 
-    height: 60px;
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 100;
-  }
-  ul {
-    background-color: rgba(0, 0, 0, 0.7);
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    z-index: 100;
-    color: white;
-    padding: 20px 40px;
-    font-size: 10px;
-    margin-bottom: 0;
-  }
-  li {
-    letter-spacing: 2px;
-    padding: 7px 0;
-  }
+
+    &:hover svg, &:hover ul {
+      opacity: 1 !important;
+    }
+
+    ul {
+      background-color: rgba(0, 0, 0, 0.5);
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      z-index: 100;
+      padding: 40px 60px;
+      font-size: 9px;
+      margin-bottom: 0;
+      letter-spacing: 1px;
+      pointer-events: none;
+      opacity: 0;
+    }
+
     img {
       max-width: 100%;
       height: auto;
-      margin-top: 10px;
     }
   }
+
   label {
-    margin-top: 30px;
-    color: #7e7e7e
+    color: $color-text-grey
   }
+
   .msg--btn__submit {
     background-color: $color-primary-yellow;
-    color: black;
     width: 40%;
     transform: translateX(150%);
   }
+
   .main--p__text{
-    color: white;
-    font-size: 15px;
-    margin: 20px 0 20px 0;
+    font-size: 16px;
     line-height: 32px;
+    letter-spacing: 1px;
     padding-left: 10px;
+    font-weight: 100;
     &::before {
     content: "";
     background-color: $color-primary-yellow;
@@ -249,13 +262,18 @@ export default {
     height: 17px
     }
   }
+
   .msg--div__title{
-    color: rgb(255, 255, 255);
     font-size: 14px;
     font-weight: 500;
   }
+
   .msg--p__text{
-    color: rgba(255, 255, 255, 0.603);
-    font-size: 14px;
+    color: $color-text-grey;
   }
+
+  hr {
+    border-top: 1px dashed $color-text-grey;
+  }
+
 </style>
