@@ -1,21 +1,23 @@
 <template>
   <div class="home">
-    <div v-if="!getDB" class="spinner-border" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    <div v-else class="row" @scroll="loadMore">
-      <div class="card col-sm-6 m-1 p-0 text-white cardStyle border-0 " v-for="el in getDB" :key="el">
-        <router-link :to="`/posts/${el.title}`">
-          <img :src="`https://via.placeholder.com/${el.resolution[0]}x${el.resolution[1]}/333/111?Text=Zeke+blog`" @load="onImgLoad($event, el)" :style="getRatio(el.resolution[0], el.resolution[1])" alt="...">
+
+    <div class="row" @scroll="loadMore">
+      <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="el in getDB" :key="el.title">
+        <router-link :to="`/posts/${el.title}`" @mouseover="onMouseover">
+          <img :src="`https://via.placeholder.com/${el.resolution[0]}x${el.resolution[1]}/111/111?Text=Zeke+blog`" @load="onImgLoad($event, el)" :alt="el.title">
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(el.created)}}</div>
             <h6>{{ el.title }}</h6>
-            <p class="card-text" >{{ el.content }}</p>
+            <p class="card-text mt-2" >{{ el.content }}</p>
           </div>
-          </router-link>
+        </router-link>
       </div>
     </div>
-    <div v-show="loading">Loading content...</div>
+    <!-- v-show="loading && getDB" -->
+    <div  class="loading">
+      <div class="loading--box" ></div>
+      <div class="loading--word h6">Loading...</div>
+    </div>
   </div>
 </template>
 
@@ -27,7 +29,8 @@ export default {
   data() {
     return {
       items: 5,
-		  loading: false
+		  loading: false,
+      show: false
     }
   },
   computed:{
@@ -36,11 +39,7 @@ export default {
     }
   },
   methods: {
-    getRatio(w, h){
-      if( w < h ){
-        return "object-fit: cover"
-      }
-    },
+
     loadMore(e) {
       const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
@@ -60,7 +59,7 @@ export default {
       return convertTime(time, false)
     }
   },
-  mounted() {
+  created() {
     this.loadMore();
     document.addEventListener('scroll', this.loadMore, true)
     this.$store.dispatch('getFirestoreDB')
@@ -97,13 +96,27 @@ export default {
   }
 
   .cardStyle {
-    width: 17rem;
-  }
+    width: 28%;
+    background-color: $color-card-bg;
+    outline: $color-bg 2px solid;
+    transition: .2s ease-out;
+    overflow: hidden;
+    animation: cardAnimation .5s;
 
-  a img {
+    &:hover {
+      outline: $color-primary-yellow 8px solid;
+      width: 30%;
+    }
+    &:hover img{
+      transform: scale(1.2);
+    }
+
+    img {
       width: 100%;
       height: 22vh;
-      object-fit: cover;
+      object-fit:cover;
+      transition: all .5s ease;
+    }
   }
 
   .card-body {
@@ -114,7 +127,8 @@ export default {
   .card-text {
       width: 100%;
       height: 20vh;
-      line-height: 2;
+      line-height: 2.1;
+      letter-spacing: .5px;
       overflow:hidden;
       color: $color-text-grey;
       &::before {
@@ -127,5 +141,30 @@ export default {
       height: 12px
       }
   }
+  .loading{
+    background-color: $color-bg;
+    border-top: $color-text-grey 3px solid;
+    border-bottom: $color-text-grey 3px solid;
+    padding: 14px 0;
+    width: 100px;
+    margin: 24px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &--box {
+      width: 2px;
+      height: 14px;
+      background-color: $color-primary-yellow;
+      animation:spin .5s linear infinite;
+    }
+    &--word {
+      font-weight: 500;
+      margin: 0 0 0 16px;
+    }
+  }
 
+  @keyframes cardAnimation {
+    from  {top: -30px; opacity: 0;}
+    to    {top: 0px; opacity: 1;}
+  }
 </style>

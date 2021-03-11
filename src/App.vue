@@ -4,9 +4,9 @@
     <div class="col-4 col-md-2">
       <img src="./assets/logo.svg" alt="zeke blog logo">
       <ul class="list-group list-group-flush">
-        <router-link to="/" class="list-group-item list-group-item-action">posts</router-link>
-        <router-link to="/about" class="list-group-item list-group-item-action">about</router-link>
-        <router-link to="/form" class="list-group-item list-group-item-action">admin</router-link>
+        <router-link to="/" class="list-group-item list-group-item-action">貼文</router-link>
+        <router-link to="/about" class="list-group-item list-group-item-action">關於我</router-link>
+        <router-link to="/form" class="list-group-item list-group-item-action">管理員</router-link>
       </ul>
     </div>
     <div class="col-8 col-md-10">
