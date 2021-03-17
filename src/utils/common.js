@@ -1,5 +1,4 @@
 export default function convertTime(createdTime, isFull = true){
-  console.log('jiji=', createdTime)
     if(createdTime && typeof createdTime !== "string"){
         let date = createdTime.toDate();
         let result = date.toDateString()

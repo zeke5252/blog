@@ -21,3 +21,4 @@ createApp(App).use(store).use(router).use(BootstrapIconsVue).mount('#app')
 // post search
 // fullscreen image
 // sitemap for seo
+// The following entrypoint(s) combined asset size exceeds the recommended limit

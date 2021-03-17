@@ -70,8 +70,8 @@
 import convertTime from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import router from '../router/';
-import { db } from "@/firebaseDB.js";
-
+import { db } from "../firebaseDB.js";
+import { GET_DB, GET_POST, DATA_DB } from "@/store/types"
 
 export default {
   name: "Post",
@@ -93,20 +93,23 @@ export default {
     },
   },
   computed: {
-
+    GET_DB(){
+      return this.$store.getters.GET_DB(this.title)}
   },
   mounted() {
-    if (!this.$store.state.dbData2) {
+    if (!this.$store.state[DATA_DB]) {
       this.$store.dispatch("getFirestoreDB").then((res) => {
+        console.log('if')
         this.init();
       });
     } else {
+       console.log('else')
       this.init();
     }
   },
   methods: {
     init() {
-      let postData = this.$store.getters.getDB(this.title);
+      let postData = this.GET_DB;
       if(postData){
         let {post, isPrevDisplay, isNextDisplay} = postData;
         this.isPrevDisplay = isPrevDisplay;
@@ -124,11 +127,11 @@ export default {
       router.push("/");;
     },
     doPrev(){
-      let toTitle = this.$store.getters.getPost(this.$route.params.title, false);
+      let toTitle = this.$store.getters.GET_POST(this.$route.params.title, false);
       router.push(toTitle);
     },
     doNext(){
-      let toTitle = this.$store.getters.getPost(this.$route.params.title, true);
+      let toTitle = this.$store.getters.GET_POST(this.$route.params.title, true);
       router.push(toTitle);
     },
     doPostMsg(){
@@ -224,10 +227,15 @@ export default {
       z-index: 100;
       padding: 40px 60px;
       font-size: 9px;
-      margin-bottom: 0;
+      height: auto;
       letter-spacing: 1px;
       pointer-events: none;
       opacity: 0;
+
+      li{
+        padding: 10px 0;
+        list-style-type: none !important;
+      }
     }
 
     img {

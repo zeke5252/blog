@@ -1,39 +1,40 @@
 import { createStore } from "vuex";
-import { db } from "@/firebaseDB.js";
+import { db } from "../firebaseDB.js";
+import { UPDATE_DB, GET_DB, GET_POST, DATA_DB } from "./types";
 import { storage } from "../firebaseDB.js";
 
 export default createStore({
   state: {
-    dbData2: null,
+    [DATA_DB]: null,
   },
   getters: {
-    getDB: (state) => (title, amount) => {
+    [GET_DB] : (state) => (title, amount) => {
       if (title && title !== "") {
         let result;
         let post;
-        state.dbData2.forEach( (post,index) => { 
+        state[DATA_DB].forEach( (post,index) => { 
           if(post["title"] === title){
             let isPrevDisplay =  index !== 0  ? true : false;
-            let isNextDisplay =  index !== state.dbData2.length-1 ? true : false;
+            let isNextDisplay =  index !== state[DATA_DB].length-1 ? true : false;
             result = {post, isPrevDisplay, isNextDisplay};
           } })
         return result
       } else if(amount) {
-        return state.dbData2 && state.dbData2.filter( ( post, index ) => {
+        return state[DATA_DB] && state[DATA_DB].filter( ( post, index ) => {
           if(index < amount) return post
         });
       } else {
-        return state.dbData2
+        return state[DATA_DB]
       }
     },
-    getPost: (state) => (title, isNext = false) => {
+    [GET_POST] : (state) => (title, isNext = false) => {
       let result;
-      state.dbData2.forEach( (post,index) => {
+      state[DATA_DB].forEach( (post,index) => {
         if(post["title"] === title){
           let indexP;
           if(isNext){
             indexP = index+1;
-            result = index !== (state.dbData2.length-1) ? indexP : state.dbData2.length-1;
+            result = index !== (state[DATA_DB].length-1) ? indexP : state[DATA_DB].length-1;
           } else {
             indexP = index-1;
             result = index !== 0 ? indexP : 0;
@@ -41,26 +42,24 @@ export default createStore({
         }
       }
       );
-      return state.dbData2[result].title;
+      return state[DATA_DB][result].title;
     }
   },
   mutations: {
-    updateDB(state, p) {
-      state.dbData2 = p;
-    },
+    [UPDATE_DB] : (state, p) => state[DATA_DB] = p,
   },
   actions: {
     async getFirestoreDB({ commit }) {
-      let dbData = [];
+      let tempData = [];
       let postsRef = db.collection("posts").orderBy("created", "desc");
       await postsRef.get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          dbData.push(doc.data());
+          tempData.push(doc.data());
         });
       });
       // < convert gs to http download url >
       // let urlPromises=[];
-      // dbData.forEach((post,i)=>{
+      // tempData.forEach((post,i)=>{
       //    let t = storage.refFromURL(post.imageSrc).getDownloadURL()
       //   .then(res=>{
       //     post.imageSrc = res
@@ -68,7 +67,7 @@ export default createStore({
       //   urlPromises.push(t);
       // });
       // await Promise.all(urlPromises)
-      commit("updateDB", dbData);
+      commit(UPDATE_DB, tempData);
     },
   },
   modules: {},

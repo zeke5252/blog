@@ -1,10 +1,13 @@
 <template>
   <div class="home">
-
-    <div class="row" @scroll="loadMore">
-      <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="el in getDB" :key="el.title">
+    <!-- v-if="!getDB" -->
+    <div v-if="!GET_DB" class="loading">
+      <div/>
+    </div>
+    <div v-else class="row">
+      <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="el in GET_DB" :key="el.title">
         <router-link :to="`/posts/${el.title}`" @mouseover="onMouseover">
-          <img :src="`https://via.placeholder.com/${el.resolution[0]}x${el.resolution[1]}/111/111?Text=Zeke+blog`" @load="onImgLoad($event, el)" :alt="el.title">
+          <img :src="`https://via.placeholder.com/${el.resolution[0]}x${el.resolution[1]}/888/888`" @load="onImgLoad($event, el)" :alt="el.title">
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(el.created)}}</div>
             <h6>{{ el.title }}</h6>
@@ -13,42 +16,41 @@
         </router-link>
       </div>
     </div>
-    <!-- v-show="loading && getDB" -->
-    <div  class="loading">
-      <div class="loading--box" ></div>
-      <div class="loading--word h6">Loading...</div>
+  <!--v-if="isMore  && getDB"-->
+    <div v-if="isMore && GET_DB" class="more">
+      <div class="more--box" ></div>
+      <div class="more--word h7">MORE...</div>
     </div>
   </div>
 </template>
 
 <script>
-import convertTime from "../utils/common.js"
+import convertTime from "../utils/common.js";
+import { GET_DB } from "../store/types.js";
 
 export default {
   name: "Home",
   data() {
     return {
       items: 5,
-		  loading: false,
-      show: false
+		  isMore: false,
     }
   },
   computed:{
-    getDB(){
-      return this.$store.getters.getDB(null, this.items)
-    }
+    GET_DB(){
+      return this.$store.getters.GET_DB(null, this.items)
+    },
   },
   methods: {
-
     loadMore(e) {
       const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
       const scrollHeight = document.documentElement.scrollHeight
-			if (!this.loading && scrollTop + getWindowHeight >= scrollHeight*4/5) {
-				this.loading = true;
+			if (!this.isMore && scrollTop + getWindowHeight >= scrollHeight*4/5) {
+				this.isMore = true;
 				setTimeout(() => {
 					this.items+=5;
-					this.loading = false;
+					this.isMore = false;
 				}, 1000);                
       }
 		},
@@ -68,8 +70,8 @@ export default {
     document.removeEventListener('scroll', this.loadMore, true)
   },
   watch: {
-    getDB(val, pre){
-      if(this.$store.getters.getDB().length === val.length){
+    GET_DB(val, pre){
+      if(this.$store.getters.GET_DB().length === val.length){
         document.removeEventListener('scroll', this.loadMore, true)
       }
     }
@@ -81,34 +83,38 @@ export default {
 
   @import "../assets/css/app.scss";
   
+  .home {
+    display: flex;
+    flex-direction: column;
+  }
+
   .createdDate {
-    width: auto;
     height: 20px;
     background-color: $color-card-bg;
     position: absolute;
     right: 0;
     top: -26px;
-    border-radius: 30px 0 0 0;
     text-align: center;
-    padding: 10px 16px 16px 16px;
-    font-weight: 300;
+    letter-spacing: 1px;
+    padding: 10px 20px 16px 20px;
+    font-weight: 800;
     color: $color-primary-yellow;
   }
 
   .cardStyle {
-    width: 28%;
+    width: 29.5%;
     background-color: $color-card-bg;
-    outline: $color-bg 2px solid;
+    outline: $color-bg 0px solid;
     transition: .2s ease-out;
     overflow: hidden;
-    animation: cardAnimation .5s;
+    animation: cardAnimation ease-out .4s;
 
     &:hover {
       outline: $color-primary-yellow 8px solid;
       width: 30%;
     }
     &:hover img{
-      transform: scale(1.2);
+      transform: scale(1.1);
     }
 
     img {
@@ -141,16 +147,73 @@ export default {
       height: 12px
       }
   }
-  .loading{
-    background-color: $color-bg;
-    border-top: $color-text-grey 3px solid;
-    border-bottom: $color-text-grey 3px solid;
-    padding: 14px 0;
-    width: 100px;
-    margin: 24px auto;
+
+  .loading {
+    border-top: white 2px solid;
+    border-bottom: white 2px solid;
+    width: 90px;
+    display: flex;
+    justify-content: center;
+    animation: moreAnimation ease .3s;
+    animation-fill-mode: forwards;
+    position: relative;
+    margin: auto;
+    top: 40vh;
+    
+    &::before {
+      content:"";
+      position: absolute;
+      background-color: white;
+      width: 12px;
+      height: 4px;
+      left: 0;
+      top: -6px;
+    }
+
+    div {
+      width: 25px;
+      height: 25px;
+      border: 8px solid $color-primary-yellow;
+      border-radius: 16px;
+      position: relative;
+      animation: loadAnimation ease 1s infinite;
+
+      &::after {
+        content:"";
+        position: absolute;
+        background-color: white;
+        width: 4px;
+        height: 4px;
+        right: -10px;
+        top: -10px;
+        border-radius: 10px;
+      }
+    }
+  }
+
+  .more{
+    border-top: white 2px solid;
+    border-bottom: white 2px solid;
+    width: 90px;
+    margin: auto;
     display: flex;
     justify-content: center;
     align-items: center;
+    animation: moreAnimation ease-out .3s;
+    animation-fill-mode: forwards;
+    letter-spacing: 1px;
+    position: relative;
+
+    &::before {
+      content:"";
+      position: absolute;
+      background-color: white;
+      width: 12px;
+      height: 4px;
+      left: 0;
+      top: -6px;
+    }
+
     &--box {
       width: 2px;
       height: 14px;
@@ -164,7 +227,19 @@ export default {
   }
 
   @keyframes cardAnimation {
-    from  {top: -30px; opacity: 0;}
+    from  {top: -30px; opacity: 0; }
     to    {top: 0px; opacity: 1;}
   }
+
+  @keyframes moreAnimation {
+    from  {padding: 0px 0px; opacity: 0}
+    to    {padding: 14px 0px; opacity: 1}
+  }
+
+  @keyframes loadAnimation {
+    0%    {border-width: 2px}
+    50%   {border-width: 8px}
+    100%  {border-width: 2px}
+  }
+
 </style>
