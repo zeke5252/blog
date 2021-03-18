@@ -5,20 +5,24 @@
 
 body {
     color: white;
-    margin: 2% 0;
+    margin: 40px 0;
     background-color: transparent;
     font-family: Roboto, Noto Sans TC, sans-serif;
     font-size: 13px;
-}
-
-* {
-    border-radius: 0;
 }
 
 h6, h5, h4 {
     letter-spacing: 1px;
     font-weight: 400;
     margin: 0;
+}
+
+input {
+    background-color: $color-bg;
+    border: 0px;
+    border-radius: 0;
+    height: 30px;
+    color: white;
 }
 
 a {

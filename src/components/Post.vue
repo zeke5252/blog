@@ -5,30 +5,28 @@
   <div v-else>
     <header>
       <BIconChevronLeft class= "u-btn__back" v-on:click="doBack"/>
-      <h4>{{ title }}</h4>
-      <span>{{ contents.category }}</span>
-      <span>  /  </span>
-      <span>{{ contents.created }}</span>
+      <h4 v-text="title" />
+      <span v-text="contents.category" />
+      <span v-text="  '&sol;'  " />
+      <span v-text="contents.created" />
     </header>
-    <main>
+    <section>
       <BIconChevronRight v-if="isNextDisplay" class= "u-btn u-btn__next" @click="doNext"/>
       <BIconChevronLeft v-if="isPrevDisplay" class= "u-btn u-btn__prev" @click="doPrev"/>
-      <img :src="contents.imageSrc" class="main--img"/>
+      <img :src="contents.imageSrc" class="section--img"/>
       <ul>
         <li v-for="info in Object.entries(contents.exif && JSON.parse(contents.exif))" :key="info">
-          <span style="font-weight:400">{{info[0]}}</span> : <span style="color:#999">{{info[1]}}</span>
+          <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[0]" />
         </li>
       </ul>
-    </main>
-      <p class="main--p__text my-3">
+    </section>
+      <p class="section--p__text my-3">
         {{ contents.content }}
       </p>
   </div>
   <div class="row">
     <div class="col-sm-4">
-      <label class="form-label h6 mb-3 mt-5 " for="formTitle">
-      留言
-      </label>
+      <label class="form-label h6 mb-3 mt-5 " for="formTitle"> 留言 </label>
       <input
         v-model="msgTitle"
         type="text"
@@ -56,13 +54,13 @@
       </button>
     </div>
   </div>
-    <ul class="px-0" v-if="contents ">
-      <li v-for="msg in contents.msgs" :key="msg">
-        <div class="h6 msg--div__title mb-0">{{msg.name}}</div>
-        <p class="msg--p__text mb-2">{{msg.comment}}</p>
-        <hr/>
-      </li>
-    </ul>
+  <ul class="px-0" v-if="contents ">
+    <li v-for="msg in contents.msgs" :key="msg">
+      <div class="h6 msg--div__title mb-0">{{msg.name}}</div>
+      <p class="msg--p__text mb-2">{{msg.comment}}</p>
+      <hr/>
+    </li>
+  </ul>
     <footer class="my-5"></footer>
 </template>
 
@@ -210,7 +208,7 @@ export default {
     }
   }
 
-  main {
+  section {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -254,8 +252,8 @@ export default {
     transform: translateX(150%);
   }
 
-  .main--p__text{
-    font-size: 16px;
+  .section--p__text{
+    font-size: 15px;
     line-height: 32px;
     letter-spacing: 1px;
     padding-left: 10px;

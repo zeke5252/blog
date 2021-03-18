@@ -1,12 +1,25 @@
 <template>
   <div class="home">
+    <div class="search--input">
+      <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img"></label>
+      <input
+        v-model="keyword"
+        type="text"
+        list="keywordlistOptions"
+        id="searchInput"
+        aria-label="searchInput"
+      />
+    </div>
+    <datalist id="keywordlistOptions">
+      <option v-for="el in getDB_all()" :key="el.title" :value="el.title" />
+    </datalist>
     <!-- v-if="!getDB" -->
     <div v-if="!GET_DB" class="loading">
       <div/>
     </div>
     <div v-else class="row">
-      <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="el in GET_DB" :key="el.title">
-        <router-link :to="`/posts/${el.title}`" @mouseover="onMouseover">
+      <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="el in !keyResults? GET_DB : keyResults" :key="el.title">
+        <router-link :to="`/posts/${el.title}`">
           <img :src="`https://via.placeholder.com/${el.resolution[0]}x${el.resolution[1]}/888/888`" @load="onImgLoad($event, el)" :alt="el.title">
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(el.created)}}</div>
@@ -27,6 +40,7 @@
 <script>
 import convertTime from "../utils/common.js";
 import { GET_DB } from "../store/types.js";
+import _ from "lodash";
 
 export default {
   name: "Home",
@@ -34,6 +48,8 @@ export default {
     return {
       items: 5,
 		  isMore: false,
+      keyword: "",
+      keyResults: null
     }
   },
   computed:{
@@ -59,7 +75,10 @@ export default {
     },
     getConvertTime(time){
       return convertTime(time, false)
-    }
+    },
+    getDB_all(){
+      return this.$store.getters.GET_DB()
+    },
   },
   created() {
     this.loadMore();
@@ -74,6 +93,17 @@ export default {
       if(this.$store.getters.GET_DB().length === val.length){
         document.removeEventListener('scroll', this.loadMore, true)
       }
+    },
+
+    keyword: function(val, pre) {
+      let vm = this;
+      _.debounce(function(){
+        let all = vm.getDB_all();
+        let results = all.filter( (post,index) => {
+          return post.title.includes(val)
+        })
+        vm.keyResults = results;
+      }, 500)()
     }
   }
 };
@@ -224,6 +254,31 @@ export default {
       font-weight: 500;
       margin: 0 0 0 16px;
     }
+  }
+
+  .search--input {
+    display: flex;
+    padding-right: 50px;
+    justify-content: flex-end;
+    position: fixed;
+    top: 10px;
+    right: 0;
+    width: 100%;
+    z-index: 100;
+
+    input {
+      width: 15%;
+      min-width: 200px;
+      height: 30px;
+      background-color: transparent;
+      border-bottom: 1px $color-text-grey solid
+    }
+  }
+  
+  .search--img{
+    width: 30px;
+    height: 30px;
+    border-bottom: 1px $color-text-grey solid
   }
 
   @keyframes cardAnimation {
