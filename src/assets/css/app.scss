@@ -17,17 +17,20 @@ h6, h5, h4 {
     margin: 0;
 }
 
-input {
-    background-color: $color-bg;
+input, textarea {
     border: 0px;
     border-radius: 0;
-    height: 30px;
     color: white;
+}
+
+button {
+    border-radius: 0;
 }
 
 a {
     color: white !important;
     text-decoration: none;
+    border-radius: 0;
 }
 
   ::-webkit-input-placeholder {

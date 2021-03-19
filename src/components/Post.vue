@@ -14,9 +14,9 @@
       <BIconChevronRight v-if="isNextDisplay" class= "u-btn u-btn__next" @click="doNext"/>
       <BIconChevronLeft v-if="isPrevDisplay" class= "u-btn u-btn__prev" @click="doPrev"/>
       <img :src="contents.imageSrc" class="section--img"/>
-      <ul>
+      <ul v-if="contents.exif!=='{}'">
         <li v-for="info in Object.entries(contents.exif && JSON.parse(contents.exif))" :key="info">
-          <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[0]" />
+          <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
         </li>
       </ul>
     </section>
@@ -223,7 +223,7 @@ export default {
       right: 0;
       bottom: 0;
       z-index: 100;
-      padding: 40px 60px;
+      padding: 24px 40px;
       font-size: 9px;
       height: auto;
       letter-spacing: 1px;

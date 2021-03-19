@@ -1,5 +1,9 @@
 <template>
-  <div class="home">
+    <!-- v-if="!getDB" -->
+    <div v-if="!GET_DB" class="loading">
+      <div/>
+    </div>
+  <div v-else class="home">
     <div class="search--input">
       <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img"></label>
       <input
@@ -13,11 +17,7 @@
     <datalist id="keywordlistOptions">
       <option v-for="el in getDB_all()" :key="el.title" :value="el.title" />
     </datalist>
-    <!-- v-if="!getDB" -->
-    <div v-if="!GET_DB" class="loading">
-      <div/>
-    </div>
-    <div v-else class="row">
+    <div class="row">
       <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="el in !keyResults? GET_DB : keyResults" :key="el.title">
         <router-link :to="`/posts/${el.title}`">
           <img :src="`https://via.placeholder.com/${el.resolution[0]}x${el.resolution[1]}/888/888`" @load="onImgLoad($event, el)" :alt="el.title">
@@ -138,6 +138,7 @@ export default {
     transition: .2s ease-out;
     overflow: hidden;
     animation: cardAnimation ease-out .4s;
+    border-radius: 0 !important;
 
     &:hover {
       outline: $color-primary-yellow 8px solid;
@@ -181,7 +182,7 @@ export default {
   .loading {
     border-top: white 2px solid;
     border-bottom: white 2px solid;
-    width: 90px;
+    width: 80px;
     display: flex;
     justify-content: center;
     animation: moreAnimation ease .3s;
@@ -201,8 +202,8 @@ export default {
     }
 
     div {
-      width: 25px;
-      height: 25px;
+      width: 22px;
+      height: 22px;
       border: 8px solid $color-primary-yellow;
       border-radius: 16px;
       position: relative;
@@ -224,7 +225,7 @@ export default {
   .more{
     border-top: white 2px solid;
     border-bottom: white 2px solid;
-    width: 90px;
+    width: 80px;
     margin: auto;
     display: flex;
     justify-content: center;
@@ -288,7 +289,7 @@ export default {
 
   @keyframes moreAnimation {
     from  {padding: 0px 0px; opacity: 0}
-    to    {padding: 14px 0px; opacity: 1}
+    to    {padding: 12px 0px; opacity: 1}
   }
 
   @keyframes loadAnimation {
