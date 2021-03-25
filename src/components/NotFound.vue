@@ -1,6 +1,6 @@
 <template>
   <h1>
-    File not found
+    Page not found
   </h1>
 </template>
 
@@ -12,14 +12,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-a {
-  color: #42b983;
-}
+
+  h1 {
+    position: absolute;
+    top: 45vh;
+    left: 50%;
+    font-size: 28px;
+    text-align: center;
+  } 
+
+
 </style>

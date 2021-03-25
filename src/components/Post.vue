@@ -9,20 +9,15 @@
       <span v-text="contents.category" />
       <span v-text="  '&sol;'  " />
       <span v-text="contents.created" />
-    </header>
-    <section>
       <BIconChevronRight v-if="isNextDisplay" class= "u-btn u-btn__next" @click="doNext"/>
       <BIconChevronLeft v-if="isPrevDisplay" class= "u-btn u-btn__prev" @click="doPrev"/>
-      <img :src="contents.imageSrc" class="section--img"/>
-      <ul v-if="contents.exif!=='{}'">
-        <li v-for="info in Object.entries(contents.exif && JSON.parse(contents.exif))" :key="info">
-          <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
-        </li>
-      </ul>
+    </header>
+    <section class="section--photos my-3">
+      <template v-for="(el,index) in contentToArr" :key="index">    
+        <PhotoItem v-if="el.includes('http')"  :File="onFile(el)" />
+        <p v-else>{{el}}</p>
+      </template>
     </section>
-      <p class="section--p__text my-3">
-        {{ contents.content }}
-      </p>
   </div>
   <div class="row">
     <div class="col-sm-4">
@@ -69,7 +64,9 @@ import convertTime from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import router from '../router/';
 import { db } from "../firebaseDB.js";
-import { GET_DB, GET_POST, DATA_DB } from "@/store/types"
+import { GET_DB, GET_POST, DATA_DB } from "@/store/types";
+
+import PhotoItem from "./Photo.vue";
 
 export default {
   name: "Post",
@@ -80,7 +77,11 @@ export default {
       isNextDisplay: null,
       msgTitle: '',
       msg: '',
+      contentToArr: []
     };
+  },
+  components: {
+    PhotoItem
   },
   props: {
     title: String,
@@ -115,11 +116,38 @@ export default {
         this.msgTitle= '';
         this.msg= '';
         post.created = convertTime(post.created);
+        this.doContentToArr(post.content);
         this.contents = post;
       } else {
         this.$router.push('/components/NotFound.vue')
       }
 
+    },
+    doContentToArr(content){
+      let urls = content.match(/\bhttps?:\/\/\S+/gi);
+      urls.forEach(url=>{
+        content = content.replace(url, "URLS");
+      })
+      console.log('str=', content)
+      let contentArr = content.split("URLS")
+      console.log('arr=', contentArr)
+      let i=1;
+      // Insert urls to corresponding indexes.
+      urls.forEach((url,index)=>{
+        contentArr.splice(index+i, 0, url)
+        i++
+      })
+      // Remove elements with only whitespace.
+      this.contentToArr = contentArr.filter( el=> el.replace(/\s/g, '').length )
+    },
+    onFile(url){
+      let result;
+      JSON.parse(this.contents.imageFiles).forEach(image=>{
+        if(image.imageSrc===url){
+          result = image
+        }
+      })
+      return result;
     },
     doBack(){
       router.push("/");;
@@ -130,6 +158,7 @@ export default {
     },
     doNext(){
       let toTitle = this.$store.getters.GET_POST(this.$route.params.title, true);
+            console.log('toTitle=', toTitle)
       router.push(toTitle);
     },
     doPostMsg(){
@@ -166,6 +195,7 @@ export default {
 
     h4 {
       margin-bottom: 0;
+      margin-right: 10px;
     }
 
     span {
@@ -179,11 +209,11 @@ export default {
 
   .u-btn {
     color:white; 
-    width: 60px; 
-    height: 60px;
+    width: 40px; 
+    height: 40px;
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    right: 0;
     z-index: 100;
     
     &__back {
@@ -193,52 +223,10 @@ export default {
       padding: 10px;
     }
     &__prev {
-      opacity: 0;
-      left: 0;
-      &:hover {
-        opacity: 1 !important;
-      }
+     // left: 0;
     }
     &__next {
-      opacity: 0;
-      right: 0;
-      &:hover {
-        opacity: 1 !important;
-      }
-    }
-  }
-
-  section {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-
-    &:hover svg, &:hover ul {
-      opacity: 1 !important;
-    }
-
-    ul {
-      background-color: rgba(0, 0, 0, 0.5);
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      z-index: 100;
-      padding: 24px 40px;
-      font-size: 9px;
-      height: auto;
-      letter-spacing: 1px;
-      pointer-events: none;
-      opacity: 0;
-
-      li{
-        padding: 10px 0;
-        list-style-type: none !important;
-      }
-    }
-
-    img {
-      max-width: 100%;
-      height: auto;
+     // right: 0;
     }
   }
 
@@ -252,20 +240,31 @@ export default {
     transform: translateX(150%);
   }
 
-  .section--p__text{
-    font-size: 15px;
-    line-height: 32px;
-    letter-spacing: 1px;
-    padding-left: 10px;
-    font-weight: 100;
-    &::before {
-    content: "";
-    background-color: $color-primary-yellow;
-    position: absolute;
-    margin-top: 7px;
-    margin-left: -10px;
-    width: 3px;
-    height: 17px
+  .section--photos{
+    width: 100%;
+
+    ::deep p {
+      font-size: 15px;
+      line-height: 32px;
+      letter-spacing: 1px;
+      font-weight: 100;
+      margin-top: 20px;
+
+      &::before {
+        content: "";
+        background-color: $color-primary-yellow;
+        position: absolute;
+        margin-top: 7px;
+        margin-left: 0px;
+        width: 3px;
+        height: 17px
+      }
+
+    img {
+      margin: 28px 0;
+      display: block;
+      width: 80%;
+    }
     }
   }
 

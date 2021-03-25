@@ -17,10 +17,16 @@ h6, h5, h4 {
     margin: 0;
 }
 
-input, textarea {
-    border: 0px;
-    border-radius: 0;
-    color: white;
+input, textarea, select, input:focus {
+    border-width: 0px !important;
+    border-radius: 0 !important;
+}
+
+button{
+    background-color: $color-primary-yellow;
+    border: 0px !important;
+    border-radius: 0 !important;
+    color: black;
 }
 
 button {

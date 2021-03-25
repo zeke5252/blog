@@ -20,7 +20,13 @@
     <div class="row">
       <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="el in !keyResults? GET_DB : keyResults" :key="el.title">
         <router-link :to="`/posts/${el.title}`">
-          <img :src="`https://via.placeholder.com/${el.resolution[0]}x${el.resolution[1]}/888/888`" @load="onImgLoad($event, el)" :alt="el.title">
+         
+          <img :src="!el.imageFiles ? 
+          `https://via.placeholder.com/888/888` : 
+          `https://via.placeholder.com/${JSON.parse(el.imageFiles)[0].resolution[0]}x${JSON.parse(el.imageFiles)[0].resolution[1]}/888/888`" 
+          @load="onImgLoad($event, el)" 
+          :alt="el.title">
+
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(el.created)}}</div>
             <h6>{{ el.title }}</h6>
@@ -46,7 +52,7 @@ export default {
   name: "Home",
   data() {
     return {
-      items: 5,
+      count: 5,
 		  isMore: false,
       keyword: "",
       keyResults: null
@@ -54,7 +60,7 @@ export default {
   },
   computed:{
     GET_DB(){
-      return this.$store.getters.GET_DB(null, this.items)
+      return this.$store.getters.GET_DB(null, this.count)
     },
   },
   methods: {
@@ -65,13 +71,13 @@ export default {
 			if (!this.isMore && scrollTop + getWindowHeight >= scrollHeight*4/5) {
 				this.isMore = true;
 				setTimeout(() => {
-					this.items+=5;
+					this.count+=5;
 					this.isMore = false;
 				}, 1000);                
       }
 		},
     onImgLoad(e, el){
-     e.target.src = el.imageSrc;
+     e.target.src = !el.imageFiles ?  el.imageSrc : JSON.parse(el.imageFiles)[0].imageSrc;
     },
     getConvertTime(time){
       return convertTime(time, false)
@@ -272,7 +278,11 @@ export default {
       min-width: 200px;
       height: 30px;
       background-color: transparent;
-      border-bottom: 1px $color-text-grey solid
+      border-bottom: 1px $color-text-grey solid !important;
+
+      &:focus {
+        color: transparent !important;
+      }
     }
   }
   
