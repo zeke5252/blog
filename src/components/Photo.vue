@@ -1,8 +1,8 @@
 <template>
   <div class="cover--photo">
-    <img :src="File.imageSrc" />
-    <ul v-if="File.exif!=='{}'">
-      <li v-for="info in Object.entries(File.exif && JSON.parse(File.exif))" :key="info">
+    <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="$event.target.src= Url" />
+    <ul v-if="photoUtil.getExif(Url, Images)!=='{}'">
+      <li v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
         <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
       </li>
     </ul>
@@ -10,8 +10,7 @@
 </template>
 
 <script>
-
-// Only single image file will be used. No JSON parsing.
+import {photoUtil} from "../utils/common.js";
 
 export default {
   name: "photo-item",
@@ -20,15 +19,13 @@ export default {
     };
   },
   props: {
-    File: Object,
+    Url: String,
+    Images: String
   },
   computed: {
   },
   created() {
-  },
-  methods: {
-    init() {
-    },
+    this.photoUtil = photoUtil;
   },
 };
 </script>
@@ -41,6 +38,7 @@ export default {
     position: relative;
     display: flex;
     width: 80%;
+    background-color: black;
 
      &:hover ul {
       opacity: 1 !important;
@@ -49,8 +47,13 @@ export default {
     img {
       width: 100%;
       height: auto;
-         margin: 28px 0;
-         display: block;
+      display: block;
+      outline: white 0px solid;
+      transition: all .2s ease-out;
+      
+      &:hover{
+        outline: white 10px solid;
+      }
     }
 
     ul {
@@ -75,6 +78,12 @@ export default {
 
   label {
     color: $color-text-grey
+  }
+
+    @keyframes photoAnimation {
+    0%    {outline: 2px}
+    50%   {outline: 8px}
+    100%  {outline: 2px}
   }
 
 </style>

@@ -17,6 +17,10 @@ h6, h5, h4 {
     margin: 0;
 }
 
+ul {
+    margin-bottom: 0;
+}
+
 input, textarea, select, input:focus {
     border-width: 0px !important;
     border-radius: 0 !important;
@@ -31,6 +35,9 @@ button{
 
 button {
     border-radius: 0;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 30px;
 }
 
 a {

@@ -20,8 +20,8 @@
       <div class="group--container" :style="this.images.length && 'height: 30vh'">
         <div class="group--container__photo" v-for="(image, index) in images" :key="index">
           <div v-if="this.images[index]" >
-            <button @click="copySrc(index)">copy</button>
-            <button @click="removeImage(index)">Remove image</button>
+            <button @click="copySrc(index)">Copy name</button>
+            <button @click="removeImage(index)">Remove</button>
             <img :src="image" @load="getImgExif(index)"/>
           </div>
         </div>
@@ -45,11 +45,11 @@
       </div>
     </div>
     <span v-for="progress in progresses" v-show="progress>0" :key="progress">{{progress}}</span>
-    <button type="submit" class="btn btn-primary" v-on:click="submitHandler">
+    <button type="submit" class="btn--submit" v-on:click="submitHandler">
       Submit
     </button>
-    <button type="button" class="btn btn-secondary" v-on:click="signoutHandler">
-      登出
+    <button type="button" class="btn--signout" v-on:click="signoutHandler">
+      Sign out
     </button>
   </form>
 </template>
@@ -243,42 +243,47 @@ export default {
 <style lang="scss">
 
   @import "../assets/css/app.scss";
-  
+  label {
+    color: $color-text-grey;
+    padding: 8px 0;
+  }
   .group--container{
+    width: 100%;
     display: flex;
-    // height: 30vh;
+
     &__photo {
-      width: auto;
-      height: 100%;
+      width: 160px;
+      height: 160px;
       position: relative;
+      margin-right: 8px;
       img {
         position: absolute;
+        object-fit: cover;
         left:0;
         top: 0;
-        overflow: hidden;
-        width: auto;
-        height: 90%;
+        width: 160px;
+        height: 160px;
+
       }
       button {
+        font-weight: 500;
         display: block;
         position: relative;
         z-index: 300;
         left:0;
         top: 0;
-        margin: 5px 5px 0 5px;
-        padding: 5px;
+        margin: 8px 8px 0 8px;
+        padding: 5px 8px;
       }
     }
   }
 
+  .btn--submit {
+    background-color: $color-primary-yellow;
+  }
 
+  .btn--signout {
+    background-color: transparent;
+    color: white;
+  }
 </style>
-
-// upload photos
-// get file name
-// paste file name in textarea
-// Press submit
-// Get file names
-// Upload files and get the corresponding urls
-// Replace file names with urls
-// Array joins

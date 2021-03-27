@@ -15,22 +15,16 @@
       />
     </div>
     <datalist id="keywordlistOptions">
-      <option v-for="el in getDB_all()" :key="el.title" :value="el.title" />
+      <option v-for="post in getDB_all()" :key="post.title" :value="post.title" />
     </datalist>
     <div class="row">
-      <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="el in !keyResults? GET_DB : keyResults" :key="el.title">
-        <router-link :to="`/posts/${el.title}`">
-         
-          <img :src="!el.imageFiles ? 
-          `https://via.placeholder.com/888/888` : 
-          `https://via.placeholder.com/${JSON.parse(el.imageFiles)[0].resolution[0]}x${JSON.parse(el.imageFiles)[0].resolution[1]}/888/888`" 
-          @load="onImgLoad($event, el)" 
-          :alt="el.title">
-
+      <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
+        <router-link :to="`/posts/${post.title}`">
+          <img :src="photoUtil.getPlaceholderImage(null ,post.imageFiles)" @load="$event.target.src= photoUtil.getSrc(post.imageFiles)" :alt="post.title">
           <div class="card-body">
-            <div class="createdDate">{{getConvertTime(el.created)}}</div>
-            <h6>{{ el.title }}</h6>
-            <p class="card-text mt-2" >{{ el.content }}</p>
+            <div class="createdDate">{{getConvertTime(post.created)}}</div>
+            <h6>{{ post.title }}</h6>
+            <p class="card-text mt-2" >{{ getFirstParagraph(post.content) }}</p>
           </div>
         </router-link>
       </div>
@@ -44,9 +38,10 @@
 </template>
 
 <script>
-import convertTime from "../utils/common.js";
+import {convertTime, splitContents, photoUtil } from "../utils/common.js";
 import { GET_DB } from "../store/types.js";
 import _ from "lodash";
+
 
 export default {
   name: "Home",
@@ -76,20 +71,28 @@ export default {
 				}, 1000);                
       }
 		},
-    onImgLoad(e, el){
-     e.target.src = !el.imageFiles ?  el.imageSrc : JSON.parse(el.imageFiles)[0].imageSrc;
-    },
     getConvertTime(time){
       return convertTime(time, false)
     },
     getDB_all(){
       return this.$store.getters.GET_DB()
     },
+    getFirstParagraph(content){
+      let result;
+      result = splitContents(content);
+      if(!result){
+        return "No contents!"
+      }
+      return result.find(el=>{
+        return el.substring(0, 4)!=="http"
+      })
+    },
   },
   created() {
     this.loadMore();
     document.addEventListener('scroll', this.loadMore, true)
-    this.$store.dispatch('getFirestoreDB')
+    this.$store.dispatch('getFirestoreDB');
+    this.photoUtil = photoUtil;
   },
   beforeUnmount() {
     document.removeEventListener('scroll', this.loadMore, true)

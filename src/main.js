@@ -18,7 +18,7 @@ createApp(App).use(store).use(router).use(BootstrapIconsVue).mount('#app')
 // firestore storage (done)
 // form validator
 // order by created time(done)
-// post search
+// post search (done)
 // fullscreen image
 // sitemap for seo
 // The following entrypoint(s) combined asset size exceeds the recommended limit

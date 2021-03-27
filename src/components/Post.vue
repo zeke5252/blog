@@ -12,10 +12,10 @@
       <BIconChevronRight v-if="isNextDisplay" class= "u-btn u-btn__next" @click="doNext"/>
       <BIconChevronLeft v-if="isPrevDisplay" class= "u-btn u-btn__prev" @click="doPrev"/>
     </header>
-    <section class="section--photos my-3">
+    <section class="my-3">
       <template v-for="(el,index) in contentToArr" :key="index">    
-        <PhotoItem v-if="el.includes('http')"  :File="onFile(el)" />
-        <p v-else>{{el}}</p>
+        <PhotoItem v-if="el.substring(0,4)==='http'"  :Url="el" :Images="contents.imageFiles" />
+        <p class="section--p  " v-else>{{el}}</p>
       </template>
     </section>
   </div>
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import convertTime from "../utils/common.js";
+import {convertTime,splitContents} from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import router from '../router/';
 import { db } from "../firebaseDB.js";
@@ -98,11 +98,9 @@ export default {
   mounted() {
     if (!this.$store.state[DATA_DB]) {
       this.$store.dispatch("getFirestoreDB").then((res) => {
-        console.log('if')
         this.init();
       });
     } else {
-       console.log('else')
       this.init();
     }
   },
@@ -116,38 +114,12 @@ export default {
         this.msgTitle= '';
         this.msg= '';
         post.created = convertTime(post.created);
-        this.doContentToArr(post.content);
+        this.contentToArr = splitContents(post.content);
         this.contents = post;
       } else {
         this.$router.push('/components/NotFound.vue')
       }
 
-    },
-    doContentToArr(content){
-      let urls = content.match(/\bhttps?:\/\/\S+/gi);
-      urls.forEach(url=>{
-        content = content.replace(url, "URLS");
-      })
-      console.log('str=', content)
-      let contentArr = content.split("URLS")
-      console.log('arr=', contentArr)
-      let i=1;
-      // Insert urls to corresponding indexes.
-      urls.forEach((url,index)=>{
-        contentArr.splice(index+i, 0, url)
-        i++
-      })
-      // Remove elements with only whitespace.
-      this.contentToArr = contentArr.filter( el=> el.replace(/\s/g, '').length )
-    },
-    onFile(url){
-      let result;
-      JSON.parse(this.contents.imageFiles).forEach(image=>{
-        if(image.imageSrc===url){
-          result = image
-        }
-      })
-      return result;
     },
     doBack(){
       router.push("/");;
@@ -158,7 +130,6 @@ export default {
     },
     doNext(){
       let toTitle = this.$store.getters.GET_POST(this.$route.params.title, true);
-            console.log('toTitle=', toTitle)
       router.push(toTitle);
     },
     doPostMsg(){
@@ -240,32 +211,23 @@ export default {
     transform: translateX(150%);
   }
 
-  .section--photos{
-    width: 100%;
-
-    ::deep p {
+  .section--p {
       font-size: 15px;
       line-height: 32px;
       letter-spacing: 1px;
       font-weight: 100;
-      margin-top: 20px;
+      margin: 40px 0;
+      text-indent: 10px;
 
       &::before {
         content: "";
         background-color: $color-primary-yellow;
         position: absolute;
         margin-top: 7px;
-        margin-left: 0px;
+        margin-left: -10px;
         width: 3px;
         height: 17px
       }
-
-    img {
-      margin: 28px 0;
-      display: block;
-      width: 80%;
-    }
-    }
   }
 
   .msg--div__title{
