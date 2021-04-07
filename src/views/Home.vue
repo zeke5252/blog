@@ -1,8 +1,7 @@
 <template>
-    <!-- v-if="!getDB" -->
-    <div v-if="!GET_DB" class="loading">
-      <div/>
-    </div>
+  <div v-if="!GET_DB" class="loading">
+    <div/>
+  </div>
   <div v-else class="home">
     <div class="search--input">
       <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img"></label>
@@ -15,7 +14,7 @@
       />
     </div>
     <datalist id="keywordlistOptions">
-      <option v-for="post in getDB_all()" :key="post.title" :value="post.title" />
+      <option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
     </datalist>
     <div class="row">
       <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
@@ -29,7 +28,6 @@
         </router-link>
       </div>
     </div>
-  <!--v-if="isMore  && getDB"-->
     <div v-if="isMore && GET_DB" class="more">
       <div class="more--box" ></div>
       <div class="more--word h7">MORE...</div>
@@ -38,84 +36,80 @@
 </template>
 
 <script>
-import {convertTime, splitContents, photoUtil } from "../utils/common.js";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { useStore } from "vuex";
+import { convertTime, splitContents, photoUtil } from "../utils/common.js";
 import { GET_DB } from "../store/types.js";
 import _ from "lodash";
 
-
 export default {
-  name: "Home",
-  data() {
-    return {
-      count: 5,
-		  isMore: false,
-      keyword: "",
-      keyResults: null
-    }
-  },
-  computed:{
-    GET_DB(){
-      return this.$store.getters.GET_DB(null, this.count)
-    },
-  },
-  methods: {
-    loadMore(e) {
-      const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
-      const scrollHeight = document.documentElement.scrollHeight
-			if (!this.isMore && scrollTop + getWindowHeight >= scrollHeight*4/5) {
-				this.isMore = true;
-				setTimeout(() => {
-					this.count+=5;
-					this.isMore = false;
-				}, 1000);                
-      }
-		},
-    getConvertTime(time){
-      return convertTime(time, false)
-    },
-    getDB_all(){
-      return this.$store.getters.GET_DB()
-    },
-    getFirstParagraph(content){
-      let result;
-      result = splitContents(content);
-      if(!result){
-        return "No contents!"
-      }
-      return result.find(el=>{
-        return el.substring(0, 4)!=="http"
-      })
-    },
-  },
-  created() {
-    this.loadMore();
-    document.addEventListener('scroll', this.loadMore, true)
-    this.$store.dispatch('getFirestoreDB');
-    this.photoUtil = photoUtil;
-  },
-  beforeUnmount() {
-    document.removeEventListener('scroll', this.loadMore, true)
-  },
-  watch: {
-    GET_DB(val, pre){
-      if(this.$store.getters.GET_DB().length === val.length){
-        document.removeEventListener('scroll', this.loadMore, true)
-      }
-    },
 
-    keyword: function(val, pre) {
-      let vm = this;
+  name: "Home",
+
+  setup(props) {
+    
+    const store = useStore();
+
+    const count= ref(5);
+		const isMore= ref(false);
+    const keyword= ref("");
+    const keyResults= ref(null);
+
+    const GET_DB = computed(()=> store.getters.GET_DB(null, count.value))
+    const GET_DB_ALL = computed(()=> store.getters.GET_DB())
+
+    const loadMore= (e) => {
+            const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight;
+			      if (!isMore.value && scrollTop + getWindowHeight >= scrollHeight*4/5) {
+				      isMore.value = true;
+				      setTimeout(() => {
+					      count.value += 5;
+					      isMore.value = false;
+                if(GET_DB.value.length < count.value){
+                  document.removeEventListener('scroll', loadMore, true)
+                }
+				      }, 1000);                
+            }
+          }
+
+    document.addEventListener('scroll', loadMore, true);
+    store.dispatch('getFirestoreDB').then(res=>{
+      loadMore();
+    });
+
+    const getConvertTime= (time) => convertTime(time, false);
+    const getFirstParagraph= (content) => {
+            let result;
+            result = splitContents(content);
+            if(!result) return "No contents!"
+            return result.find( el=> el.substring(0, 4)!=="http" )
+          };
+
+    watch(keyword, (val, pre) => {
       _.debounce(function(){
-        let all = vm.getDB_all();
-        let results = all.filter( (post,index) => {
-          return post.title.includes(val)
-        })
-        vm.keyResults = results;
+        let all = GET_DB_ALL;
+        let results = all.filter( (post,index) => post.title.includes(val) )
+        keyResults.value = results;
       }, 500)()
+    })
+
+    onBeforeUnmount(()=>{
+      document.removeEventListener('scroll', loadMore, true)
+    });
+
+    return {
+      photoUtil,
+      getConvertTime,
+      getFirstParagraph,
+      GET_DB,
+      GET_DB_ALL
     }
-  }
+  },
+
 };
+
 </script>
 
 <style lang="scss">

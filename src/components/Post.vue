@@ -60,9 +60,12 @@
 </template>
 
 <script>
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import {convertTime,splitContents} from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import router from '../router/';
+import { useStore } from "vuex";
+import { useRouter, useRoute } from 'vue-router'
 import { db } from "../firebaseDB.js";
 import { GET_DB, GET_POST, DATA_DB } from "@/store/types";
 
@@ -70,87 +73,111 @@ import PhotoItem from "./Photo.vue";
 
 export default {
   name: "Post",
-  data() {
-    return {
-      contents: null,
-      isPrevDisplay: null,
-      isNextDisplay: null,
-      msgTitle: '',
-      msg: '',
-      contentToArr: []
-    };
-  },
-  components: {
-    PhotoItem
-  },
+
   props: {
     title: String,
   },
-  watch: {
-    title: function() {
-      this.init();
-    },
-  },
-  computed: {
-    GET_DB(){
-      return this.$store.getters.GET_DB(this.title)}
-  },
-  mounted() {
-    if (!this.$store.state[DATA_DB]) {
-      this.$store.dispatch("getFirestoreDB").then((res) => {
-        this.init();
-      });
-    } else {
-      this.init();
-    }
-  },
-  methods: {
-    init() {
-      let postData = this.GET_DB;
-      if(postData){
-        let {post, isPrevDisplay, isNextDisplay} = postData;
-        this.isPrevDisplay = isPrevDisplay;
-        this.isNextDisplay = isNextDisplay;
-        this.msgTitle= '';
-        this.msg= '';
-        post.created = convertTime(post.created);
-        this.contentToArr = splitContents(post.content);
-        this.contents = post;
-      } else {
-        this.$router.push('/components/NotFound.vue')
-      }
 
-    },
-    doBack(){
-      router.push("/");;
-    },
-    doPrev(){
-      let toTitle = this.$store.getters.GET_POST(this.$route.params.title, false);
+  setup(props) {
+
+    const store = useStore();
+
+    const router = useRouter()
+    const route = useRoute()
+
+    const contents= ref(null);
+    const isPrevDisplay= ref(null);
+    const isNextDisplay= ref(null);
+    const msgTitle= ref('');
+    const msg= ref('');
+    const contentToArr= ref([]);
+
+    const GET_DB = computed(()=> store.getters.GET_DB(props.title))
+
+    const getConvertTime = (time) => convertTime(time, false);
+
+    const init = () => {
+      let postData = GET_DB.value;
+      console.log('data=', postData)
+      if(postData){
+        // let {post, isPrevDisplay, isNextDisplay} = postData.;
+        isPrevDisplay.value = postData.isPrevDisplay;
+        isNextDisplay.value = postData.isNextDisplay;
+        msgTitle.value= '';
+        msg.value= '';
+        postData.post.created = convertTime(postData.post.created);
+        contentToArr.value = splitContents(postData.post.content);
+        contents.value = postData.post;
+      } else {
+        router.push('/components/NotFound.vue')
+      }
+    };
+
+    const doBack = () => {
+      router.push("/");
+    };
+
+    const doPrev = () => {
+      let toTitle = store.getters.GET_POST(route.params.title, false);
       router.push(toTitle);
-    },
-    doNext(){
-      let toTitle = this.$store.getters.GET_POST(this.$route.params.title, true);
+    };
+
+    const doNext = () => {
+      let toTitle = store.getters.GET_POST(route.params.title, true);
       router.push(toTitle);
-    },
-    doPostMsg(){
-      db.collection("posts").where("title", "==", this.contents.title).get()
+    };
+
+    const doPostMsg = () => {
+      db.collection("posts").where("title", "==", contents.value.title).get()
       .then( posts => {
         posts.forEach(async (post) => {
           const postRef = db.collection("posts").doc(post.id);
-          postRef.update({msgs:firebase.firestore.FieldValue.arrayUnion({name: this.msgTitle, comment: this.msg})})
+          postRef.update({msgs:firebase.firestore.FieldValue.arrayUnion({name: msgTitle.value, comment: msg.value})})
           .then(async res=>{ 
             let postGet = await postRef.get();
             let postData = postGet.data()
             this.contents.msgs = postData.msgs;
             alert('留言成功！')
-            this.init();
+            init();
           })
         })
       })
       .catch((error) => {
         console.log("Error getting documents: ", error);
       });
-    },
+    };
+
+    onMounted(() => {
+      if (store.state[DATA_DB]) {
+        store.dispatch("getFirestoreDB").then((res) => {
+          console.log('yes')
+          init();
+        });
+      } else {
+        console.log('no')
+        init();
+      }
+      }
+    );
+
+    watch(props.title, (val, pre) => {
+      init();
+    })
+
+    return {
+      getConvertTime,
+      GET_DB,
+      contents,
+      isPrevDisplay,
+      isNextDisplay,
+      msgTitle,
+      msg,
+      contentToArr
+    }
+  },
+
+  components: {
+    PhotoItem
   },
 };
 </script>
