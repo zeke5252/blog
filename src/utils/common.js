@@ -21,8 +21,10 @@ function splitContents(content){
   urls.forEach((url,index)=>{
     contentArr.splice(index*2 + 1, 0, url)
   })
+  // Remove an empty line.
+  const newResult = contentArr.map( el=> el.replace(/ \n/g,'').trim())
   // Remove elements with only whitespaces.
-   return contentArr.filter( el=> el.replace(/\s/g, '').length )
+   return newResult.filter( el=> el.replace(/\s/g, '').length )
 }
 
 let photoUtil = {
@@ -38,7 +40,7 @@ let photoUtil = {
 
   getPlaceholderImage(url= null, images){
     const image = this._getFileInfo(url, images)
-    return `https://via.placeholder.com/${image.resolution[0]}x${image.resolution[1]}/888/888`
+    return `https://via.placeholder.com/${image.resolution[0]}x${image.resolution[1]}/333/333`
   },
 
   getSrc(images){

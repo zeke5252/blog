@@ -89,8 +89,10 @@ export default {
 
     watch(keyword, (val, pre) => {
       _.debounce(function(){
-        let all = GET_DB_ALL;
+ 
+        let all = GET_DB_ALL.value;
         let results = all.filter( (post,index) => post.title.includes(val) )
+        console.log('results=', results)
         keyResults.value = results;
       }, 500)()
     })
@@ -100,11 +102,14 @@ export default {
     });
 
     return {
+      isMore,
       photoUtil,
+      keyword,
+      keyResults,
       getConvertTime,
       getFirstParagraph,
       GET_DB,
-      GET_DB_ALL
+      GET_DB_ALL,
     }
   },
 
@@ -276,10 +281,7 @@ export default {
       height: 30px;
       background-color: transparent;
       border-bottom: 1px $color-text-grey solid !important;
-
-      &:focus {
-        color: transparent !important;
-      }
+      color: white;
     }
   }
   

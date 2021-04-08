@@ -37,7 +37,7 @@
       <textarea
         v-model="msg"
         class="form-control border-0"
-        style="white-space: pre"
+        style="white-space: pre-line"
         placeholder="內容"
       ></textarea>
     </div>
@@ -61,7 +61,7 @@
 
 <script>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
-import {convertTime,splitContents} from "../utils/common.js";
+import { convertTime, splitContents } from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import router from '../router/';
 import { useStore } from "vuex";
@@ -79,11 +79,9 @@ export default {
   },
 
   setup(props) {
-
     const store = useStore();
-
-    const router = useRouter()
-    const route = useRoute()
+    const router = useRouter();
+    const route = useRoute();
 
     const contents= ref(null);
     const isPrevDisplay= ref(null);
@@ -94,13 +92,9 @@ export default {
 
     const GET_DB = computed(()=> store.getters.GET_DB(props.title))
 
-    const getConvertTime = (time) => convertTime(time, false);
-
     const init = () => {
       let postData = GET_DB.value;
-      console.log('data=', postData)
       if(postData){
-        // let {post, isPrevDisplay, isNextDisplay} = postData.;
         isPrevDisplay.value = postData.isPrevDisplay;
         isNextDisplay.value = postData.isNextDisplay;
         msgTitle.value= '';
@@ -112,6 +106,8 @@ export default {
         router.push('/components/NotFound.vue')
       }
     };
+
+    const getConvertTime = (time) => convertTime(time, false);
 
     const doBack = () => {
       router.push("/");
@@ -136,7 +132,7 @@ export default {
           .then(async res=>{ 
             let postGet = await postRef.get();
             let postData = postGet.data()
-            this.contents.msgs = postData.msgs;
+            contents.value.msgs = postData.msgs;
             alert('留言成功！')
             init();
           })
@@ -148,19 +144,19 @@ export default {
     };
 
     onMounted(() => {
-      if (store.state[DATA_DB]) {
+      console.log('mount')
+      if (!store.state[DATA_DB]) {
         store.dispatch("getFirestoreDB").then((res) => {
-          console.log('yes')
           init();
         });
       } else {
-        console.log('no')
         init();
       }
       }
     );
 
-    watch(props.title, (val, pre) => {
+    watch(()=>props.title, () => {
+      console.log('watch')
       init();
     })
 
@@ -170,9 +166,13 @@ export default {
       contents,
       isPrevDisplay,
       isNextDisplay,
+      doBack,
+      doPrev,
+      doNext,
       msgTitle,
       msg,
-      contentToArr
+      contentToArr,
+      doPostMsg
     }
   },
 
@@ -221,7 +221,7 @@ export default {
       padding: 10px;
     }
     &__prev {
-     // left: 0;
+      left: 0;
     }
     &__next {
      // right: 0;
@@ -239,12 +239,13 @@ export default {
   }
 
   .section--p {
-      font-size: 15px;
-      line-height: 32px;
+      font-size: 19px;
+      line-height: 38px;
       letter-spacing: 1px;
-      font-weight: 100;
+      font-weight: 200;
       margin: 40px 0;
       text-indent: 10px;
+      white-space: pre-wrap;
 
       &::before {
         content: "";

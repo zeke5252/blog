@@ -5,7 +5,7 @@
       <div class="menu--img--stripe">
         <img src="./assets/logo.svg" alt="zeke blog logo">
       </div>
-      <ul class="p-0 mt-5">
+      <ul class="p-0">
         <router-link to="/"       class="mx-auto">
           <img src="./assets/menu_posts.svg" :style="isActive('')" alt="zeke blog menu_posts">
         </router-link>
@@ -59,7 +59,7 @@ html {
   &::before {
     content:"";
     width: 5px;
-    height: 100%;
+    height: 50%;
     background-color: $color-primary-yellow;
     position: absolute;
     left: 0

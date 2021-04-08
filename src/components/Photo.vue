@@ -47,7 +47,7 @@ export default {
     img {
       width: 100%;
       height: auto;
-      display: block;
+      //display: block;
       outline: white 0px solid;
       transition: all .2s ease-out;
       

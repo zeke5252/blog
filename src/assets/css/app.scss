@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;300;400;500;600;700;900&display=swap');
 @import "./variables";
 @import "./transitions";
 
@@ -7,7 +8,7 @@ body {
     color: white;
     margin: 40px 0;
     background-color: transparent;
-    font-family: Roboto, Noto Sans TC, sans-serif;
+    font-family: Roboto, Noto Serif TC, sans-serif;
     font-size: 13px;
 }
 

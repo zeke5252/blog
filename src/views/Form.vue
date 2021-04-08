@@ -17,9 +17,9 @@
         <label for="formFile" class="form-label">上傳相片</label>
         <input v-on:change="onFileChange" class="form-control" type="file" id="formFile" multiple/>
       </div>
-      <div class="group--container" :style="this.images.length && 'height: 30vh'">
+      <div class="group--container" :style="images.length>0 && 'height: 30vh'">
         <div class="group--container__photo" v-for="(image, index) in images" :key="index">
-          <div v-if="this.images[index]" >
+          <div v-if="images[index]" >
             <button @click="copySrc(index)">Copy name</button>
             <button @click="removeImage(index)">Remove</button>
             <img :src="image" @load="getImgExif(index)"/>
@@ -200,7 +200,7 @@ export default {
 
     copySrc: function(index) {
       const el = document.createElement('textarea');
-      el.value = this.files[index].name;
+      el.value = " " + this.files[index].name + " ";
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
@@ -240,7 +240,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 
   @import "../assets/css/app.scss";
   label {
