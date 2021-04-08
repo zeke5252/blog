@@ -37,7 +37,7 @@ export default {
   .cover--photo {
     position: relative;
     display: flex;
-    width: 80%;
+    width: 90%;
     background-color: black;
 
      &:hover ul {
@@ -47,7 +47,6 @@ export default {
     img {
       width: 100%;
       height: auto;
-      //display: block;
       outline: white 0px solid;
       transition: all .2s ease-out;
       

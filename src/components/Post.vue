@@ -5,12 +5,12 @@
   <div v-else>
     <header>
       <BIconChevronLeft class= "u-btn__back" v-on:click="doBack"/>
+      <BIconChevronLeft class= "u-btn__prev" :style="!isPrevDisplay && 'opacity: .3'" @click="doPrev"/>
       <h4 v-text="title" />
       <span v-text="contents.category" />
       <span v-text="  '&sol;'  " />
       <span v-text="contents.created" />
-      <BIconChevronRight v-if="isNextDisplay" class= "u-btn u-btn__next" @click="doNext"/>
-      <BIconChevronLeft v-if="isPrevDisplay" class= "u-btn u-btn__prev" @click="doPrev"/>
+      <BIconChevronRight class= "u-btn__next" :style="!isNextDisplay && 'opacity: .3'" @click="doNext"/>
     </header>
     <section class="my-3">
       <template v-for="(el,index) in contentToArr" :key="index">    
@@ -187,7 +187,10 @@ export default {
   @import "../assets/css/app.scss";
 
   header {
+    width: 90%;
     display:flex; 
+    position: relative;
+    justify-content: center;
     align-items: center;
     margin-bottom: 10px;
 
@@ -206,25 +209,21 @@ export default {
   }
 
   .u-btn {
-    color:white; 
-    width: 40px; 
-    height: 40px;
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 100;
-    
     &__back {
+      position: absolute;
+      left:0;
       color:white; 
       width: 40px; 
       height: 40px;
       padding: 10px;
+      opacity: .4;
     }
-    &__prev {
-      left: 0;
-    }
-    &__next {
-     // right: 0;
+    &__prev, &__next {
+      color:white; 
+      width: 40px; 
+      height: 40px;
+      padding: 10px;
+      margin: 0 20px;
     }
   }
 
@@ -239,8 +238,9 @@ export default {
   }
 
   .section--p {
-      font-size: 19px;
-      line-height: 38px;
+      width: 90%;
+      font-size: 17px;
+      line-height: 41px;
       letter-spacing: 1px;
       font-weight: 200;
       margin: 40px 0;
@@ -254,7 +254,7 @@ export default {
         margin-top: 7px;
         margin-left: -10px;
         width: 3px;
-        height: 17px
+        height: 20px
       }
   }
 
