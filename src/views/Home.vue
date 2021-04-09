@@ -17,9 +17,9 @@
       <option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
     </datalist>
     <div class="row">
-      <div class="card col-sm-6 m-3 p-0 text-white cardStyle border-0 " v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
+      <div class="card col-sm-6 mx-3 mb-3 p-0 text-white cardStyle border-0 " v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
         <router-link :to="`/posts/${post.title}`">
-          <img :src="photoUtil.getPlaceholderImage(null ,post.imageFiles)" @load="$event.target.src= photoUtil.getSrc(post.imageFiles)" :alt="post.title">
+          <PhotoItem :Url="photoUtil.getSrc(post.imageFiles)" :Images="post.imageFiles" :showExif="false" />
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(post.created)}}</div>
             <h6>{{ post.title }}</h6>
@@ -41,6 +41,8 @@ import { useStore } from "vuex";
 import { convertTime, splitContents, photoUtil } from "../utils/common.js";
 import { GET_DB } from "../store/types.js";
 import _ from "lodash";
+
+import PhotoItem from "../components/Photo.vue";
 
 export default {
 
@@ -112,7 +114,10 @@ export default {
       GET_DB_ALL,
     }
   },
-
+  
+  components: {
+    PhotoItem
+  },
 };
 
 </script>
@@ -151,16 +156,6 @@ export default {
     &:hover {
       outline: $color-primary-yellow 8px solid;
       width: 30%;
-    }
-    &:hover img{
-      transform: scale(1.1);
-    }
-
-    img {
-      width: 100%;
-      height: 22vh;
-      object-fit:cover;
-      transition: all .5s ease;
     }
   }
 
@@ -278,17 +273,20 @@ export default {
     input {
       width: 15%;
       min-width: 200px;
-      height: 30px;
-      background-color: transparent;
-      border-bottom: 1px $color-text-grey solid !important;
+      height: 40px;
+      padding: 5px;
+      background-color: $color-bg;
+      opacity: .8;
       color: white;
     }
   }
   
   .search--img{
-    width: 30px;
-    height: 30px;
-    border-bottom: 1px $color-text-grey solid
+    width: 40px;
+    height: 40px;
+    background-color: $color-bg;
+    padding: 5px;
+    opacity: .8;
   }
 
   @keyframes cardAnimation {

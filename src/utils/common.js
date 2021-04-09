@@ -39,7 +39,9 @@ let photoUtil = {
   },
 
   getPlaceholderImage(url= null, images){
-    const image = this._getFileInfo(url, images)
+    console.log('images=', images)
+    let image = this._getFileInfo(url, images)
+    console.log('image=', image)
     return `https://via.placeholder.com/${image.resolution[0]}x${image.resolution[1]}/333/333`
   },
 

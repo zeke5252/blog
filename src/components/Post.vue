@@ -14,7 +14,9 @@
     </header>
     <section class="my-3">
       <template v-for="(el,index) in contentToArr" :key="index">    
-        <PhotoItem v-if="el.substring(0,4)==='http'"  :Url="el" :Images="contents.imageFiles" />
+        <div v-if="el.substring(0,4)==='http'" style="width: 90%">  
+          <PhotoItem :Url="el" :Images="contents.imageFiles" />
+        </div>
         <p class="section--p  " v-else>{{el}}</p>
       </template>
     </section>
@@ -253,8 +255,6 @@ export default {
       text-indent: 10px;
       white-space: pre-wrap;
       font-family: Roboto, Noto Serif TC, sans-serif;
-      text-decoration: underline dotted #444;
-      text-underline-offset: .8em;
 
       &::before {
         content: "";

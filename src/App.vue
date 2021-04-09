@@ -47,7 +47,6 @@ export default {
 
 html { 
   background: $color-bg url(./assets/bg.jpg) no-repeat center center fixed; 
-  background-blend-mode: soft-light;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;

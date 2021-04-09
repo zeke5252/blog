@@ -1,7 +1,7 @@
 <template>
   <div class="cover--photo">
     <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="$event.target.src= Url" />
-    <ul v-if="photoUtil.getExif(Url, Images)!=='{}'">
+    <ul v-if="photoUtil.getExif(Url, Images)!=='{}' && showExif">
       <li v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
         <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
       </li>
@@ -20,7 +20,11 @@ export default {
   },
   props: {
     Url: String,
-    Images: String
+    Images: String,
+    showExif: {
+      type: Boolean,
+      default: true
+    }
   },
   computed: {
   },
@@ -37,7 +41,7 @@ export default {
   .cover--photo {
     position: relative;
     display: flex;
-    width: 90%;
+    width: 100%;
     background-color: black;
 
      &:hover ul {
