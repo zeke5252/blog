@@ -1,7 +1,7 @@
 <template>
 <div class="container-fluid">
   <div class="row">
-    <nav class="col-4 col-md-2 m-0 mt-3 p-0" style="position:fixed; left: 0;">
+    <nav class="col-4 col-md-2 m-0 p-0" style="position:fixed; left: 0;">
       <div class="menu--img--stripe">
         <img src="./assets/logo.svg" alt="zeke blog logo">
       </div>

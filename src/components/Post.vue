@@ -6,10 +6,10 @@
     <header>
       <BIconChevronLeft class= "u-btn__back" v-on:click="doBack"/>
       <BIconChevronLeft class= "u-btn__prev" :style="!isPrevDisplay && 'opacity: .3'" @click="doPrev"/>
-      <h4 v-text="title" />
-      <span v-text="contents.category" />
-      <span v-text="  '&sol;'  " />
-      <span v-text="contents.created" />
+      <div>
+        <h2 v-text="title" />
+        <span v-text="contents.category + '&nbsp;&nbsp;&nbsp;&sol;&nbsp;&nbsp;&nbsp;' + contents.created" />
+      </div>
       <BIconChevronRight class= "u-btn__next" :style="!isNextDisplay && 'opacity: .3'" @click="doNext"/>
     </header>
     <section class="my-3">
@@ -192,19 +192,25 @@ export default {
     position: relative;
     justify-content: center;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 50px;
 
-    h4 {
-      margin-bottom: 0;
-      margin-right: 10px;
+    div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h2 {
+      letter-spacing: 3px;
+      font-weight: 500;
+      font-family: Roboto, Noto Serif TC, sans-serif;
     }
 
     span {
-      color:white; 
-      font-size:15px; 
-      margin-left: 10px; 
+      color: white; 
+      font-size: 13px; 
       color: #777;
-      transform: translateY(20%); font-weight: 400
+      letter-spacing: 2px;
     }
   }
 
@@ -239,31 +245,36 @@ export default {
 
   .section--p {
       width: 90%;
-      font-size: 17px;
+      font-size: 16px;
       line-height: 41px;
       letter-spacing: 1px;
       font-weight: 200;
       margin: 40px 0;
       text-indent: 10px;
       white-space: pre-wrap;
+      font-family: Roboto, Noto Serif TC, sans-serif;
+      text-decoration: underline dotted #444;
+      text-underline-offset: .8em;
 
       &::before {
         content: "";
         background-color: $color-primary-yellow;
         position: absolute;
-        margin-top: 7px;
+        margin-top: 12px;
         margin-left: -10px;
         width: 3px;
-        height: 20px
+        height: 16px
       }
   }
 
   .msg--div__title{
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
+    
   }
 
   .msg--p__text{
+    margin-top: 10px;
     color: $color-text-grey;
   }
 
