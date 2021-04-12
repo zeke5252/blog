@@ -59,48 +59,93 @@ import { firebase } from "@firebase/app";
 import { db } from "@/firebaseDB.js";
 import { storage } from "../firebaseDB.js";
 import router from '../router/';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+const _this = this;
 
 export default {
   name: "Form",
-  data() {
-    return {
-      title: "",
-      category: "photography",
-      content: "",
-      created: "",
-      images: [],
-      files: [],
-      filesToUpload: [],
-      progresses: []
+
+  setup(props, context) {
+    const title = ref("");
+    const category = ref("photography");
+    const content = ref("");
+    const created= ref("");
+    const images= ref([]);
+    const files= ref([]);
+    const filesToUpload= ref([]);
+    const progresses= ref([]);
+
+    onMounted(()=>{
+      init();
+    });
+
+    const init = () =>{
+      title.value= "";
+      category.value= "photography";
+      content.value= "";
+      images.value= [];
+      files.value= []; // all temporarily selected files 
+      filesToUpload.value= [];
+      progresses.value= []
     };
-  },
-  computed: {},
-  mounted() {
-    this.init();
-  },
-  methods: {
-    init() {
-      this.title= "";
-      this.category= "photography";
-      this.content= "";
-      this.images= [];
-      this.files= []; // all temporarily selected files 
-      this.filesToUpload= [];
-      this.progresses= []
-    },
 
-    submitHandler() {
-      console.log('this.files=', this.files)
+    // Select photos from the local disk.
 
-      
-      this.files.forEach((file, index)=>{
-        if(this.content.includes(file.name)){
-          this.filesToUpload.push(file)
+    const onFileChange = (e) => {
+      var _files = e.target.files || e.dataTransfer.files;
+      if (!_files.length) return;
+      createImage(_files);
+    };
+
+    const createImage = (docs) => {
+      docs.forEach(doc=>{
+        var reader = new FileReader();
+        reader.onload = (e) => {
+          images.value.push(e.target.result);
+        };
+        files.value.push(doc);
+        reader.readAsDataURL(doc);
+      })
+    };
+
+    const removeImage = (index) => {
+      images.value.splice(index, 1);
+    };
+
+    const copySrc = (index) => {
+      const el = document.createElement('textarea');
+      el.value = " " + files.value[index].name + " ";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    };
+
+    const getImgExif = (index) => {
+      EXIF.getData(event.target, function() {
+        let rawData = EXIF.getAllTags(event.target);
+        let {ApertureValue, DateTime, ExposureBias, ExposureTime, ISOSpeedRatings, Model} = rawData;
+        let formattedData = new Map();
+        formattedData.set("Aperture", Math.round(ApertureValue*10)/10);
+        formattedData.set("Date / Time", DateTime);
+        formattedData.set("Exposure bias", Math.round(ExposureBias*10)/10);
+        formattedData.set("Exposure time", ExposureTime);
+        formattedData.set("ISO", ISOSpeedRatings);
+        formattedData.set("Model", Model);
+
+        let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
+        files.value.[index].exif = allMetaData;
+        files.value[index].resolution = [this.naturalWidth, this.naturalHeight]
+    });
+    };
+
+    const submitHandler = () => {
+      files.value.forEach((_file, index)=>{
+        if(content.value.includes(_file.name)){
+          filesToUpload.value.push(_file)
         }
       })
-
       // do validation
-
       // 1. Upload photo
       // 2. get the firestorage path
       // 3. save it to imageSrc.
@@ -108,17 +153,17 @@ export default {
         contentType: "image/png",
       };
 
-      let filesAllPromises = this.filesToUpload.map((file,i)=>{
+      let filesAllPromises = filesToUpload.value.map((file,i)=>{
          let storageRef = storage.ref();
          var uploadTask = storageRef
-           .child("photography/" + this.filesToUpload[i].name)
-           .put(this.filesToUpload[i], metadata);
+           .child("photography/" + filesToUpload.value[i].name)
+           .put(filesToUpload.value[i], metadata);
 
         return new Promise((resolve, reject)=>{
           uploadTask.on(
            firebase.storage.TaskEvent.STATE_CHANGED,
            (snapshot) => {
-             this.progresses[i] = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+             progresses.value[i] = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
              switch (snapshot.state) {
                case firebase.storage.TaskState.PAUSED: // or 'paused'
                  console.log("Upload is paused");
@@ -145,69 +190,39 @@ export default {
             () => {
             // Upload successfully, now get the download URL
               uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-              this.filesToUpload[i].imageSrc = downloadURL;
+              filesToUpload.value[i].imageSrc = downloadURL;
               resolve(true)
               });
             }
-         );
+         )
         })
       })
 
       Promise.all(filesAllPromises).then(resArr=>{ 
-        this.filesToUpload.forEach(file=>{
-          if(this.content.includes(file.name)){
-            this.content = this.content.replace(file.name,file.imageSrc)
+        filesToUpload.value.forEach(_file=>{
+          if(content.value.includes(_file.name)){
+            content.value = content.value.replace(_file.name,_file.imageSrc)
           }
         })
 
         db.collection("posts").add({
-          title: this.title,
-          category: this.category,
+          title: title.value,
+          category: category.value,
           created: firebase.firestore.FieldValue.serverTimestamp(),
-          imageFiles: JSON.stringify(this.filesToUpload),
-          content: this.content
+          imageFiles: JSON.stringify(filesToUpload.value),
+          content: content.value 
            })
         .then((docRef) => {
           alert("Upload is successful!");
-          this.init();
+          init();
         })
         .catch((error) => {
           console.error("Error adding document: ", error);
         });
       })
-    },
-    onFileChange(e) {
-      var files = e.target.files || e.dataTransfer.files;
-      if (!files.length) return;
-      this.createImage(files);
-    },
-    createImage(files) {
-      var _this = this;
-      files.forEach(file=>{
-        var reader = new FileReader();
-        reader.onload = (e) => {
-          _this.images.push(e.target.result);
-        };
-        this.files.push(file);
-        reader.readAsDataURL(file);
-      })
-      console.log('files=', this.files)
-    },
+    };
 
-    removeImage: function(index) {
-      this.images.splice(index, 1);
-    },
-
-    copySrc: function(index) {
-      const el = document.createElement('textarea');
-      el.value = " " + this.files[index].name + " ";
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
-    },
-
-    signoutHandler(){
+    const signoutHandler = () => {
       firebase.auth().signOut().then(() => {
         // Sign-out successful.
         console.log('sign out')
@@ -216,26 +231,24 @@ export default {
       }).catch((error) => {
         // An error happened.
       });
-    },
-    getImgExif(index){
-      let _this = this
-      EXIF.getData(event.target, function() {
-        let rawData = EXIF.getAllTags(this);
-        let {ApertureValue, DateTime, ExposureBias, ExposureTime, ISOSpeedRatings, Model} = rawData;
-        let formattedData = new Map();
-        formattedData.set("Aperture", Math.round(ApertureValue*10)/10);
-        formattedData.set("Date / Time", DateTime);
-        formattedData.set("Exposure bias", Math.round(ExposureBias*10)/10);
-        formattedData.set("Exposure time", ExposureTime);
-        formattedData.set("ISO", ISOSpeedRatings);
-        formattedData.set("Model", Model);
+    };
 
-        let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
-      _this.files[index].exif = allMetaData;
-      _this.files[index].resolution = [this.naturalWidth, this.naturalHeight]
-    });
-
-    }
+    return {
+      title,
+      category,
+      content,
+      created,
+      images,
+      files,
+      filesToUpload,
+      progresses,
+      submitHandler,
+      onFileChange,
+      removeImage,
+      copySrc,
+      signoutHandler,
+      getImgExif
+    };
   },
 };
 </script>

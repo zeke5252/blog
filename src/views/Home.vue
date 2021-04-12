@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
 import { convertTime, splitContents, photoUtil } from "../utils/common.js";
 import { GET_DB } from "../store/types.js";
@@ -91,10 +91,8 @@ export default {
 
     watch(keyword, (val, pre) => {
       _.debounce(function(){
- 
         let all = GET_DB_ALL.value;
         let results = all.filter( (post,index) => post.title.includes(val) )
-        console.log('results=', results)
         keyResults.value = results;
       }, 500)()
     })

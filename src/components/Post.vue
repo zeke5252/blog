@@ -146,7 +146,6 @@ export default {
     };
 
     onMounted(() => {
-      console.log('mount')
       if (!store.state[DATA_DB]) {
         store.dispatch("getFirestoreDB").then((res) => {
           init();

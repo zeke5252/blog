@@ -10,14 +10,13 @@
 </template>
 
 <script>
-import {photoUtil} from "../utils/common.js";
+import { photoUtil } from "../utils/common.js";
+import { toRefs } from "vue";
+
 
 export default {
   name: "photo-item",
-  data() {
-    return {
-    };
-  },
+  
   props: {
     Url: String,
     Images: String,
@@ -26,16 +25,20 @@ export default {
       default: true
     }
   },
-  computed: {
-  },
-  created() {
-    this.photoUtil = photoUtil;
+
+  setup(props) {
+    const { Url, Images, showExif } = toRefs(props);
+    return {
+      photoUtil,
+      Url,
+      Images,
+      showExif
+    }  
   },
 };
 </script>
 
 <style scoped lang="scss">
-  
   @import "../assets/css/app.scss";
 
   .cover--photo {
