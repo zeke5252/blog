@@ -1,6 +1,11 @@
 <template>
   <div class="about">
-    <h1>This is an about page</h1>
-    <p>大家好我是阿甫</p>
+    <h1>About me</h1>
+    <p>A front-end programmer, a ui/ux designer, and a photographer</p>
+    <section>
+      <div>LinkedIn</div>
+      <div>Facebook</div>
+      <div>Instgram</div>
+    </section>
   </div>
 </template>

@@ -1,28 +1,23 @@
 <template>
 <div class="container-fluid">
-  <div class="row">
-    <nav class="col-4 col-md-2 m-0 p-0" style="position:fixed; left: 0;">
-      <div class="menu--img--stripe">
-        <img src="./assets/logo.svg" alt="zeke blog logo">
-      </div>
-      <ul class="p-0">
-        <router-link to="/"       class="mx-auto">
-          <img src="./assets/menu_posts.svg" :style="isActive('')" alt="zeke blog menu_posts">
-        </router-link>
-        <img src="./assets/menu_devider.svg" class="mx-auto" alt="zeke blog menu_devider">
-        <router-link to="/about"  class="mx-auto">
-          <img src="./assets/menu_about.svg" :style="isActive('about')" alt="zeke blog menu_about">
-        </router-link>
-        <img src="./assets/menu_devider.svg" class="mx-auto" alt="zeke blog menu_devider">
-        <router-link to="/form"   class="mx-auto" >
-          <img src="./assets/menu_admin.svg" :style="isActive('form')"  alt="zeke blog menu_admin">
-        </router-link>
-      </ul>
+  <div class="row mt-4">
+    <nav class="d-none d-md-block col-2 p-0 fixed-top" >
+        <img class="img-fluid mt-4" src="./assets/logo.svg" alt="zeke blog logo">
+        <ul class="p-0">
+          <router-link to="/"       class="mx-auto">
+            <img src="./assets/menu_posts.svg" :style="isActive('')" alt="zeke blog menu_posts">
+          </router-link>
+          <img src="./assets/menu_devider.svg" class="mx-auto" alt="zeke blog menu_devider">
+          <router-link to="/about"  class="mx-auto">
+            <img src="./assets/menu_about.svg" :style="isActive('about')" alt="zeke blog menu_about">
+          </router-link>
+          <img src="./assets/menu_devider.svg" class="mx-auto" alt="zeke blog menu_devider">
+          <router-link to="/form"   class="mx-auto" >
+            <img src="./assets/menu_admin.svg" :style="isActive('form')"  alt="zeke blog menu_admin">
+          </router-link>
+        </ul>
     </nav>
-    <!-- Leave empty column for menu -->
-    <div class="col-4 col-md-2">
-    </div>
-    <main class="col-8 col-md-10">
+    <main class="col-12 col-md-10 offset-md-2">
       <router-view/>
     </main>
   </div>
@@ -51,18 +46,6 @@ html {
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
-}
-
-.menu--img--stripe {
-    position: relative;
-  &::before {
-    content:"";
-    width: 5px;
-    height: 50%;
-    background-color: $color-primary-yellow;
-    position: absolute;
-    left: 0
-  }
 }
 
 ul {

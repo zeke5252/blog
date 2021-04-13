@@ -1,6 +1,6 @@
 <template>
   <div class="cover--photo">
-    <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="$event.target.src= Url" />
+    <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="$event.target.src= Url" :class="{ photoBorder: showBorder }" />
     <ul v-if="photoUtil.getExif(Url, Images)!=='{}' && showExif">
       <li v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
         <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
@@ -21,6 +21,10 @@ export default {
     Url: String,
     Images: String,
     showExif: {
+      type: Boolean,
+      default: true
+    },
+    showBorder: {
       type: Boolean,
       default: true
     }
@@ -54,12 +58,6 @@ export default {
     img {
       width: 100%;
       height: auto;
-      outline: white 0px solid;
-      transition: all .2s ease-out;
-      
-      &:hover{
-        outline: white 10px solid;
-      }
     }
 
     ul {
@@ -79,6 +77,15 @@ export default {
         padding: 10px 0;
         list-style-type: none !important;
       }
+    }
+  }
+
+  .photoBorder {
+    outline: white 0px solid;
+    transition: all .2s ease-out;
+      
+    &:hover{
+      outline: white 10px solid;
     }
   }
 

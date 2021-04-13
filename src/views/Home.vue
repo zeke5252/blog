@@ -16,14 +16,16 @@
     <datalist id="keywordlistOptions">
       <option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
     </datalist>
-    <div class="row">
-      <div class="card col-sm-6 mx-3 mb-3 p-0 text-white cardStyle border-0 " v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
-        <router-link :to="`/posts/${post.title}`">
-          <PhotoItem :Url="photoUtil.getSrc(post.imageFiles)" :Images="post.imageFiles" :showExif="false" />
+    <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-5 ">
+      <div class="col"  v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
+        <router-link :to="`/posts/${post.title}`" class="card text-white cardStyle border-0" >
+          <div style="overflow: hidden;">
+            <PhotoItem :Url="photoUtil.getSrc(post.imageFiles)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
+          </div>
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(post.created)}}</div>
-            <h6>{{ post.title }}</h6>
-            <p class="card-text mt-2" >{{ getFirstParagraph(post.content) }}</p>
+            <h6 class="card-title">{{ post.title }}</h6>
+            <p class="card-text my-2" >{{ getFirstParagraph(post.content) }}</p>
           </div>
         </router-link>
       </div>
@@ -123,11 +125,6 @@ export default {
 <style lang="scss">
 
   @import "../assets/css/app.scss";
-  
-  .home {
-    display: flex;
-    flex-direction: column;
-  }
 
   .createdDate {
     height: 20px;
@@ -138,37 +135,43 @@ export default {
     text-align: center;
     letter-spacing: 1px;
     padding: 10px 20px 16px 20px;
-    font-weight: 800;
+    font-weight: 700;
     color: $color-primary-yellow;
   }
 
   .cardStyle {
-    width: 29.5%;
     background-color: $color-card-bg;
     outline: $color-bg 0px solid;
     transition: .2s ease-out;
-    overflow: hidden;
     animation: cardAnimation ease-out .4s;
-    border-radius: 0 !important;
+    overflow: hidden;
 
     &:hover {
       outline: $color-primary-yellow 8px solid;
-      width: 30%;
+    };
+
+    img {
+      transform: scale(1);
+      height: 24vh !important;
+      object-fit: cover;
+      transition: .2s ease-out; 
     }
+
+    &:hover img{
+      transform: scale(1.2);
+    };
+
   }
 
   .card-body {
-    background-color: $color-card-bg;
     position: relative;
-    padding: 26px 20px 40px 20px;
+    padding: 26px 20px 30px 20px;
   }
   .card-text {
-      width: 100%;
-      height: 20vh;
       line-height: 2.1;
       letter-spacing: .5px;
-      overflow:hidden;
       color: $color-text-grey;
+
       &::before {
       content: "";
       background-color: $color-primary-yellow;
