@@ -2,19 +2,22 @@
   <div v-if="!contents" class="spinner-border" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div class="me-sm-0 me-md-5 " v-else>
+  <div class="me-sm-0 me-md-5" v-else>
     <header class="mb-5 fixed-top">
-      <img src="../assets/back.svg" class= "u-btn__back" v-on:click="doBack"/>
       <img src="../assets/prev.svg" class= "u-btn__prev" :style="!isPrevDisplay && 'opacity: .3'" @click="doPrev"/>
-      <div>
+      <div class="header--info">
         <h2 v-text="title" />
         <span v-text="contents.category + '&nbsp;&nbsp;&sol;&nbsp;&nbsp;' + contents.created" />
+        <div v-if="contents.msgs" class="d-inline-flex mt-2">    
+          <img src="../assets/msg.svg" class= "msg me-1" />
+          <span style="color: white">{{contents.msgs.length}}</span>
+        </div>
       </div>
       <img src="../assets/next.svg" class= "u-btn__next" :style="!isNextDisplay && 'opacity: .3'" @click="doNext"/>
     </header>
     <section class="my-3">
       <template v-for="(el,index) in contentToArr" :key="index">    
-        <div v-if="el.substring(0,4)==='http'" class="me-sm-0 me-md-5">  
+        <div v-if="el.substring(0,4)==='http'" class="me-sm-0 ">  
           <PhotoItem :Url="el" :Images="contents.imageFiles" />
         </div>
         <p class="section--p  " v-else>{{el}}</p>
@@ -46,7 +49,7 @@
   </div>
   <div class="row">
     <div class="col-sm-6 mb-6 ">
-      <button type="button" class="col-12 col-md-6 offset-md-6 mb-5 " v-on:click="doPostMsg">
+      <button type="button" class="col-12 col-md-6 offset-md-6 mb-5 mt-1 " style="height: 40px;" v-on:click="doPostMsg">
         Post message
       </button>
     </div>
@@ -193,7 +196,7 @@ export default {
     justify-content: center;
     align-items: center;
 
-    div {
+    .header--info {
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -205,31 +208,38 @@ export default {
     }
 
     span {
-      color: white; 
-      font-size: 13px; 
+      font-size: 12px; 
       color: #777;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
     }
   }
 
   .u-btn {
-    &__back {
-      position: absolute;
-      left:0;
+    &__next {
+      position:absolute;
       color:white; 
       width: 40px; 
       height: 40px;
-      padding: 6px;
+      padding: 12px;
+      margin: 0;
+      right: 0;
       cursor: pointer
     }
-    &__prev, &__next {
+    &__prev {
+      position:absolute;
       color:white; 
       width: 40px; 
       height: 40px;
-      padding: 6px;
-      margin: 0 20px;
+      padding: 12px;
+      margin: 0;
+      left: 0;
       cursor: pointer
     }
+  }
+
+  .msg {
+    width: 16px; 
+    height: 16px;
   }
 
   label {
@@ -240,7 +250,7 @@ export default {
       font-size: 16px;
       line-height: 41px;
       letter-spacing: 1px;
-      font-weight: 200;
+      font-weight: 300;
       margin: 40px 0;
       text-indent: 10px;
       white-space: pre-wrap;
