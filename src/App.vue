@@ -1,8 +1,9 @@
 <template>
 <div class="container-fluid">
-  <div class="row mt-4">
+ <img src="./assets/logo_m.svg" class= "logo--m d-block d-sm-none p-1 fixed-top mt-1 mx-2" style="width: 40px; height: 40px" v-on:click=""/>
+  <div class="row mt-5">
     <nav class="d-none d-md-block col-2 p-0 fixed-top" >
-        <img class="img-fluid mt-4" src="./assets/logo.svg" alt="zeke blog logo">
+        <img class="img-fluid mt-5" src="./assets/logo.svg" alt="zeke blog logo">
         <ul class="p-0">
           <router-link to="/"       class="mx-auto">
             <img src="./assets/menu_posts.svg" :style="isActive('')" alt="zeke blog menu_posts">
@@ -70,5 +71,9 @@ ul {
     }
 
 }
+
+  .logo--m {
+      cursor: pointer
+  }
 
 </style>

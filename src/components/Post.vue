@@ -2,15 +2,15 @@
   <div v-if="!contents" class="spinner-border" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
-  <div class="me-sm-0 me-md-5" v-else>
-    <header>
-      <BIconChevronLeft class= "u-btn__back" v-on:click="doBack"/>
-      <BIconChevronLeft class= "u-btn__prev" :style="!isPrevDisplay && 'opacity: .3'" @click="doPrev"/>
+  <div class="me-sm-0 me-md-5 " v-else>
+    <header class="mb-5 fixed-top">
+      <img src="../assets/back.svg" class= "u-btn__back" v-on:click="doBack"/>
+      <img src="../assets/prev.svg" class= "u-btn__prev" :style="!isPrevDisplay && 'opacity: .3'" @click="doPrev"/>
       <div>
         <h2 v-text="title" />
-        <span v-text="contents.category + '&nbsp;&nbsp;&nbsp;&sol;&nbsp;&nbsp;&nbsp;' + contents.created" />
+        <span v-text="contents.category + '&nbsp;&nbsp;&sol;&nbsp;&nbsp;' + contents.created" />
       </div>
-      <BIconChevronRight class= "u-btn__next" :style="!isNextDisplay && 'opacity: .3'" @click="doNext"/>
+      <img src="../assets/next.svg" class= "u-btn__next" :style="!isNextDisplay && 'opacity: .3'" @click="doNext"/>
     </header>
     <section class="my-3">
       <template v-for="(el,index) in contentToArr" :key="index">    
@@ -22,7 +22,7 @@
     </section>
   </div>
   <div class="row">
-    <div class="col-sm-4">
+    <div class="col-sm-6">
       <label class="form-label h6 mb-3 mt-5 " for="formTitle"> 留言 </label>
       <input
         v-model="msgTitle"
@@ -35,7 +35,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-sm-4 mb-2">
+    <div class="col-sm-6 mb-2">
       <textarea
         v-model="msg"
         class="form-control border-0"
@@ -45,8 +45,8 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-sm-4">
-      <button type="button" class="btn mb-5 msg--btn__submit" v-on:click="doPostMsg">
+    <div class="col-sm-6 mb-6 ">
+      <button type="button" class="col-12 col-md-6 offset-md-6 mb-5 " v-on:click="doPostMsg">
         Post message
       </button>
     </div>
@@ -192,7 +192,6 @@ export default {
     position: relative;
     justify-content: center;
     align-items: center;
-    margin-bottom: 50px;
 
     div {
       display: flex;
@@ -203,7 +202,6 @@ export default {
     h2 {
       letter-spacing: 3px;
       font-weight: 500;
-      font-family: Roboto, Noto Serif TC, sans-serif;
     }
 
     span {
@@ -221,26 +219,21 @@ export default {
       color:white; 
       width: 40px; 
       height: 40px;
-      padding: 10px;
-      opacity: .4;
+      padding: 6px;
+      cursor: pointer
     }
     &__prev, &__next {
       color:white; 
       width: 40px; 
       height: 40px;
-      padding: 10px;
+      padding: 6px;
       margin: 0 20px;
+      cursor: pointer
     }
   }
 
   label {
     color: $color-text-grey
-  }
-
-  .msg--btn__submit {
-    background-color: $color-primary-yellow;
-    width: 40%;
-    transform: translateX(150%);
   }
 
   .section--p {
@@ -251,7 +244,6 @@ export default {
       margin: 40px 0;
       text-indent: 10px;
       white-space: pre-wrap;
-      font-family: Roboto, Noto Serif TC, sans-serif;
 
       &::before {
         content: "";

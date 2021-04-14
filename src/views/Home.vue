@@ -3,16 +3,17 @@
     <div/>
   </div>
   <div v-else class="home">
-    <div class="search--input">
-      <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img"></label>
-      <input
-        v-model="keyword"
-        type="text"
-        list="keywordlistOptions"
-        id="searchInput"
-        aria-label="searchInput"
-      />
-    </div>
+      <div class="d-flex justify-content-end fixed-top pe-2 pe-md-5 mt-1">
+        <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img"></label>
+        <input
+          class="search--input"
+          v-model="keyword"
+          type="text"
+          list="keywordlistOptions"
+          id="searchInput"
+          aria-label="searchInput"
+        />
+      </div> 
     <datalist id="keywordlistOptions">
       <option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
     </datalist>
@@ -262,29 +263,17 @@ export default {
   }
 
   .search--input {
-    display: flex;
-    padding-right: 50px;
-    justify-content: flex-end;
-    position: fixed;
-    top: 10px;
-    right: 0;
-    width: 100%;
-    z-index: 100;
-
-    input {
-      width: 15%;
       min-width: 200px;
-      height: 40px;
+      height: 36px;
       padding: 5px;
       background-color: $color-bg;
       opacity: .8;
       color: white;
-    }
   }
   
   .search--img{
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     background-color: $color-bg;
     padding: 5px;
     opacity: .8;
