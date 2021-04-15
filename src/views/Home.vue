@@ -150,15 +150,15 @@ export default {
     &:hover {
       outline: $color-primary-yellow 8px solid;
     };
-
-    img {
+    // Select every <img> element whose src attribute value contains the substring "https"
+    img[src*="https"] {
       transform: scale(1);
-      height: 24vh !important;
+      height: 24vh;
       object-fit: cover;
       transition: .2s ease-out; 
     }
 
-    &:hover img{
+    &:hover img[src*="https"]{
       transform: scale(1.2);
     };
 

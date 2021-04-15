@@ -1,6 +1,7 @@
 <template>
   <div class="cover--photo">
-    <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="$event.target.src= Url" :class="{ photoBorder: showBorder }" />
+    <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="loadLogo($event)" :class="{ photoBorder: showBorder }" />
+    <img v-if="!isLoaded" class="getPlaceholder--logo" src="../assets/logo_m.svg" />
     <ul v-if="photoUtil.getExif(Url, Images)!=='{}' && showExif">
       <li v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
         <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
@@ -11,7 +12,7 @@
 
 <script>
 import { photoUtil } from "../utils/common.js";
-import { toRefs } from "vue";
+import { toRefs, ref } from "vue";
 
 
 export default {
@@ -30,13 +31,25 @@ export default {
     }
   },
 
-  setup(props) {
+  setup(props, context) {
     const { Url, Images, showExif } = toRefs(props);
+    const isLoaded = ref(false);
+    const loadLogo = (e) => {
+      e.target.src= Url.value;
+
+      // When real photo is loaded, not replacement photo.
+      e.target.onload = () => {
+        isLoaded.value = true;
+      }
+    };
+
     return {
       photoUtil,
       Url,
       Images,
-      showExif
+      showExif,
+      loadLogo,
+      isLoaded
     }  
   },
 };
@@ -57,7 +70,15 @@ export default {
 
     img {
       width: 100%;
-      height: auto;
+      align-self: start;
+    }
+
+    .getPlaceholder--logo {
+      position: absolute;
+      width: 10%;
+      transform: translateX(450%);
+      align-self: center;
+      opacity: .15;
     }
 
     ul {
