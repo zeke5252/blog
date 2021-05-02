@@ -4,9 +4,9 @@
   </div>
   <div v-else class="home">
       <div class="d-flex justify-content-end fixed-top pe-2 pe-md-5 mt-1">
-        <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img"></label>
+        <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img p-1"></label>
         <input
-          class="search--input"
+          class="search--input p-1"
           v-model="keyword"
           type="text"
           list="keywordlistOptions"
@@ -132,10 +132,10 @@ export default {
     background-color: $color-card-bg;
     position: absolute;
     right: 0;
-    top: -26px;
+    top: -22px;
     text-align: center;
     letter-spacing: 1px;
-    padding: 10px 20px 16px 20px;
+    padding: 8px 20px 14px 20px;
     font-weight: 700;
     color: $color-primary-yellow;
   }
@@ -146,6 +146,7 @@ export default {
     transition: .2s ease-out;
     animation: cardAnimation ease-out .4s;
     overflow: hidden;
+    border-radius: 0;
 
     &:hover {
       outline: $color-primary-yellow 8px solid;
@@ -263,9 +264,7 @@ export default {
   }
 
   .search--input {
-      min-width: 200px;
       height: 36px;
-      padding: 5px;
       background-color: $color-bg;
       opacity: .8;
       color: white;
@@ -275,8 +274,6 @@ export default {
     width: 36px;
     height: 36px;
     background-color: $color-bg;
-    padding: 5px;
-    opacity: .8;
   }
 
   @keyframes cardAnimation {

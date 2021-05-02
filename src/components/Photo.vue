@@ -2,8 +2,8 @@
   <div class="cover--photo">
     <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="loadLogo($event)" :class="{ photoBorder: showBorder }" />
     <img v-if="!isLoaded" class="getPlaceholder--logo" src="../assets/logo_m.svg" />
-    <ul v-if="photoUtil.getExif(Url, Images)!=='{}' && showExif">
-      <li v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
+    <ul class="px-4  py-3 px-sm-5  py-sm-4" v-if="photoUtil.getExif(Url, Images)!=='{}' && showExif">
+      <li class ="py-1 py-sm-2" v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
         <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
       </li>
     </ul>
@@ -87,7 +87,6 @@ export default {
       right: 0;
       bottom: 0;
       z-index: 100;
-      padding: 24px 40px;
       font-size: 9px;
       height: auto;
       letter-spacing: 1px;
@@ -95,7 +94,6 @@ export default {
       opacity: 0;
 
       li{
-        padding: 10px 0;
         list-style-type: none !important;
       }
     }

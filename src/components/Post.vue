@@ -248,7 +248,7 @@ export default {
 
   .section--p {
       font-size: 16px;
-      line-height: 41px;
+      line-height: 36px;
       letter-spacing: 1px;
       font-weight: 300;
       margin: 40px 0;

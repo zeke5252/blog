@@ -1,7 +1,14 @@
 <template>
   <form v-on:submit.prevent>
+    <div class="row justify-content-end">
+      <div class="col-5 col-sm-2">
+        <button type="button" class="col-12" style="background-color: transparent; color: white; border: 1px solid !important" v-on:click="signoutHandler">
+          Sign out
+        </button>
+      </div>
+    </div>
     <div class="row">
-      <div class="col-4 mb-4">
+      <div class="col-12 col-sm-4 mb-4">
         <label for="formTitle" class="form-label">標題</label>
         <input
           v-model="title"
@@ -13,22 +20,20 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-4 mb-4">
+      <div class="col-12 col-sm-4 mb-4">
         <label for="formFile" class="form-label">上傳相片</label>
         <input v-on:change="onFileChange" class="form-control" type="file" id="formFile" multiple/>
       </div>
       <div class="group--container" :style="images.length>0 && 'height: 30vh'">
         <div class="group--container__photo" v-for="(image, index) in images" :key="index">
-          <div v-if="images[index]" >
-            <button @click="copySrc(index)">Copy name</button>
-            <button @click="removeImage(index)">Remove</button>
-            <img :src="image" @load="getImgExif(index)"/>
-          </div>
+          <img :src="image" @load="getImgExif(index)"/>
+          <button class="m-2 mb-0 d-block" @click="copySrc(index)">Copy name</button>
+          <button class="m-2 mb-0 d-block" @click="removeImage(index)">Remove</button>
         </div>
       </div>
     </div>
     <div class="row">
-      <div class="col-4 mb-4">
+      <div class="col-12 col-sm-4 mb-4">
         <label for="formFile" class="form-label">類別</label>
         <select v-model="category" class="form-select" aria-label="Default select example" >
           <option value="photography">攝影</option>
@@ -39,18 +44,15 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-6 mb-4">
+      <div class="col-12 col-sm-6 mb-4">
         <label for="area-content" class="form-label">貼文內容</label>
         <textarea v-model="content" class="form-control" id="area-content" rows="5" cols="30" style="white-space: pre-wrap" />
       </div>
     </div>
-    <span v-for="progress in progresses" v-show="progress>0" :key="progress">{{progress}}</span>
-    <button type="submit" class="btn--submit" v-on:click="submitHandler">
+    <button type="submit" class="btn col-12 col-sm-2 mb-3" v-on:click="submitHandler">
       Submit
     </button>
-    <button type="button" class="btn--signout" v-on:click="signoutHandler">
-      Sign out
-    </button>
+    <span v-for="progress in progresses" v-show="progress>0" class="p-2" :key="progress">{{progress}}</span>
   </form>
 </template>
 
@@ -213,8 +215,8 @@ export default {
           content: content.value 
            })
         .then((docRef) => {
-          alert("Upload is successful!");
-          init();
+          //alert("Upload is successful!");
+          //init();
         })
         .catch((error) => {
           console.error("Error adding document: ", error);
@@ -269,6 +271,7 @@ export default {
       height: 160px;
       position: relative;
       margin-right: 8px;
+
       img {
         position: absolute;
         object-fit: cover;
@@ -278,25 +281,12 @@ export default {
         height: 160px;
 
       }
+      
       button {
         font-weight: 500;
-        display: block;
         position: relative;
-        z-index: 300;
-        left:0;
-        top: 0;
-        margin: 8px 8px 0 8px;
-        padding: 5px 8px;
       }
     }
   }
 
-  .btn--submit {
-    background-color: $color-primary-yellow;
-  }
-
-  .btn--signout {
-    background-color: transparent;
-    color: white;
-  }
 </style>

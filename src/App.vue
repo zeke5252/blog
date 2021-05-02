@@ -4,7 +4,7 @@
     <main class="col-12 col-md-10 offset-md-2">
       <router-view/>
     </main>
-    <div v-if="isMobileMenu" class="w-100 h-100 fixed-top" style= "background-color: transparent" @click="doMenu"></div>
+    <div v-if="isMobileMenu" class="w-100 h-100 fixed-top" style= "background-color: black; opacity: .3;" @click="doMenu"></div>
     <nav :class="!isMobileMenu ? 'd-none d-md-block col-2 p-0 fixed-top' : 'col-6 p-0 fixed-top h-100 mobileBg'" >
         <img class="img-fluid mt-5" src="./assets/logo.svg" alt="zeke blog logo">
         <ul class="p-0">
