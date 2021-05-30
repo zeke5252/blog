@@ -3,7 +3,7 @@
     <div/>
   </div>
   <div v-else class="home">
-      <div class="d-flex justify-content-end fixed-top pe-2 pe-md-5 mt-1">
+      <div class="d-flex justify-content-end fixed-top pe-2 pe-md-2 mt-1">
         <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img p-1"></label>
         <input
           class="search--input p-1"
@@ -17,7 +17,7 @@
     <datalist id="keywordlistOptions">
       <option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
     </datalist>
-    <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-5 ">
+    <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2 ">
       <div class="col"  v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
         <router-link :to="`/posts/${post.title}`" class="card text-white cardStyle border-0" >
           <div style="overflow: hidden;">

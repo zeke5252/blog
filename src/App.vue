@@ -1,27 +1,25 @@
 <template>
 <div class="container-fluid">
   <div class="row mt-5">
-    <main class="col-12 col-md-10 offset-md-2">
+    <main class="col-12 col-md-11 offset-md-1">
       <router-view/>
     </main>
     <div v-if="isMobileMenu" class="w-100 h-100 fixed-top" style= "background-color: black; opacity: .3;" @click="doMenu"></div>
-    <nav :class="!isMobileMenu ? 'd-none d-md-block col-2 p-0 fixed-top' : 'col-6 p-0 fixed-top h-100 mobileBg'" >
-        <img class="img-fluid mt-5" src="./assets/logo.svg" alt="zeke blog logo">
+    <nav :class="!isMobileMenu ? 'd-none d-md-block col-1 p-0 fixed-top justify-content-center' : 'col-3 px-4 fixed-top h-100 mobileBg'" >
+        <img class="img-fluid my-5 px-2 px-lg-4" src="./assets/logo.svg" alt="zeke blog logo">
         <ul class="p-0">
           <router-link to="/"       class="mx-auto">
             <img src="./assets/menu_posts.svg" :style="isActive('')" alt="zeke blog menu_posts">
           </router-link>
-          <img src="./assets/menu_devider.svg" class="mx-auto" alt="zeke blog menu_devider">
           <router-link to="/about"  class="mx-auto">
             <img src="./assets/menu_about.svg" :style="isActive('about')" alt="zeke blog menu_about">
           </router-link>
-          <img src="./assets/menu_devider.svg" class="mx-auto" alt="zeke blog menu_devider">
           <router-link to="/form"   class="mx-auto" >
             <img src="./assets/menu_admin.svg" :style="isActive('form')"  alt="zeke blog menu_admin">
           </router-link>
         </ul>
     </nav>
-    <img src="./assets/logo_m.svg" class= "logo--m d-block d-md-none p-1 fixed-top mt-1 mx-2" style="width: 40px; height: 40px;" @click="doMenu"/>
+    <img src="./assets/logo.svg" class= "logo--m d-block d-md-none p-0 fixed-top mt-1 mx-3" style="width: 40px; height: 40px;" @click="doMenu"/>
   </div>
 </div>
 </template>
@@ -60,27 +58,13 @@ export default {
   @import "./assets/css/app.scss";
 
   html { 
-    background: $color-bg url(./assets/bg.jpg) no-repeat center center fixed; 
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+    background-color: $color-bg;
   }
 
   ul {
     display: flex;
     height: 60vh;
     flex-direction: column;
-    &:first-child {
-
-      content:"";
-      position: absolute;
-      width: 5px;
-      height: 100%;
-      background-color: $color-primary-yellow;
-      left: 0;
-      top: 0
-    }
 
     img {
         width: 30px;

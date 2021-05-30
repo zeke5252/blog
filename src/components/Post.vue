@@ -255,14 +255,18 @@ export default {
       text-indent: 10px;
       white-space: pre-wrap;
 
-      &::before {
+      &:first-of-type {
+      text-indent: 0px;
+      }
+
+      &:first-of-type::before {
         content: "";
         background-color: $color-primary-yellow;
         position: absolute;
         margin-top: 12px;
         margin-left: -10px;
         width: 3px;
-        height: 16px
+        height: 16px;
       }
   }
 
