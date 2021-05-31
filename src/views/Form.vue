@@ -49,6 +49,9 @@
         <textarea v-model="content" class="form-control" id="area-content" rows="5" cols="30" style="white-space: pre-wrap" />
       </div>
     </div>
+    <button class="btn col-12 col-sm-2 mb-3 me-2" style="background-color: transparent; color: white; outline: 1px solid !important; outline-offset: -1px;" v-on:click="saveDraft">
+      Save draft
+    </button>
     <button type="submit" class="btn col-12 col-sm-2 mb-3" v-on:click="submitHandler">
       Submit
     </button>
@@ -141,16 +144,17 @@ export default {
     });
     };
 
+    const saveDraft = () => {
+      console.log('save it')
+    };
+
     const submitHandler = () => {
       files.value.forEach((_file, index)=>{
         if(content.value.includes(_file.name)){
           filesToUpload.value.push(_file)
         }
       })
-      // do validation
-      // 1. Upload photo
-      // 2. get the firestorage path
-      // 3. save it to imageSrc.
+
       var metadata = {
         contentType: "image/png",
       };
@@ -215,8 +219,8 @@ export default {
           content: content.value 
            })
         .then((docRef) => {
-          //alert("Upload is successful!");
-          //init();
+          alert("Upload is successful!");
+          init();
         })
         .catch((error) => {
           console.error("Error adding document: ", error);
@@ -244,6 +248,7 @@ export default {
       files,
       filesToUpload,
       progresses,
+      saveDraft,
       submitHandler,
       onFileChange,
       removeImage,

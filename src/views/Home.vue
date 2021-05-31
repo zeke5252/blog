@@ -25,7 +25,7 @@
           </div>
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(post.created)}}</div>
-            <h6 class="card-title">{{ post.title }}</h6>
+            <h5 class="card-title">{{ post.title }}</h5>
             <p class="card-text my-2" >{{ getFirstParagraph(post.content) }}</p>
           </div>
         </router-link>
