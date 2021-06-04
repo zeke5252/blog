@@ -1,6 +1,6 @@
 <template>
 <div class="container-fluid">
-  <div class="row mt-5">
+  <div class="row mt-5 ">
     <main class="col-12 col-md-11 offset-md-1">
       <router-view/>
     </main>

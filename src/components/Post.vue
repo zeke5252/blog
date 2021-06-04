@@ -251,7 +251,7 @@ export default {
       line-height: 36px;
       letter-spacing: 1px;
       font-weight: 300;
-      margin: 40px 0;
+      margin: 40px 10px;
       text-indent: 10px;
       white-space: pre-wrap;
 
@@ -263,10 +263,10 @@ export default {
         content: "";
         background-color: $color-primary-yellow;
         position: absolute;
-        margin-top: 12px;
-        margin-left: -10px;
-        width: 3px;
-        height: 16px;
+        margin-top: 10px;
+        margin-left:-10px;
+        width: 2px;
+        height: 14px
       }
   }
 

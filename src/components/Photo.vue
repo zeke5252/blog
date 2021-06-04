@@ -1,12 +1,12 @@
 <template>
   <div class="cover--photo">
-    <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="loadLogo($event)" :class="{ photoBorder: showBorder }" />
     <img v-if="!isLoaded" class="getPlaceholder--logo" src="../assets/logo_m.svg" />
     <ul class="px-4  py-3 px-sm-5  py-sm-4" v-if="photoUtil.getExif(Url, Images)!=='{}' && showExif">
       <li class ="py-1 py-sm-2" v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
         <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
       </li>
     </ul>
+    <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="loadLogo($event)" :class="{ photoBorder: showBorder }" />
   </div>
 </template>
 
@@ -99,13 +99,15 @@ export default {
     }
   }
 
+    @media (hover:hover) {
+    .photoBorder:hover {
+      outline: white 10px solid;
+    }
+  }
+
   .photoBorder {
     outline: white 0px solid;
     transition: all .2s ease-out;
-      
-    &:hover{
-      outline: white 10px solid;
-    }
   }
 
   label {

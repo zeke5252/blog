@@ -66,10 +66,8 @@ import { storage } from "../firebaseDB.js";
 import router from '../router/';
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 const _this = this;
-
 export default {
   name: "Form",
-
   setup(props, context) {
     const title = ref("");
     const category = ref("photography");
@@ -79,11 +77,9 @@ export default {
     const files= ref([]);
     const filesToUpload= ref([]);
     const progresses= ref([]);
-
     onMounted(()=>{
       init();
     });
-
     const init = () =>{
       title.value= "";
       category.value= "photography";
@@ -91,17 +87,25 @@ export default {
       images.value= [];
       files.value= []; // all temporarily selected files 
       filesToUpload.value= [];
-      progresses.value= []
+      progresses.value= [];
+
+      var docRef = db.collection("draft").doc("normal");
+      docRef.get().then((doc) => {
+          if (doc.data().content) {
+              content.value = doc.data().content;
+          } else {
+              // doc.data() will be undefined in this case
+          }
+      }).catch((error) => {
+          console.log("Error getting document:", error);
+      });
     };
-
     // Select photos from the local disk.
-
     const onFileChange = (e) => {
       var _files = e.target.files || e.dataTransfer.files;
       if (!_files.length) return;
       createImage(_files);
     };
-
     const createImage = (docs) => {
       docs.forEach(doc=>{
         var reader = new FileReader();
@@ -112,11 +116,9 @@ export default {
         reader.readAsDataURL(doc);
       })
     };
-
     const removeImage = (index) => {
       images.value.splice(index, 1);
     };
-
     const copySrc = (index) => {
       const el = document.createElement('textarea');
       el.value = " " + files.value[index].name + " ";
@@ -125,7 +127,6 @@ export default {
       document.execCommand('copy');
       document.body.removeChild(el);
     };
-
     const getImgExif = (index) => {
       EXIF.getData(event.target, function() {
         let rawData = EXIF.getAllTags(event.target);
@@ -137,34 +138,35 @@ export default {
         formattedData.set("Exposure time", ExposureTime);
         formattedData.set("ISO", ISOSpeedRatings);
         formattedData.set("Model", Model);
-
         let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
         files.value.[index].exif = allMetaData;
         files.value[index].resolution = [this.naturalWidth, this.naturalHeight]
     });
     };
-
     const saveDraft = () => {
-      console.log('save it')
+      var docRef = db.collection("draft").doc("normal");
+      docRef.set({
+        content: content.value
+      }).then((doc) => {
+          alert("Draft saved.")
+      }).catch((error) => {
+          console.log("Error getting document:", error);
+      });
     };
-
     const submitHandler = () => {
       files.value.forEach((_file, index)=>{
         if(content.value.includes(_file.name)){
           filesToUpload.value.push(_file)
         }
       })
-
       var metadata = {
         contentType: "image/png",
       };
-
       let filesAllPromises = filesToUpload.value.map((file,i)=>{
          let storageRef = storage.ref();
          var uploadTask = storageRef
            .child("photography/" + filesToUpload.value[i].name)
            .put(filesToUpload.value[i], metadata);
-
         return new Promise((resolve, reject)=>{
           uploadTask.on(
            firebase.storage.TaskEvent.STATE_CHANGED,
@@ -203,14 +205,12 @@ export default {
          )
         })
       })
-
       Promise.all(filesAllPromises).then(resArr=>{ 
         filesToUpload.value.forEach(_file=>{
           if(content.value.includes(_file.name)){
             content.value = content.value.replace(_file.name,_file.imageSrc)
           }
         })
-
         db.collection("posts").add({
           title: title.value,
           category: category.value,
@@ -227,7 +227,6 @@ export default {
         });
       })
     };
-
     const signoutHandler = () => {
       firebase.auth().signOut().then(() => {
         // Sign-out successful.
@@ -238,7 +237,6 @@ export default {
         // An error happened.
       });
     };
-
     return {
       title,
       category,
@@ -261,7 +259,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
   @import "../assets/css/app.scss";
   label {
     color: $color-text-grey;
@@ -270,13 +267,11 @@ export default {
   .group--container{
     width: 100%;
     display: flex;
-
     &__photo {
       width: 160px;
       height: 160px;
       position: relative;
       margin-right: 8px;
-
       img {
         position: absolute;
         object-fit: cover;
@@ -284,7 +279,6 @@ export default {
         top: 0;
         width: 160px;
         height: 160px;
-
       }
       
       button {
@@ -293,5 +287,4 @@ export default {
       }
     }
   }
-
 </style>

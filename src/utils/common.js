@@ -24,6 +24,7 @@ function splitContents(content){
   // Remove an empty line.
   const newResult = contentArr.map( el=> el.replace(/ \n/g,'').trim())
   // Remove elements with only whitespaces.
+  console.log(newResult)
    return newResult.filter( el=> el.replace(/\s/g, '').length )
 }
 

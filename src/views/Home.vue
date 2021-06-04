@@ -3,7 +3,7 @@
     <div/>
   </div>
   <div v-else class="home">
-      <div class="d-flex justify-content-end fixed-top pe-2 pe-md-2 mt-1">
+      <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
         <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img p-1"></label>
         <input
           class="search--input p-1"
@@ -140,6 +140,16 @@ export default {
     color: $color-primary-yellow;
   }
 
+  @media (hover:hover) {
+    .cardStyle:hover {
+      outline: $color-primary-yellow 8px solid;
+    };
+
+    .cardStyle:hover img[src*="https"]{
+      transform: scale(1.2);
+    };
+  }
+
   .cardStyle {
     background-color: $color-card-bg;
     outline: $color-bg 0px solid;
@@ -148,9 +158,6 @@ export default {
     overflow: hidden;
     border-radius: 0;
 
-    &:hover {
-      outline: $color-primary-yellow 8px solid;
-    };
     // Select every <img> element whose src attribute value contains the substring "https"
     img[src*="https"] {
       transform: scale(1);
@@ -158,11 +165,6 @@ export default {
       object-fit: cover;
       transition: .2s ease-out; 
     }
-
-    &:hover img[src*="https"]{
-      transform: scale(1.2);
-    };
-
   }
 
   .card-body {
