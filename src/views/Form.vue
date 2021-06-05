@@ -46,10 +46,10 @@
     <div class="row">
       <div class="col-12 col-sm-6 mb-4">
         <label for="area-content" class="form-label">貼文內容</label>
-        <textarea v-model="content" class="form-control" id="area-content" rows="5" cols="30" style="white-space: pre-wrap" />
+        <textarea v-model="content" class="form-control fs-3" id="area-content" rows="15" cols="30" style="white-space: pre-wrap" />
       </div>
     </div>
-    <button class="btn col-12 col-sm-2 mb-3 me-2" style="background-color: transparent; color: white; outline: 1px solid !important; outline-offset: -1px;" v-on:click="saveDraft">
+    <button class="btn col-12 col-sm-2 mb-3 me-2" style="background-color: transparent; color: white; outline: 1px solid !important; outline-offset: -1px;" v-on:click="doDraft(content)">
       Save draft
     </button>
     <button type="submit" class="btn col-12 col-sm-2 mb-3" v-on:click="submitHandler">
@@ -63,32 +63,47 @@
 import { firebase } from "@firebase/app";
 import { db } from "@/firebaseDB.js";
 import { storage } from "../firebaseDB.js";
+import { useStore } from "vuex";
 import router from '../router/';
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
-const _this = this;
+import { GET_DB, GET_DB_ALL, IS_POST_EXISTED, DATA_DB } from "@/store/types";
+
 export default {
   name: "Form",
   setup(props, context) {
+    const store = useStore();
+
     const title = ref("");
     const category = ref("photography");
     const content = ref("");
     const created= ref("");
     const images= ref([]);
-    const files= ref([]);
-    const filesToUpload= ref([]);
+    const photoPool= ref([]); // all temporarily selected files 
+    const photosToUpload= ref([]);
     const progresses= ref([]);
-    onMounted(()=>{
-      init();
-    });
+    const GET_DB_ALL = computed(()=> store.getters.GET_DB())
+
+    onMounted(() => {
+      if (!store.state[DATA_DB]) {
+        store.dispatch("getFirestoreDB").then((res) => {
+        init();
+        });
+      } else {
+        init();
+      }
+      }
+    );
+
     const init = () =>{
       title.value= "";
       category.value= "photography";
       content.value= "";
       images.value= [];
-      files.value= []; // all temporarily selected files 
-      filesToUpload.value= [];
+      photoPool.value= [];
+      photosToUpload.value= [];
       progresses.value= [];
 
+      // Set draft
       var docRef = db.collection("draft").doc("normal");
       docRef.get().then((doc) => {
           if (doc.data().content) {
@@ -102,31 +117,32 @@ export default {
     };
     // Select photos from the local disk.
     const onFileChange = (e) => {
-      var _files = e.target.files || e.dataTransfer.files;
-      if (!_files.length) return;
-      createImage(_files);
-    };
-    const createImage = (docs) => {
-      docs.forEach(doc=>{
+      var localFiles = e.target.files || e.dataTransfer.files;
+      if (!localFiles.length) return;
+      // create images
+      localFiles.forEach(file=>{
         var reader = new FileReader();
         reader.onload = (e) => {
           images.value.push(e.target.result);
         };
-        files.value.push(doc);
-        reader.readAsDataURL(doc);
-      })
+        photoPool.value.push(file);
+        reader.readAsDataURL(file);
+      });
     };
+
     const removeImage = (index) => {
       images.value.splice(index, 1);
     };
+
     const copySrc = (index) => {
       const el = document.createElement('textarea');
-      el.value = " " + files.value[index].name + " ";
+      el.value = " " + photoPool.value[index].name + " ";
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
     };
+
     const getImgExif = (index) => {
       EXIF.getData(event.target, function() {
         let rawData = EXIF.getAllTags(event.target);
@@ -135,98 +151,128 @@ export default {
         formattedData.set("Aperture", Math.round(ApertureValue*10)/10);
         formattedData.set("Date / Time", DateTime);
         formattedData.set("Exposure bias", Math.round(ExposureBias*10)/10);
-        formattedData.set("Exposure time", ExposureTime);
+        formattedData.set("Exposure time", ExposureTime.toFixed(3));
         formattedData.set("ISO", ISOSpeedRatings);
         formattedData.set("Model", Model);
         let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
-        files.value.[index].exif = allMetaData;
-        files.value[index].resolution = [this.naturalWidth, this.naturalHeight]
-    });
+        photoPool.value.[index].exif = allMetaData;
+        photoPool.value[index].resolution = [this.naturalWidth, this.naturalHeight]
+      });
     };
-    const saveDraft = () => {
+
+    const doDraft = (val = '') => {
       var docRef = db.collection("draft").doc("normal");
       docRef.set({
-        content: content.value
+        content: val
       }).then((doc) => {
-          alert("Draft saved.")
+          if(val !== '') alert("Draft saved.");
       }).catch((error) => {
           console.log("Error getting document:", error);
       });
     };
+
     const submitHandler = () => {
-      files.value.forEach((_file, index)=>{
-        if(content.value.includes(_file.name)){
-          filesToUpload.value.push(_file)
-        }
-      })
-      var metadata = {
-        contentType: "image/png",
+      let isTitleExisted = store.getters.IS_POST_EXISTED(title.value);
+      if(isTitleExisted) {
+        alert("The title has been in use.");
+        return;
       };
-      let filesAllPromises = filesToUpload.value.map((file,i)=>{
-         let storageRef = storage.ref();
-         var uploadTask = storageRef
-           .child("photography/" + filesToUpload.value[i].name)
-           .put(filesToUpload.value[i], metadata);
-        return new Promise((resolve, reject)=>{
-          uploadTask.on(
-           firebase.storage.TaskEvent.STATE_CHANGED,
-           (snapshot) => {
-             progresses.value[i] = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-             switch (snapshot.state) {
-               case firebase.storage.TaskState.PAUSED: // or 'paused'
-                 console.log("Upload is paused");
-                 break;
-               case firebase.storage.TaskState.RUNNING: // or 'running'
-                 console.log("Upload is running");
-                 break;
-             }
-           },
-           (error) => {
-             switch (error.code) {
-               case "storage/unauthorized":
-                 // User doesn't have permission to access the object
-                 break;
-               case "storage/canceled":
-                 // User canceled the upload
-                 break;
-               // ...
-               case "storage/unknown":
-                 // Unknown error occurred, inspect error.serverResponse
-                 break;
-             }
-           },
-            () => {
-            // Upload successfully, now get the download URL
-              uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-              filesToUpload.value[i].imageSrc = downloadURL;
-              resolve(true)
-              });
-            }
-         )
-        })
-      })
-      Promise.all(filesAllPromises).then(resArr=>{ 
-        filesToUpload.value.forEach(_file=>{
-          if(content.value.includes(_file.name)){
-            content.value = content.value.replace(_file.name,_file.imageSrc)
-          }
-        })
-        db.collection("posts").add({
-          title: title.value,
-          category: category.value,
-          created: firebase.firestore.FieldValue.serverTimestamp(),
-          imageFiles: JSON.stringify(filesToUpload.value),
-          content: content.value 
-           })
-        .then((docRef) => {
-          alert("Upload is successful!");
-          init();
-        })
-        .catch((error) => {
-          console.error("Error adding document: ", error);
+
+      let dataToUpload = {
+        title: title.value,
+        category: category.value,
+        created: firebase.firestore.FieldValue.serverTimestamp(),
+        imageFiles: [],
+        content: content.value 
+      };
+
+      // If photos are selected in the text content, push them to photoUpload.
+      if(photoPool.length > 0){
+                console.log('with photos');
+        photoPool.value.forEach((file, index)=>{
+          if(content.value.includes(file.name)) photosToUpload.value.push(file)
         });
-      })
+
+        var metadata = { contentType: "image/png"};
+
+        let filesAllPromises = photosToUpload.value.map((file,i)=>{
+          let storageRef = storage.ref();
+          var uploadTask = storageRef
+            .child("photography/" + photosToUpload.value[i].name)
+            .put(photosToUpload.value[i], metadata);
+          return new Promise((resolve, reject)=>{
+            uploadTask.on(
+            firebase.storage.TaskEvent.STATE_CHANGED,
+            (snapshot) => {
+              progresses.value[i] = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              switch (snapshot.state) {
+                case firebase.storage.TaskState.PAUSED: // or 'paused'
+                  console.log("Upload is paused");
+                  break;
+                case firebase.storage.TaskState.RUNNING: // or 'running'
+                  console.log("Upload is running");
+                  break;
+              }
+            },
+            (error) => {
+              switch (error.code) {
+                case "storage/unauthorized":
+                  // User doesn't have permission to access the object
+                  break;
+                case "storage/canceled":
+                  // User canceled the upload
+                  break;
+                // ...
+                case "storage/unknown":
+                  // Unknown error occurred, inspect error.serverResponse
+                  break;
+              }
+            },
+              () => {
+                // get the download URL
+                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                photosToUpload.value[i].imageSrc = downloadURL;
+                resolve(true)
+                });
+              }
+          )
+          })
+        });
+
+        Promise.all(filesAllPromises).then(resArr=>{ 
+          photosToUpload.value.forEach(_file=>{
+            if(content.value.includes(_file.name)){
+              content.value = content.value.replace(_file.name,_file.imageSrc)
+            }
+          });
+
+          dataToUpload.imageFiles = JSON.stringify(photosToUpload.value);
+
+          db.collection("posts").add(dataToUpload)
+          .then((docRef) => {
+            alert("Upload is successful!");
+            doDraft();
+            init();
+          })
+          .catch((error) => {
+            console.error("Error adding document: ", error);
+          });
+        });
+
+      } else {
+        console.log('no photos');
+        db.collection("posts").add(dataToUpload)
+          .then((docRef) => {
+            alert("Upload is successful!");
+            doDraft();
+            init();
+          })
+          .catch((error) => {
+            console.error("Error adding document: ", error);
+          });
+      };
     };
+
     const signoutHandler = () => {
       firebase.auth().signOut().then(() => {
         // Sign-out successful.
@@ -243,10 +289,10 @@ export default {
       content,
       created,
       images,
-      files,
-      filesToUpload,
+      photoPool,
+      photosToUpload,
       progresses,
-      saveDraft,
+      doDraft,
       submitHandler,
       onFileChange,
       removeImage,

@@ -11,21 +11,21 @@ function convertTime(createdTime, isFull = true){
 function splitContents(content){
   let urls = content.match(/\bhttps?:\/\/\S+/gi);
   if(!urls){
-    return;
+    return content;
+  } else {
+    urls.forEach(url=>{
+      content = content.replace(url, "URLS");
+    })
+    let contentArr = content.split("URLS")
+    // Insert urls to corresponding indexes.
+    urls.forEach((url,index)=>{
+      contentArr.splice(index*2 + 1, 0, url)
+    })
+    // Remove an empty line.
+    const newResult = contentArr.map( el=> el.replace(/ \n/g,'').trim())
+    // Remove elements with only whitespaces.
+    return newResult.filter( el=> el.replace(/\s/g, '').length )
   }
-  urls.forEach(url=>{
-    content = content.replace(url, "URLS");
-  })
-  let contentArr = content.split("URLS")
-  // Insert urls to corresponding indexes.
-  urls.forEach((url,index)=>{
-    contentArr.splice(index*2 + 1, 0, url)
-  })
-  // Remove an empty line.
-  const newResult = contentArr.map( el=> el.replace(/ \n/g,'').trim())
-  // Remove elements with only whitespaces.
-  console.log(newResult)
-   return newResult.filter( el=> el.replace(/\s/g, '').length )
 }
 
 let photoUtil = {

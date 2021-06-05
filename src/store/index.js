@@ -1,6 +1,6 @@
 import { createStore } from "vuex";
 import { db } from "../firebaseDB.js";
-import { UPDATE_DB, GET_DB, GET_POST, DATA_DB } from "./types";
+import { UPDATE_DB, GET_DB, GET_NEXT_OR_PREV_POST, DATA_DB, IS_POST_EXISTED } from "./types";
 import { storage } from "../firebaseDB.js";
 
 export default createStore({
@@ -11,7 +11,6 @@ export default createStore({
     [GET_DB] : (state) => (title, amount) => {
       if (title && title !== "") {
         let result;
-        let post;
         state[DATA_DB].forEach( (post,index) => { 
           if(post["title"] === title){
             let isPrevDisplay =  index !== 0  ? true : false;
@@ -27,8 +26,9 @@ export default createStore({
         return state[DATA_DB]
       }
     },
-    [GET_POST] : (state) => (title, isNext = false) => {
+    [GET_NEXT_OR_PREV_POST] : (state) => (title, isNext = false) => {
       let result;
+      console.log('haha')
       state[DATA_DB].forEach( (post,index) => {
         if(post["title"] === title){
           let indexP;
@@ -40,10 +40,14 @@ export default createStore({
             result = index !== 0 ? indexP : 0;
           }
         }
-      }
-      );
+      });
       return state[DATA_DB][result].title;
-    }
+    },
+    [IS_POST_EXISTED] : (state) => (title) => {
+      return state[DATA_DB].find( (post) => {
+        return post.title === title
+      });
+    },
   },
   mutations: {
     [UPDATE_DB] : (state, p) => state[DATA_DB] = p,

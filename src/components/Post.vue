@@ -16,11 +16,14 @@
       <img src="../assets/next.svg" class= "u-btn__next" :style="!isNextDisplay && 'opacity: .3'" @click="doNext"/>
     </header>
     <section class="my-3">
-      <template v-for="(el,index) in contentToArr" :key="index">    
+      <template v-if="Array.isArray(contentToArr)" v-for="(el,index) in contentToArr" :key="index">    
         <div v-if="el.substring(0,4)==='http'" class="me-sm-0 ">  
           <PhotoItem :Url="el" :Images="contents.imageFiles" />
         </div>
         <p class="section--p  " v-else>{{el}}</p>
+      </template>
+      <template v-else>    
+        <p class="section--p">{{contentToArr}}</p>
       </template>
     </section>
   </div>
@@ -72,7 +75,7 @@ import router from '../router/';
 import { useStore } from "vuex";
 import { useRouter, useRoute } from 'vue-router'
 import { db } from "../firebaseDB.js";
-import { GET_DB, GET_POST, DATA_DB } from "@/store/types";
+import { GET_DB, GET_NEXT_OR_PREV_POST, DATA_DB } from "@/store/types";
 
 import PhotoItem from "./Photo.vue";
 
@@ -119,12 +122,12 @@ export default {
     };
 
     const doPrev = () => {
-      let toTitle = store.getters.GET_POST(route.params.title, false);
+      let toTitle = store.getters.GET_NEXT_OR_PREV_POST(route.params.title, false);
       router.push(toTitle);
     };
 
     const doNext = () => {
-      let toTitle = store.getters.GET_POST(route.params.title, true);
+      let toTitle = store.getters.GET_NEXT_OR_PREV_POST(route.params.title, true);
       router.push(toTitle);
     };
 
@@ -160,7 +163,6 @@ export default {
     );
 
     watch(()=>props.title, () => {
-      console.log('watch')
       init();
     })
 

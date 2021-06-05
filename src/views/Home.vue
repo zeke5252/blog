@@ -19,8 +19,8 @@
     </datalist>
     <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2 ">
       <div class="col"  v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
-        <router-link :to="`/posts/${post.title}`" class="card text-white cardStyle border-0" >
-          <div style="overflow: hidden;">
+        <router-link :to="`/posts/${post.title}`" :class="post.imageFiles.length > 0 ? 'card styleImg border-0' : 'card styleTxt' " >
+          <div v-if="post.imageFiles.length > 0" style="overflow: hidden;">
             <PhotoItem :Url="photoUtil.getSrc(post.imageFiles)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
           </div>
           <div class="card-body">
@@ -85,12 +85,18 @@ export default {
     });
 
     const getConvertTime= (time) => convertTime(time, false);
+
     const getFirstParagraph= (content) => {
-            let result;
-            result = splitContents(content);
-            if(!result) return "No contents!"
-            return result.find( el=> el.substring(0, 4)!=="http" )
-          };
+      let contentsArr;
+      contentsArr = splitContents(content);
+      if(!contentsArr){
+        return "No contents!";
+      } else if(!Array.isArray(contentsArr)){
+        return contentsArr
+      } else {
+        return contentsArr.find( el=> el.substring(0, 4)!=="http" )
+      }
+    };
 
     watch(keyword, (val, pre) => {
       _.debounce(function(){
@@ -141,16 +147,16 @@ export default {
   }
 
   @media (hover:hover) {
-    .cardStyle:hover {
+    .styleImg:hover {
       outline: $color-primary-yellow 8px solid;
     };
 
-    .cardStyle:hover img[src*="https"]{
+    .styleImg:hover img[src*="https"]{
       transform: scale(1.2);
     };
   }
 
-  .cardStyle {
+  .styleImg {
     background-color: $color-card-bg;
     outline: $color-bg 0px solid;
     transition: .2s ease-out;
@@ -158,20 +164,7 @@ export default {
     overflow: hidden;
     border-radius: 0;
 
-    // Select every <img> element whose src attribute value contains the substring "https"
-    img[src*="https"] {
-      transform: scale(1);
-      height: 24vh;
-      object-fit: cover;
-      transition: .2s ease-out; 
-    }
-  }
-
-  .card-body {
-    position: relative;
-    padding: 26px 20px 30px 20px;
-  }
-  .card-text {
+      .card-text {
       line-height: 2.1;
       letter-spacing: .5px;
       color: $color-text-grey;
@@ -185,6 +178,46 @@ export default {
       width: 2px;
       height: 12px
       }
+  }
+
+    // Select every <img> element whose src attribute value contains the substring "https"
+    img[src*="https"] {
+      transform: scale(1);
+      height: 24vh;
+      object-fit: cover;
+      transition: .2s ease-out; 
+    }
+  }
+
+  .styleTxt {
+    background-color: #eee;
+    outline: $color-bg 0px solid;
+    transition: .2s ease-out;
+    animation: cardAnimation ease-out .4s;
+    overflow: hidden;
+    border-radius: 0 30px 30px 30px;
+    color: black !important;
+
+    .card-text {
+      line-height: 2.1;
+      letter-spacing: .5px;
+      color: #888;
+
+      &::before {
+      content: "";
+      background-color: $color-primary-yellow;
+      position: absolute;
+      margin-top: 7px;
+      margin-left:-8px;
+      width: 2px;
+      height: 12px;
+      }
+    }
+  }
+
+  .card-body {
+    position: relative;
+    padding: 26px 20px 30px 20px;
   }
 
   .loading {
