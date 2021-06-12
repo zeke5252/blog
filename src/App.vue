@@ -6,7 +6,9 @@
     </main>
     <div v-if="isMobileMenu" class="w-100 h-100 fixed-top" style= "background-color: black; opacity: .3;" @click="doMenu"></div>
     <nav :class="!isMobileMenu ? 'd-none d-md-block col-1 p-0 fixed-top justify-content-center' : 'col-3 px-4 fixed-top h-100 mobileBg'" >
-        <img class="img-fluid my-5 px-2 px-lg-4" src="./assets/logo.svg" alt="zeke blog logo">
+        <router-link to="/">
+          <img class="img-fluid my-5 px-2 px-lg-4" src="./assets/logo.svg" alt="zeke blog logo">
+        </router-link>
         <ul class="p-0">
           <router-link to="/"       class="mx-auto">
             <img src="./assets/menu_posts.svg" :style="isActive('')" alt="zeke blog menu_posts">

@@ -187,8 +187,8 @@ export default {
       };
 
       // If photos are selected in the text content, push them to photoUpload.
-      if(photoPool.length > 0){
-                console.log('with photos');
+      if(photoPool.value.length > 0){
+        console.log('with photos');
         photoPool.value.forEach((file, index)=>{
           if(content.value.includes(file.name)) photosToUpload.value.push(file)
         });
@@ -232,7 +232,9 @@ export default {
                 // get the download URL
                 uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
                 photosToUpload.value[i].imageSrc = downloadURL;
-                resolve(true)
+                console.log('url=', downloadURL);
+                resolve(true);
+
                 });
               }
           )
@@ -240,12 +242,14 @@ export default {
         });
 
         Promise.all(filesAllPromises).then(resArr=>{ 
+          console.log("photosToUpload.value=", photosToUpload.value)
           photosToUpload.value.forEach(_file=>{
             if(content.value.includes(_file.name)){
-              content.value = content.value.replace(_file.name,_file.imageSrc)
+              content.value = content.value.replace(_file.name,_file.imageSrc);
             }
           });
-
+          
+          dataToUpload.content = content.value;
           dataToUpload.imageFiles = JSON.stringify(photosToUpload.value);
 
           db.collection("posts").add(dataToUpload)
@@ -253,6 +257,7 @@ export default {
             alert("Upload is successful!");
             doDraft();
             init();
+            router.push("/");
           })
           .catch((error) => {
             console.error("Error adding document: ", error);

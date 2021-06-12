@@ -195,7 +195,8 @@ export default {
     transition: .2s ease-out;
     animation: cardAnimation ease-out .4s;
     overflow: hidden;
-    border-radius: 0 30px 30px 30px;
+    border-width: 0px;
+    border-radius: 2px;
     color: black !important;
 
     .card-text {
