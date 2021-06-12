@@ -148,14 +148,15 @@ export default {
         let rawData = EXIF.getAllTags(event.target);
         let {ApertureValue, DateTime, ExposureBias, ExposureTime, ISOSpeedRatings, Model} = rawData;
         let formattedData = new Map();
-        formattedData.set("Aperture", Math.round(ApertureValue*10)/10);
-        formattedData.set("Date / Time", DateTime);
-        formattedData.set("Exposure bias", Math.round(ExposureBias*10)/10);
-        formattedData.set("Exposure time", ExposureTime.toFixed(3));
-        formattedData.set("ISO", ISOSpeedRatings);
-        formattedData.set("Model", Model);
+        formattedData.set("Aperture", ApertureValue ? Math.round(ApertureValue*10)/10 : "");
+        formattedData.set("Date / Time", DateTime ? DateTime : "");
+        formattedData.set("Exposure bias", ExposureBias ? Math.round(ExposureBias*10)/10  : "");
+        formattedData.set("Exposure time", ExposureTime ? ExposureTime.toFixed(3) : "");
+        formattedData.set("ISO", ISOSpeedRatings ? ISOSpeedRatings : "");
+        formattedData.set("Model", Model ? Model : "");
         let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
-        photoPool.value.[index].exif = allMetaData;
+
+        photoPool.value[index].exif = allMetaData;
         photoPool.value[index].resolution = [this.naturalWidth, this.naturalHeight]
       });
     };
@@ -248,9 +249,10 @@ export default {
               content.value = content.value.replace(_file.name,_file.imageSrc);
             }
           });
-          
+          console.log("dataToUpload.imageFiles=", dataToUpload.imageFiles)
           dataToUpload.content = content.value;
           dataToUpload.imageFiles = JSON.stringify(photosToUpload.value);
+                    console.log("dataToUpload.imageFiles=", dataToUpload.imageFiles)
 
           db.collection("posts").add(dataToUpload)
           .then((docRef) => {
@@ -271,6 +273,7 @@ export default {
             alert("Upload is successful!");
             doDraft();
             init();
+            router.push("/");
           })
           .catch((error) => {
             console.error("Error adding document: ", error);
