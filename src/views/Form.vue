@@ -77,8 +77,6 @@ export default {
     content = ref(""),
     created= ref(""),
     displayImages= ref([]),
-    newFiles= ref([]),
-        newFiles2= ref([]),
     photoPool= ref([]), // all temporarily selected files 
     photosToUpload= ref([]),
     progresses= ref([]),
@@ -104,8 +102,6 @@ export default {
       photoPool.value= [];
       photosToUpload.value= [];
       progresses.value= [];
-      newFiles.values= [];
-            newFiles2.values= [];
 
       // Set draft
       var docRef = db.collection("draft").doc("normal");
@@ -124,24 +120,23 @@ export default {
       var localFiles = e.target.files || e.dataTransfer.files;
       if (!localFiles.length) return;
       localFiles.forEach((file, index)=>{
-        readFile(file,index);
+        file.index = index;
+        readFile(file);
       });
     };
 
-    const readFile = (file, index) => {
+    const readFile = (file) => {
         let reader = new FileReader();
-        let question = reader.readAsDataURL(file);
-        newFiles.value[index] = file;
+        reader.readAsDataURL(file);
         reader.onload = (e) => {
           let src = e.target.result;
-          buildCanvasImg(src,  newFiles.value[index], index);
+          buildCanvasImg(src,  file);
         };
     };
 
-    const buildCanvasImg = (src, file, index) => {
+    const buildCanvasImg = (src, file) => {      
       let image = new Image();
       image.src = src;
-        newFiles2.value[index] = file;
       image.onload = function(){
         let canvas = document.createElement('canvas');
         let ctx = canvas.getContext('2d');
@@ -153,10 +148,9 @@ export default {
         canvas.height = afterH;
         ctx.drawImage(image, 0, 0, afterW, afterH);
         let data = canvas.toDataURL('image/jpeg', 0.9);
-        displayImages.value[index] = data;
-        file = convertToFileObj(data, newFiles2.value[index]);
-        photoPool.value[index] = newFiles2.value[index] ;
-        getImgExif(index);
+        displayImages.value[file.index] = data;
+        photoPool.value[file.index] = convertToFileObj(data, file);
+        getImgExif(file.index);
       };
     };
 
@@ -184,7 +178,7 @@ export default {
         let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
         if(photoPool.value[index]){
           photoPool.value[index].exif = allMetaData;
-          console.log('photoPool.value[index].exif=', index);
+          console.log('photoPool.value[index]: ', photoPool.value[index]);
           photoPool.value[index].resolution = [this.naturalWidth, this.naturalHeight];
         }
 
