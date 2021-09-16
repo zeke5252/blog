@@ -24,8 +24,8 @@
         <label for="formFile" class="form-label">上傳相片</label>
         <input v-on:change="onFileChange" class="form-control" type="file" id="formFile" multiple/>
       </div>
-      <div class="group--container" :style="images.length>0 && 'height: 30vh'">
-        <div class="group--container__photo" v-for="(image, index) in images" :key="index">
+      <div class="group--container" :style="displayImages.length > 0 && 'height: 30vh'">
+        <div class="group--container__photo" v-for="(image, index) in displayImages" :key="index">
           <img :src="image"/>
           <button class="m-2 mb-0 d-block" @click="copySrc(index)">Copy name</button>
           <button class="m-2 mb-0 d-block" @click="removeImage(index)">Remove</button>
@@ -71,17 +71,18 @@ import { GET_DB, GET_DB_ALL, IS_POST_EXISTED, DATA_DB } from "@/store/types";
 export default {
   name: "Form",
   setup(props, context) {
-    const store = useStore();
-
-    const title = ref("");
-    const category = ref("photography");
-    const content = ref("");
-    const created= ref("");
-    const images= ref([]);
-    const photoPool= ref([]); // all temporarily selected files 
-    const photosToUpload= ref([]);
-    const progresses= ref([]);
-    const GET_DB_ALL = computed(()=> store.getters.GET_DB())
+    const store = useStore(),
+    title = ref(""),
+    category = ref("photography"),
+    content = ref(""),
+    created= ref(""),
+    displayImages= ref([]),
+    newFiles= ref([]),
+        newFiles2= ref([]),
+    photoPool= ref([]), // all temporarily selected files 
+    photosToUpload= ref([]),
+    progresses= ref([]),
+    GET_DB_ALL = computed(()=> store.getters.GET_DB())
 
     onMounted(() => {
       
@@ -99,10 +100,12 @@ export default {
       title.value= "";
       category.value= "photography";
       content.value= "";
-      images.value= [];
+      displayImages.value= [];
       photoPool.value= [];
       photosToUpload.value= [];
       progresses.value= [];
+      newFiles.values= [];
+            newFiles2.values= [];
 
       // Set draft
       var docRef = db.collection("draft").doc("normal");
@@ -116,65 +119,57 @@ export default {
           console.log("Error getting document:", error);
       });
     };
-    // Select photos from the local disk.
+    
     const onFileChange = (e) => {
       var localFiles = e.target.files || e.dataTransfer.files;
-      
       if (!localFiles.length) return;
       localFiles.forEach((file, index)=>{
-        console.log('file: ', file);
-        
-        // 讀取檔案
-        let reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (e) => {
-          let src = e.target.result;
-          
-          // 讀取圖片
-          let image = new Image();
-          image.src = src;
-          image.onload = function(){
-            // 建立 canvas 壓縮圖片
-            let canvas = document.createElement('canvas');
-            let ctx = canvas.getContext('2d');
-            let imageW = image.width;
-            let imageH = image.height;
-            let afterW = 1024;
-            let afterH = imageH / imageW * afterW;
-            canvas.width = afterW;
-            canvas.height = afterH;
-            ctx.drawImage(image, 0, 0, afterW, afterH);
-            let data = canvas.toDataURL('image/jpeg', 0.8);
-            console.log('data: ', data);
-
-            // 把base64轉回檔案
-            var arr = data.split(','), mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-            while(n--){
-              u8arr[n] = bstr.charCodeAt(n);
-            }
-            file = new File([u8arr], file.name, {type:mime});
-            photoPool.value.push(file);
-            getImgExif(index);
-            images.value.push(data);
-          };
-        };
+        readFile(file,index);
       });
     };
 
-    const removeImage = (index) => {
-      images.value.splice(index, 1);
+    const readFile = (file, index) => {
+        let reader = new FileReader();
+        let question = reader.readAsDataURL(file);
+        newFiles.value[index] = file;
+        reader.onload = (e) => {
+          let src = e.target.result;
+          buildCanvasImg(src,  newFiles.value[index], index);
+        };
     };
 
-    const copySrc = (index) => {
-      const el = document.createElement('textarea');
-      el.value = " " + photoPool.value[index].name + " ";
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand('copy');
-      document.body.removeChild(el);
+    const buildCanvasImg = (src, file, index) => {
+      let image = new Image();
+      image.src = src;
+        newFiles2.value[index] = file;
+      image.onload = function(){
+        let canvas = document.createElement('canvas');
+        let ctx = canvas.getContext('2d');
+        let imageW = image.width;
+        let imageH = image.height;
+        let afterW = 1600;
+        let afterH = imageH / imageW * afterW;
+        canvas.width = afterW;
+        canvas.height = afterH;
+        ctx.drawImage(image, 0, 0, afterW, afterH);
+        let data = canvas.toDataURL('image/jpeg', 0.9);
+        displayImages.value[index] = data;
+        file = convertToFileObj(data, newFiles2.value[index]);
+        photoPool.value[index] = newFiles2.value[index] ;
+        getImgExif(index);
+      };
     };
 
+    const convertToFileObj = (data, file) => {
+      let arr = data.split(','), mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new File([u8arr], file.name, {type:mime});
+    };
+
+    
     const getImgExif = (index) => {
       EXIF.getData(event.target, function() {
         let rawData = EXIF.getAllTags(event.target);
@@ -187,10 +182,27 @@ export default {
         formattedData.set("ISO", ISOSpeedRatings ? ISOSpeedRatings : "");
         formattedData.set("Model", Model ? Model : "");
         let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
+        if(photoPool.value[index]){
+          photoPool.value[index].exif = allMetaData;
+          console.log('photoPool.value[index].exif=', index);
+          photoPool.value[index].resolution = [this.naturalWidth, this.naturalHeight];
+        }
 
-        photoPool.value[index].exif = allMetaData;
-        photoPool.value[index].resolution = [this.naturalWidth, this.naturalHeight]
       });
+    };
+
+    const removeImage = (index) => {
+      displayImages.value.splice(index, 1);
+      photoPool.value.splice(index, 1);
+    };
+
+    const copySrc = (index) => {
+      const el = document.createElement('textarea');
+      el.value = " " + photoPool.value[index].name + " ";
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
     };
 
     const doDraft = (val = '') => {
@@ -211,7 +223,7 @@ export default {
         return;
       };
 
-      let dataToUpload = {
+      let postToUpload = {
         title: title.value,
         category: category.value,
         created: firebase.firestore.FieldValue.serverTimestamp(),
@@ -226,13 +238,11 @@ export default {
           if(content.value.includes(file.name)) photosToUpload.value.push(file)
         });
 
-        var metadata = { contentType: "image/png"};
-
         let filesAllPromises = photosToUpload.value.map((file,i)=>{
           let storageRef = storage.ref();
           var uploadTask = storageRef
             .child("photography/" + photosToUpload.value[i].name)
-            .put(photosToUpload.value[i], metadata);
+            .put(photosToUpload.value[i], {contentType: "image/png"});
           return new Promise((resolve, reject)=>{
             uploadTask.on(
             firebase.storage.TaskEvent.STATE_CHANGED,
@@ -265,7 +275,6 @@ export default {
                 // get the download URL
                 uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
                 photosToUpload.value[i].imageSrc = downloadURL;
-                console.log('url=', downloadURL);
                 resolve(true);
 
                 });
@@ -275,18 +284,14 @@ export default {
         });
 
         Promise.all(filesAllPromises).then(resArr=>{ 
-          console.log("photosToUpload.value=", photosToUpload.value)
           photosToUpload.value.forEach(_file=>{
             if(content.value.includes(_file.name)){
               content.value = content.value.replace(_file.name,_file.imageSrc);
             }
           });
-          console.log("dataToUpload.imageFiles=", dataToUpload.imageFiles)
-          dataToUpload.content = content.value;
-          dataToUpload.imageFiles = JSON.stringify(photosToUpload.value);
-                    console.log("dataToUpload.imageFiles=", dataToUpload.imageFiles)
-
-          db.collection("posts").add(dataToUpload)
+          postToUpload.content = content.value;
+          postToUpload.imageFiles = JSON.stringify(photosToUpload.value);
+          db.collection("posts").add(postToUpload)
           .then((docRef) => {
             alert("Upload is successful!");
             doDraft();
@@ -300,7 +305,7 @@ export default {
 
       } else {
         console.log('no photos');
-        db.collection("posts").add(dataToUpload)
+        db.collection("posts").add(postToUpload)
           .then((docRef) => {
             alert("Upload is successful!");
             doDraft();
@@ -328,7 +333,7 @@ export default {
       category,
       content,
       created,
-      images,
+      displayImages,
       photoPool,
       photosToUpload,
       progresses,

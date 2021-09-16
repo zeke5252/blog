@@ -61,6 +61,7 @@ export default {
   .cover--photo {
     position: relative;
     display: flex;
+    width: 100%;
     background-color: black;
 
      &:hover ul {
