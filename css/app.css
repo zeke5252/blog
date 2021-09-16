@@ -1,0 +1,77 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100;300;400;500;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;300;400;500;600;700;900&display=swap");
+
+@-webkit-keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+body {
+  color: white;
+  background-color: transparent;
+  font-family: Roboto, Noto Sans TC, sans-serif;
+  font-size: 13px;
+}
+
+h6, h5, h4 {
+  letter-spacing: 1px;
+  font-weight: 400;
+  margin: 0;
+}
+
+ul {
+  margin-bottom: 0;
+}
+
+input, textarea, select, input:focus {
+  border-width: 0px !important;
+  border-radius: 0 !important;
+}
+
+button {
+  background-color: #fdcc00;
+  border: 0px !important;
+  border-radius: 0 !important;
+  color: black;
+  cursor: pointer;
+}
+
+button {
+  border-radius: 0;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 30px;
+}
+
+a {
+  color: white !important;
+  text-decoration: none;
+  border-radius: 0;
+}
+
+::-webkit-input-placeholder {
+  font-size: 14px;
+  opacity: .7;
+}
+
+:-moz-placeholder {
+  /* Firefox 18- */
+  font-size: 14px;
+  opacity: .3;
+}
+
+::-moz-placeholder {
+  /* Firefox 19+ */
+  font-size: 14px;
+  opacity: .3;
+}
+/*# sourceMappingURL=app.css.map */

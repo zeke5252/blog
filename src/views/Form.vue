@@ -26,7 +26,7 @@
       </div>
       <div class="group--container" :style="images.length>0 && 'height: 30vh'">
         <div class="group--container__photo" v-for="(image, index) in images" :key="index">
-          <img :src="image" @load="getImgExif(index)"/>
+          <img :src="image"/>
           <button class="m-2 mb-0 d-block" @click="copySrc(index)">Copy name</button>
           <button class="m-2 mb-0 d-block" @click="removeImage(index)">Remove</button>
         </div>
@@ -84,6 +84,7 @@ export default {
     const GET_DB_ALL = computed(()=> store.getters.GET_DB())
 
     onMounted(() => {
+      
       if (!store.state[DATA_DB]) {
         store.dispatch("getFirestoreDB").then((res) => {
         init();
@@ -118,15 +119,46 @@ export default {
     // Select photos from the local disk.
     const onFileChange = (e) => {
       var localFiles = e.target.files || e.dataTransfer.files;
+      
       if (!localFiles.length) return;
-      // create images
-      localFiles.forEach(file=>{
-        var reader = new FileReader();
-        reader.onload = (e) => {
-          images.value.push(e.target.result);
-        };
-        photoPool.value.push(file);
+      localFiles.forEach((file, index)=>{
+        console.log('file: ', file);
+        
+        // 讀取檔案
+        let reader = new FileReader();
         reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          let src = e.target.result;
+          
+          // 讀取圖片
+          let image = new Image();
+          image.src = src;
+          image.onload = function(){
+            // 建立 canvas 壓縮圖片
+            let canvas = document.createElement('canvas');
+            let ctx = canvas.getContext('2d');
+            let imageW = image.width;
+            let imageH = image.height;
+            let afterW = 1024;
+            let afterH = imageH / imageW * afterW;
+            canvas.width = afterW;
+            canvas.height = afterH;
+            ctx.drawImage(image, 0, 0, afterW, afterH);
+            let data = canvas.toDataURL('image/jpeg', 0.8);
+            console.log('data: ', data);
+
+            // 把base64轉回檔案
+            var arr = data.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+            while(n--){
+              u8arr[n] = bstr.charCodeAt(n);
+            }
+            file = new File([u8arr], file.name, {type:mime});
+            photoPool.value.push(file);
+            getImgExif(index);
+            images.value.push(data);
+          };
+        };
       });
     };
 
