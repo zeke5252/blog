@@ -18,7 +18,8 @@
       <option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
     </datalist>
     <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2 ">
-      <div class="col"  v-for="post in !keyResults? GET_DB : keyResults" :key="post.title">
+      <div class="col"  v-for="(post, index) in !keyResults? GET_DB : keyResults" :key="post.title">
+        <button v-if="isLogin" class="removeButton" @click="removePost(post)"> X </button>
         <router-link :to="`/posts/${post.title}`" :class="post.imageFiles.length > 0 ? 'card styleImg border-0' : 'card styleTxt' " >
           <div v-if="post.imageFiles.length > 0" style="overflow: hidden;">
             <PhotoItem :Url="photoUtil.getSrc(post.imageFiles)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
@@ -39,6 +40,8 @@
 </template>
 
 <script>
+import { db } from "@/firebaseDB.js";
+import { firebase } from "@firebase/app";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
 import { convertTime, splitContents, photoUtil } from "../utils/common.js";
@@ -54,7 +57,7 @@ export default {
   setup(props) {
     
     const store = useStore();
-
+    const isLogin = ref();
     const count= ref(5);
 		const isMore= ref(false);
     const keyword= ref("");
@@ -63,21 +66,29 @@ export default {
     const GET_DB = computed(()=> store.getters.GET_DB(null, count.value))
     const GET_DB_ALL = computed(()=> store.getters.GET_DB())
 
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user != null) {
+        isLogin.value = true;
+      } else {
+        isLogin.value = false;;
+      }
+    });
+
     const loadMore= (e) => {
-            const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-            const scrollHeight = document.documentElement.scrollHeight;
-			      if (!isMore.value && scrollTop + getWindowHeight >= scrollHeight*4/5) {
-				      isMore.value = true;
-				      setTimeout(() => {
-					      count.value += 5;
-					      isMore.value = false;
-                if(GET_DB.value.length < count.value){
-                  document.removeEventListener('scroll', loadMore, true)
-                }
-				      }, 1000);                
-            }
+      const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight;
+		  if (!isMore.value && scrollTop + getWindowHeight >= scrollHeight*4/5) {
+		    isMore.value = true;
+		    setTimeout(() => {
+		      count.value += 5;
+		      isMore.value = false;
+          if(GET_DB.value.length < count.value){
+            document.removeEventListener('scroll', loadMore, true)
           }
+		    }, 1000);                
+      }
+    }
 
     document.addEventListener('scroll', loadMore, true);
     store.dispatch('getFirestoreDB').then(res=>{
@@ -98,6 +109,29 @@ export default {
       }
     };
 
+    const removePost= (post) => {
+
+      // 記住也需要刪除線上圖檔
+      
+      let posts = db.collection("posts");
+      let query = posts.where("title", "==", post.title);
+      query.get()
+      .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            posts.doc(doc.id).delete().then(() => {
+                  store.dispatch('getFirestoreDB')
+              }).then(() => {
+                  alert("Document successfully deleted!");
+              }).catch((error) => {
+                  console.error("Error removing document: ", error);
+              });
+          });
+      })
+      .catch((error) => {
+          console.log("Error getting documents: ", error);
+      });
+    };
+
     watch(keyword, (val, pre) => {
       _.debounce(function(){
         let all = GET_DB_ALL.value;
@@ -111,10 +145,12 @@ export default {
     });
 
     return {
+      isLogin,
       isMore,
       photoUtil,
       keyword,
       keyResults,
+      removePost,
       getConvertTime,
       getFirstParagraph,
       GET_DB,
@@ -144,6 +180,12 @@ export default {
     padding: 8px 20px 14px 20px;
     font-weight: 700;
     color: $color-primary-yellow;
+  }
+
+  .removeButton {
+    position: relative; 
+    transform: translateY(100%); 
+    z-index: 1
   }
 
   @media (hover:hover) {

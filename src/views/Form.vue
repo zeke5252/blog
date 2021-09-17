@@ -49,7 +49,7 @@
         <textarea v-model="content" class="form-control fs-3" id="area-content" rows="15" cols="30" style="white-space: pre-wrap" />
       </div>
     </div>
-    <button class="btn col-12 col-sm-2 mb-3 me-2" style="background-color: transparent; color: white; outline: 1px solid !important; outline-offset: -1px;" v-on:click="doDraft(content)">
+    <button class="btn col-12 col-sm-2 mb-3 me-2" style="background-color: transparent; color: white; outline: 1px solid !important; outline-offset: -1px;" v-on:click="setDraft(content)">
       Save draft
     </button>
     <button type="submit" class="btn col-12 col-sm-2 mb-3" v-on:click="submitHandler">
@@ -102,8 +102,10 @@ export default {
       photoPool.value= [];
       photosToUpload.value= [];
       progresses.value= [];
+      getDraft();
+    };
 
-      // Set draft
+    const getDraft = () => {
       var docRef = db.collection("draft").doc("normal");
       docRef.get().then((doc) => {
           if (doc.data().content) {
@@ -111,6 +113,17 @@ export default {
           } else {
               // doc.data() will be undefined in this case
           }
+      }).catch((error) => {
+          console.log("Error getting document:", error);
+      });
+    };
+
+    const setDraft = (val = '') => {
+      var docRef = db.collection("draft").doc("normal");
+      docRef.set({
+        content: val
+      }).then((doc) => {
+          if(val !== '') alert("Draft saved.");
       }).catch((error) => {
           console.log("Error getting document:", error);
       });
@@ -199,17 +212,6 @@ export default {
       document.body.removeChild(el);
     };
 
-    const doDraft = (val = '') => {
-      var docRef = db.collection("draft").doc("normal");
-      docRef.set({
-        content: val
-      }).then((doc) => {
-          if(val !== '') alert("Draft saved.");
-      }).catch((error) => {
-          console.log("Error getting document:", error);
-      });
-    };
-
     const submitHandler = () => {
       let isTitleExisted = store.getters.IS_POST_EXISTED(title.value);
       if(isTitleExisted) {
@@ -288,7 +290,7 @@ export default {
           db.collection("posts").add(postToUpload)
           .then((docRef) => {
             alert("Upload is successful!");
-            doDraft();
+            setDraft();
             init();
             router.push("/");
           })
@@ -302,7 +304,7 @@ export default {
         db.collection("posts").add(postToUpload)
           .then((docRef) => {
             alert("Upload is successful!");
-            doDraft();
+            setDraft();
             init();
             router.push("/");
           })
@@ -331,7 +333,7 @@ export default {
       photoPool,
       photosToUpload,
       progresses,
-      doDraft,
+      setDraft,
       submitHandler,
       onFileChange,
       removeImage,
