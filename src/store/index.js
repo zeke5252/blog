@@ -1,7 +1,6 @@
 import { createStore } from "vuex";
 import { db } from "../firebaseDB.js";
 import { UPDATE_DB, GET_DB, GET_NEXT_OR_PREV_POST, DATA_DB, IS_POST_EXISTED } from "./types";
-import { storage } from "../firebaseDB.js";
 
 export default createStore({
   state: {
@@ -28,7 +27,6 @@ export default createStore({
     },
     [GET_NEXT_OR_PREV_POST] : (state) => (title, isNext = false) => {
       let result;
-      console.log('haha')
       state[DATA_DB].forEach( (post,index) => {
         if(post["title"] === title){
           let indexP;
@@ -62,16 +60,6 @@ export default createStore({
           tempData.push(doc.data());
         });
       });
-      // < convert gs to http download url >
-      // let urlPromises=[];
-      // tempData.forEach((post,i)=>{
-      //    let t = storage.refFromURL(post.imageSrc).getDownloadURL()
-      //   .then(res=>{
-      //     post.imageSrc = res
-      //   });
-      //   urlPromises.push(t);
-      // });
-      // await Promise.all(urlPromises)
       commit(UPDATE_DB, tempData);
     },
   },

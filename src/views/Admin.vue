@@ -51,6 +51,7 @@ export default {
       .then((userCredential) => {
         // Signed in
         var user = userCredential.user;
+        console.log('user: ', user);
         alert("Login is successful!");
         router.push("Form");
         // ...

@@ -19,7 +19,7 @@
     </datalist>
     <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2 ">
       <div class="col"  v-for="(post, index) in !keyResults? GET_DB : keyResults" :key="post.title">
-        <button v-if="isLogin" class="removeButton" @click="removePost(post)"> X </button>
+        <button v-if="isLogin" class="removeButton" @click="removePost(post)"> <font-awesome-icon icon="trash" /> </button>
         <router-link :to="`/posts/${post.title}`" :class="post.imageFiles.length > 0 ? 'card styleImg border-0' : 'card styleTxt' " >
           <div v-if="post.imageFiles.length > 0" style="overflow: hidden;">
             <PhotoItem :Url="photoUtil.getSrc(post.imageFiles)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
@@ -74,6 +74,11 @@ export default {
       }
     });
 
+    document.addEventListener('scroll', loadMore, true);
+    store.dispatch('getFirestoreDB').then(res=>{
+      loadMore();
+    });
+
     const loadMore= (e) => {
       const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
@@ -90,10 +95,7 @@ export default {
       }
     }
 
-    document.addEventListener('scroll', loadMore, true);
-    store.dispatch('getFirestoreDB').then(res=>{
-      loadMore();
-    });
+ 
 
     const getConvertTime= (time) => convertTime(time, false);
 
@@ -110,6 +112,7 @@ export default {
     };
 
     const removePost= (post) => {
+      console.log('post: ', post);
 
       // 記住也需要刪除線上圖檔
       
@@ -121,6 +124,7 @@ export default {
             posts.doc(doc.id).delete().then(() => {
                   store.dispatch('getFirestoreDB')
               }).then(() => {
+                  removeDBImages();
                   alert("Document successfully deleted!");
               }).catch((error) => {
                   console.error("Error removing document: ", error);
@@ -131,6 +135,10 @@ export default {
           console.log("Error getting documents: ", error);
       });
     };
+
+    const removeDBImages= () => {
+      
+    }
 
     watch(keyword, (val, pre) => {
       _.debounce(function(){
