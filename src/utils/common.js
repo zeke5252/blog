@@ -9,7 +9,7 @@ function convertTime(createdTime, isFull = true){
 }
 
 function splitContents(content){
-  let urls = content.match(/\bhttps?:\/\/\S+/gi);
+  let urls = getContentUrls(content);
   if(!urls){
     return content;
   } else {
@@ -23,9 +23,13 @@ function splitContents(content){
     })
     // Remove an empty line.
     const newResult = contentArr.map( el=> el.replace(/ \n/g,'').trim())
-    // Remove elements with only whitespaces.
+    // Remove elements with only white spaces.
     return newResult.filter( el=> el.replace(/\s/g, '').length )
   }
+}
+
+function getContentUrls(content) {
+  return content.match(/\bhttps?:\/\/\S+/gi);
 }
 
 let photoUtil = {
@@ -44,8 +48,8 @@ let photoUtil = {
     return `https://via.placeholder.com/${image.resolution[0]}x${image.resolution[1]}/333/333`
   },
 
-  getSrc(images){
-    return this._parseFile(images)[0].imageSrc
+  getSrc(jsonImages, isFirstOnly = false){
+    return isFirstOnly ? this._parseFile(jsonImages)[0].imageSrc : this._parseFile(jsonImages).map(image => image.imageSrc);
   },
 
   getExif(url= null, images){

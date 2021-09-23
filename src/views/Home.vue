@@ -22,7 +22,7 @@
         <button v-if="isLogin" class="removeButton" @click="removePost(post)"> <font-awesome-icon icon="trash" /> </button>
         <router-link :to="`/posts/${post.title}`" :class="post.imageFiles.length > 0 ? 'card styleImg border-0' : 'card styleTxt' " >
           <div v-if="post.imageFiles.length > 0" style="overflow: hidden;">
-            <PhotoItem :Url="photoUtil.getSrc(post.imageFiles)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
+            <PhotoItem :Url="photoUtil.getSrc(post.imageFiles, true)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
           </div>
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(post.created)}}</div>
@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import { db } from "@/firebaseDB.js";
+import { db, storage } from "@/firebaseDB.js";
 import { firebase } from "@firebase/app";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
@@ -112,10 +112,6 @@ export default {
     };
 
     const removePost= (post) => {
-      console.log('post: ', post);
-
-      // 記住也需要刪除線上圖檔
-      
       let posts = db.collection("posts");
       let query = posts.where("title", "==", post.title);
       query.get()
@@ -124,8 +120,7 @@ export default {
             posts.doc(doc.id).delete().then(() => {
                   store.dispatch('getFirestoreDB')
               }).then(() => {
-                  removeDBImages();
-                  alert("Document successfully deleted!");
+                  removeDBImages(post);
               }).catch((error) => {
                   console.error("Error removing document: ", error);
               });
@@ -136,8 +131,17 @@ export default {
       });
     };
 
-    const removeDBImages= () => {
-      
+    const removeDBImages= (post) => {
+      let imagesUrls = photoUtil.getSrc(post.imageFiles);
+      let imagesToDelete = imagesUrls.map( url => url.match(/(?<=%2F)[\w- \.]*/)[0]);
+      let filesAllPromises =  imagesToDelete.map(image => {
+        let storageRef = storage.ref();
+        storageRef.child(`${post.category}/${image}`).delete();
+      });
+
+      Promise.all(filesAllPromises).then(res=>{
+        alert('The post has been deleted!')
+      })
     }
 
     watch(keyword, (val, pre) => {
