@@ -75,15 +75,14 @@ export default {
     title = ref(""),
     category = ref("photography"),
     content = ref(""),
-    created= ref(""),
-    displayImages= ref([]),
-    photoPool= ref([]), // all temporarily selected files 
-    photosToUpload= ref([]),
-    progresses= ref([]),
+    created = ref(""),
+    displayImages = ref([]),
+    photoPool = ref([]), // all temporarily selected files 
+    photosToUpload = ref([]),
+    progresses = ref([]),
     GET_DB_ALL = computed(()=> store.getters.GET_DB())
 
     onMounted(() => {
-      
       if (!store.state[DATA_DB]) {
         store.dispatch("getFirestoreDB").then((res) => {
         init();
@@ -191,7 +190,6 @@ export default {
         let allMetaData = JSON.stringify((Object.fromEntries(formattedData.entries())));
         if(photoPool.value[index]){
           photoPool.value[index].exif = allMetaData;
-          console.log('photoPool.value[index]: ', photoPool.value[index]);
           photoPool.value[index].resolution = [this.naturalWidth, this.naturalHeight];
         }
 
@@ -213,12 +211,13 @@ export default {
     };
 
     const submitHandler = () => {
-      let isTitleExisted = store.getters.IS_POST_EXISTED(title.value);
+      const isTitleExisted = store.getters.IS_POST_EXISTED(title.value);
+      let uploadPhotosPromises;
+      
       if(isTitleExisted) {
         alert("The title has been in use.");
         return;
       };
-
       let postToUpload = {
         title: title.value,
         category: category.value,
@@ -226,15 +225,18 @@ export default {
         imageFiles: [],
         content: content.value 
       };
-
-      // If photos are selected in the text content, push them to photoUpload.
-      if(photoPool.value.length > 0){
-        console.log('with photos');
-        photoPool.value.forEach((file, index)=>{
+      const isPoolWithPhotos = photoPool.value.length > 0;
+      if(isPoolWithPhotos){
+        photoPool.value.forEach( file => {
           if(content.value.includes(file.name)) photosToUpload.value.push(file)
         });
+        uploadPhotosPromises = doUploadPhotos();
+      };
+      doUploadPost(isPoolWithPhotos, uploadPhotosPromises, postToUpload);
+    };
 
-        let filesAllPromises = photosToUpload.value.map((file,i)=>{
+    const doUploadPhotos = () => {
+      return photosToUpload.value.map((file,i)=>{
           let storageRef = storage.ref();
           var uploadTask = storageRef
             .child("photography/" + photosToUpload.value[i].name)
@@ -267,19 +269,24 @@ export default {
                   break;
               }
             },
-              () => {
-                // get the download URL
-                uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                photosToUpload.value[i].imageSrc = downloadURL;
-                resolve(true);
-
-                });
-              }
+              getPhotoUrls.bind(this, uploadTask, i, resolve)
           )
           })
         });
+    };
 
-        Promise.all(filesAllPromises).then(resArr=>{ 
+    const getPhotoUrls = (uploadTask, i, resolve) => {
+        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+        photosToUpload.value[i].imageSrc = downloadURL;
+        resolve(true);
+      })
+    };
+
+    const doUploadPost = (isWithPhotos, promises, postToUpload) => {
+      console.log('promises: ', promises);
+      if(isWithPhotos) {
+        Promise.all(promises).then(resArr=>{ 
+          console.log('promises: ', promises);
           photosToUpload.value.forEach(_file=>{
             if(content.value.includes(_file.name)){
               content.value = content.value.replace(_file.name,_file.imageSrc);
@@ -287,31 +294,24 @@ export default {
           });
           postToUpload.content = content.value;
           postToUpload.imageFiles = JSON.stringify(photosToUpload.value);
-          db.collection("posts").add(postToUpload)
-          .then((docRef) => {
-            alert("Upload is successful!");
-            setDraft();
-            init();
-            router.push("/");
-          })
-          .catch((error) => {
-            console.error("Error adding document: ", error);
-          });
+          doUploadPostProto(postToUpload);
         });
-
       } else {
-        console.log('no photos');
-        db.collection("posts").add(postToUpload)
-          .then((docRef) => {
-            alert("Upload is successful!");
-            setDraft();
-            init();
-            router.push("/");
-          })
-          .catch((error) => {
-            console.error("Error adding document: ", error);
-          });
-      };
+        doUploadPostProto(postToUpload);
+      }
+    };
+
+    const doUploadPostProto = postToUpload => {
+      db.collection("posts").add(postToUpload)
+      .then((docRef) => {
+        alert("Upload is successful!");
+        setDraft();
+        init();
+        router.push("/");
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+      });
     };
 
     const signoutHandler = () => {
