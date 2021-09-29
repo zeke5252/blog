@@ -10,14 +10,14 @@
           <img class="img-fluid my-5 px-2 px-lg-4" src="./assets/logo.svg" alt="zeke blog logo">
         </router-link>
         <ul class="p-0">
-          <router-link to="/"       class="mx-auto">
-            <img src="./assets/menu_posts.svg" :style="isActive('')" alt="zeke blog menu_posts">
+          <router-link to="/"       class="mx-auto" :style="isActive('')" >
+            <font-awesome-icon icon="grip-horizontal"/>
           </router-link>
-          <router-link to="/about"  class="mx-auto">
-            <img src="./assets/menu_about.svg" :style="isActive('about')" alt="zeke blog menu_about">
+          <router-link to="/about"  class="mx-auto" :style="isActive('about')">
+            <font-awesome-icon icon="address-card"/>
           </router-link>
-          <router-link to="/form"   class="mx-auto" >
-            <img src="./assets/menu_admin.svg" :style="isActive('form')"  alt="zeke blog menu_admin">
+          <router-link to="/form"   class="mx-auto" :style="isActive('admin')"  >
+            <font-awesome-icon icon="sign-in-alt"/>
           </router-link>
         </ul>
     </nav>
@@ -68,10 +68,11 @@ export default {
     height: 60vh;
     flex-direction: column;
 
-    img {
-        width: 30px;
-        height: auto;
-        padding: 20px 0;
+    a {
+        padding: 30px 0;
+        svg {
+          transform: scale(1.3)
+        }
       }
 
   }

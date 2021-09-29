@@ -4,7 +4,9 @@
   </div>
   <div v-else class="home">
       <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
-        <label for="searchInput" class="form-label"><img src="../assets/search.svg" class="search--img p-1"></label>
+        <label id="searchLabel" for="searchInput" >
+          <font-awesome-icon icon="search"/>
+        </label>
         <input
           class="search--input p-1"
           v-model="keyword"
@@ -19,7 +21,9 @@
     </datalist>
     <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2 ">
       <div class="col"  v-for="(post, index) in !keyResults? GET_DB : keyResults" :key="post.title">
-        <button v-if="isLogin" class="removeButton" @click="removePost(post)"> <font-awesome-icon icon="trash" /> </button>
+        <button v-if="isLogin" class="removeButton" @click="removePost(post)">
+          <font-awesome-icon icon="trash" />
+        </button>
         <router-link :to="`/posts/${post.title}`" :class="post.imageFiles.length > 0 ? 'card styleImg border-0' : 'card styleTxt' " >
           <div v-if="post.imageFiles.length > 0" style="overflow: hidden;">
             <PhotoItem :Url="photoUtil.getSrc(post.imageFiles, true)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
@@ -192,6 +196,14 @@ export default {
     padding: 8px 20px 14px 20px;
     font-weight: 700;
     color: $color-primary-yellow;
+  }
+
+  #searchLabel {
+    width: 30px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .removeButton {
