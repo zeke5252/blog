@@ -3,10 +3,10 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faTrash, faAddressCard, faSignInAlt, faGripHorizontal, faSearch } from '@fortawesome/free-solid-svg-icons'
+import { faTrash, faAddressCard, faSignInAlt, faGripHorizontal, faSearch, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faTrash, faAddressCard, faSignInAlt, faGripHorizontal, faSearch)
+library.add(faTrash, faAddressCard, faSignInAlt, faGripHorizontal, faSearch, faChevronLeft, faChevronRight)
 
 // Vue.component('font-awesome-icon', FontAwesomeIcon)
 

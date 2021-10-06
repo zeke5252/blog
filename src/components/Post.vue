@@ -4,7 +4,7 @@
   </div>
   <div class="me-sm-0 me-md-5" v-else>
     <header class="mb-5 fixed-top">
-      <img src="../assets/prev.svg" class= "u-btn__prev" :style="!isPrevDisplay && 'opacity: .3'" @click="doPrev"/>
+      <font-awesome-icon icon="chevron-left" class= "u-btn__prev" :style="!isPrevDisplay ? {opacity: .3} : {opacity: 1}" @click="doPrev"/>
       <div class="header--info">
         <h2 v-text="title" />
         <span v-text="contents.category + '&nbsp;&nbsp;&sol;&nbsp;&nbsp;' + contents.created" />
@@ -13,7 +13,7 @@
           <span style="color: white">{{contents.msgs.length}}</span>
         </div>
       </div>
-      <img src="../assets/next.svg" class= "u-btn__next" :style="!isNextDisplay && 'opacity: .3'" @click="doNext"/>
+        <font-awesome-icon icon="chevron-right" class= "u-btn__next" :style="!isNextDisplay ? {opacity: .3} : {opacity: 1}" @click="doNext"/>
     </header>
     <section class="my-3">
       <template v-if="Array.isArray(contentToArr)" v-for="(el,index) in contentToArr" :key="index">    
