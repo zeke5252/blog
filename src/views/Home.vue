@@ -58,6 +58,8 @@ export default {
   name: "Home",
 
   setup(props) {
+
+    alert('home')
     
     const store = useStore();
     const isLogin = ref();
@@ -77,11 +79,6 @@ export default {
       }
     });
 
-    document.addEventListener('scroll', loadMore, true);
-    store.dispatch('getFirestoreDB').then(res=>{
-      loadMore();
-    });
-
     const loadMore= (e) => {
       const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
@@ -98,7 +95,10 @@ export default {
       }
     }
 
- 
+    document.addEventListener('scroll', loadMore, true);
+    store.dispatch('getFirestoreDB').then(res=>{
+      loadMore();
+    });
 
     const getConvertTime= (time) => convertTime(time, false);
 
@@ -135,17 +135,18 @@ export default {
     };
 
     const removeDBImages= (post) => {
-      let imagesUrls = photoUtil.getSrc(post.imageFiles);
-      let imagesToDelete = imagesUrls.map( url => url.match(/(?<=%2F)[\w- \.]*/)[0]);
-      let filesAllPromises =  imagesToDelete.map(image => {
-        let storageRef = storage.ref();
-        storageRef.child(`${post.category}/${image}`).delete();
-      });
+      // Regex will cause issues on iOS devices
+      // let imagesUrls = photoUtil.getSrc(post.imageFiles);
+      // let imagesToDelete = imagesUrls.map( url => url.match(/(?<=%2F)[\w- \.]*/)[0]);
+      // let filesAllPromises =  imagesToDelete.map(image => {
+      //   let storageRef = storage.ref();
+      //   storageRef.child(`${post.category}/${image}`).delete();
+      // });
 
-      Promise.all(filesAllPromises).then(res=>{
-        alert('The post has been deleted!')
-      })
-    }
+      // Promise.all(filesAllPromises).then(res=>{
+      //   alert('The post has been deleted!')
+      // })
+    };
 
     watch(keyword, (val, pre) => {
       _.debounce(function(){
