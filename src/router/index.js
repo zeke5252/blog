@@ -4,14 +4,14 @@ require('firebase/auth');
 
 const routes = [
   {
-    path: "/posts/:title",
-    props: true,
-    component: () => import("../components/Post.vue"),
-  },
-  {
     path: "/",
     name: "Home",
     component: () => import("../views/Home.vue"),
+  },
+  {
+    path: "/posts/:title",
+    props: true,
+    component: () => import("../components/Post.vue"),
   },
   {
     path: "/about",

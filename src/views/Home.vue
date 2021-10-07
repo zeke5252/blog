@@ -1,6 +1,5 @@
 <template>
-  <div v-if="!GET_DB" class="loading">
-    <div/>
+  <div v-if="!GET_DB" class="loading"><div></div>
   </div>
   <div v-else class="home">
       <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">

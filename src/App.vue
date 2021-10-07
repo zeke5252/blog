@@ -7,7 +7,7 @@
     <div v-if="isMobileMenu" class="w-100 h-100 fixed-top" style= "background-color: black; opacity: .3;" @click="doMenu"></div>
     <nav :class="!isMobileMenu ? 'd-none d-md-block col-1 p-0 fixed-top justify-content-center' : 'col-3 px-4 fixed-top h-100 mobileBg'" >
         <router-link to="/">
-          <svg class="img-fluid px-4 my-4" style="width: 100%; height: 50px; margin: auto">
+          <svg class=" my-4 px-sm-3 px-md-3 px-lg-4" style="width: 100%; height: 50px; margin: auto">
             <use href="#logo"></use>
           </svg>
         </router-link>
@@ -23,7 +23,9 @@
           </router-link>
         </ul>
     </nav>
-    <img src="./assets/logo.svg" class= "logo--m d-block d-md-none p-0 fixed-top mt-1 mx-3" style="width: 40px; height: 40px;" @click="doMenu"/>
+    <svg class= "logo--m d-block d-md-none p-0 fixed-top mt-1 mx-2" style="width: 40px; height: 40px;" @click="doMenu">
+      <use href="#logo"></use>
+    </svg>
   </div>
 </div>
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg">
