@@ -58,9 +58,6 @@ export default {
   name: "Home",
 
   setup(props) {
-
-    alert('home')
-    
     const store = useStore();
     const isLogin = ref();
     const count= ref(5);
