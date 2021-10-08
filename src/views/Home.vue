@@ -132,17 +132,18 @@ export default {
     };
 
     const removeDBImages= (post) => {
-      // Regex will cause issues on iOS devices
-      // let imagesUrls = photoUtil.getSrc(post.imageFiles);
-      // let imagesToDelete = imagesUrls.map( url => url.match(/(?<=%2F)[\w- \.]*/)[0]);
-      // let filesAllPromises =  imagesToDelete.map(image => {
-      //   let storageRef = storage.ref();
-      //   storageRef.child(`${post.category}/${image}`).delete();
-      // });
+      let imagesUrls = photoUtil.getSrc(post.imageFiles);
+      // Need to use new RegExg() instead of .match(/.../) to avoid error in js
+      let re = new RegExp("(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)", 'g')
+      let imagesToDelete = imagesUrls.map( url => url.match(re)[0]);
+      let filesAllPromises =  imagesToDelete.map(image => {
+        let storageRef = storage.ref();
+        storageRef.child(`${post.category}/${image}`).delete();
+      });
 
-      // Promise.all(filesAllPromises).then(res=>{
-      //   alert('The post has been deleted!')
-      // })
+      Promise.all(filesAllPromises).then(res=>{
+        alert('The post has been deleted!')
+      })
     };
 
     watch(keyword, (val, pre) => {
