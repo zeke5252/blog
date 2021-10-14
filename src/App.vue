@@ -5,7 +5,7 @@
       <router-view/>
     </main>
     <div v-if="isMobileMenu" class="w-100 h-100 fixed-top" style= "background-color: black; opacity: .3;" @click="doMenu" ></div>
-    <nav :class="!isMobileMenu ? 'd-none d-md-block col-1 p-0 fixed-top justify-content-center' : 'col-3 px-4 fixed-top h-100 mobileBg'" >
+    <nav :class="!isMobileMenu ? 'd-none d-md-block col-1 p-0 fixed-top justify-content-center' : 'col-2 px-3 fixed-top h-100 mobileBg'" >
         <router-link to="/">
           <Logo class="my-4 px-sm-3 px-md-3 px-lg-4" style="width: 100%; height: 50px; margin: auto" clipId="desktop"/>
         </router-link>

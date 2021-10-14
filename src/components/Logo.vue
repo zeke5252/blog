@@ -66,8 +66,6 @@ import { ref, computed, watch, onMounted, onUpdated } from "vue";
   }
   #leafSpin{
     transform: scale(2);
-    // transform-origin: center;
-    // transform-box: fill-box;
     animation: 
       logoSpin
       $logo-shutter-spin-duration
@@ -85,7 +83,7 @@ import { ref, computed, watch, onMounted, onUpdated } from "vue";
       1 normal forwards running;
   }
 	.st3{
-    fill: #fff;
+    fill: $color-primary-yellow;
     transform-origin: center;
     transform-box: fill-box;
     animation: 
