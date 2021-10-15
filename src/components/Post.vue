@@ -18,7 +18,7 @@
     <section class="my-3">
       <template v-if="Array.isArray(contentToArr)" v-for="(el,index) in contentToArr" :key="index">    
         <div v-if="el.substring(0,4)==='http'" class="me-sm-0 ">  
-          <PhotoItem :Url="el" :Images="contents.imageFiles" />
+          <Photo :Url="el" :Images="contents.imageFiles" />
         </div>
         <p class="section--p  " v-else>{{el}}</p>
       </template>
@@ -77,7 +77,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { db } from "../firebaseDB.js";
 import { GET_DB, GET_NEXT_OR_PREV_POST, DATA_DB } from "@/store/types";
 
-import PhotoItem from "./Photo.vue";
+import Photo from "./Photo.vue";
 
 export default {
   name: "Post",
@@ -183,7 +183,7 @@ export default {
   },
 
   components: {
-    PhotoItem
+    Photo
   },
 };
 </script>

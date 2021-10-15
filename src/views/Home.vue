@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!GET_DB" class="loading"><div></div>
+  <div v-if="!GET_DB_ACCUMULATOR" class="loading"><div></div>
   </div>
   <div v-else class="home">
       <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
@@ -19,13 +19,13 @@
       <option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
     </datalist>
     <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2 ">
-      <div class="col"  v-for="(post, index) in !keyResults? GET_DB : keyResults" :key="post.title">
+      <div class="col"  v-for="(post, index) in !keyResults? GET_DB_ACCUMULATOR : keyResults" :key="post.title">
         <button v-if="isLogin" class="removeButton" @click="removePost(post)">
           <font-awesome-icon icon="trash" />
         </button>
         <router-link :to="`/posts/${post.title}`" :class="post.imageFiles.length > 0 ? 'card styleImg border-0' : 'card styleTxt' " >
           <div v-if="post.imageFiles.length > 0" style="overflow: hidden;">
-            <PhotoItem :Url="photoUtil.getSrc(post.imageFiles, true)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
+            <Photo :Url="photoUtil.getSrc(post.imageFiles, true)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
           </div>
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(post.created)}}</div>
@@ -35,7 +35,7 @@
         </router-link>
       </div>
     </div>
-    <div v-if="isMore && GET_DB" class="more">
+    <div v-if="isInMoreStatus && GET_DB_ACCUMULATOR" class="more">
       <div class="more--box" ></div>
       <div class="more--word h7">MORE...</div>
     </div>
@@ -45,13 +45,13 @@
 <script>
 import { db, storage } from "@/firebaseDB.js";
 import { firebase } from "@firebase/app";
-import { ref, computed, watch, onBeforeUnmount } from "vue";
+import { ref, computed, watch, onBeforeUnmount, onMounted } from "vue";
 import { useStore } from "vuex";
 import { convertTime, splitContents, photoUtil } from "../utils/common.js";
 import { GET_DB } from "../store/types.js";
 import _ from "lodash";
 
-import PhotoItem from "../components/Photo.vue";
+import Photo from "../components/Photo.vue";
 
 export default {
 
@@ -60,12 +60,13 @@ export default {
   setup(props) {
     const store = useStore();
     const isLogin = ref();
-    const count= ref(5);
-		const isMore= ref(false);
+    const postsAmount= ref(5);
+    const postsTimes= ref(0);
+		const isInMoreStatus= ref(false);
     const keyword= ref("");
     const keyResults= ref(null);
 
-    const GET_DB = computed(()=> store.getters.GET_DB(null, count.value))
+    const GET_DB_ACCUMULATOR = ref([]);
     const GET_DB_ALL = computed(()=> store.getters.GET_DB())
 
     firebase.auth().onAuthStateChanged(function(user) {
@@ -80,22 +81,21 @@ export default {
       const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight;
-		  if (!isMore.value && scrollTop + getWindowHeight >= scrollHeight*4/5) {
-		    isMore.value = true;
-		    setTimeout(() => {
-		      count.value += 5;
-		      isMore.value = false;
-          if(GET_DB.value.length < count.value){
-            document.removeEventListener('scroll', loadMore, true)
-          }
+      const isMouseIn = scrollTop + getWindowHeight >= scrollHeight*4/5;
+		  if (!isInMoreStatus.value && isMouseIn) {
+		    isInMoreStatus.value = true;
+		    setTimeout( async () => {
+          let postsToAdd;
+		      isInMoreStatus.value = false;
+          postsToAdd = await store.getters.GET_DB(null, { times: postsTimes.value, amount: postsAmount.value});
+          GET_DB_ACCUMULATOR.value = GET_DB_ACCUMULATOR.value.concat(postsToAdd);
+          postsTimes.value++;
+          if(postsToAdd.length === 0) document.removeEventListener('scroll', loadMore, true)
 		    }, 1000);                
       }
     }
 
     document.addEventListener('scroll', loadMore, true);
-    store.dispatch('getFirestoreDB').then(res=>{
-      loadMore();
-    });
 
     const getConvertTime= (time) => convertTime(time, false);
 
@@ -154,26 +154,32 @@ export default {
       }, 500)()
     })
 
+    onMounted(()=>{
+      store.dispatch('getFirestoreDB').then(res=>{
+      loadMore();
+    });
+    });
+
     onBeforeUnmount(()=>{
       document.removeEventListener('scroll', loadMore, true)
     });
 
     return {
       isLogin,
-      isMore,
+      isInMoreStatus,
       photoUtil,
       keyword,
       keyResults,
       removePost,
       getConvertTime,
       getFirstParagraph,
-      GET_DB,
+      GET_DB_ACCUMULATOR,
       GET_DB_ALL,
     }
   },
   
   components: {
-    PhotoItem
+    Photo
   },
 };
 

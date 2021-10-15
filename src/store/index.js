@@ -7,7 +7,7 @@ export default createStore({
     [DATA_DB]: null,
   },
   getters: {
-    [GET_DB] : (state) => (title, amount) => {
+    [GET_DB] : (state) => (title, obj = null) => {
       if (title && title !== "") {
         let result;
         state[DATA_DB].forEach( (post,index) => { 
@@ -17,9 +17,15 @@ export default createStore({
             result = {post, isPrevDisplay, isNextDisplay};
           } })
         return result
-      } else if(amount) {
+      } else if( obj ) {
+        console.log('obj: ', obj);
         return state[DATA_DB] && state[DATA_DB].filter( ( post, index ) => {
-          if(index < amount) return post
+          // { obj.times: 0; obj.amount: 5 }
+          if((index >= obj.times*obj.amount) && (index < (obj.times + 1)*obj.amount)){
+            console.log('post: ', post);
+            return post
+            
+          }
         });
       } else {
         return state[DATA_DB]
