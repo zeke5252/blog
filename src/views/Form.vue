@@ -66,7 +66,7 @@ import { storage } from "../firebaseDB.js";
 import { useStore } from "vuex";
 import router from '../router/';
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
-import { GET_DB, GET_DB_ALL, IS_POST_EXISTED, DATA_DB } from "@/store/types";
+import { IS_POST_EXISTED, DATA_DB } from "@/store/types";
 
 export default {
   name: "Form",
@@ -79,8 +79,7 @@ export default {
     displayImages = ref([]),
     photoPool = ref([]), // all temporarily selected files 
     photosToUpload = ref([]),
-    progresses = ref([]),
-    GET_DB_ALL = computed(()=> store.getters.GET_DB())
+    progresses = ref([])
 
     onMounted(() => {
       if (!store.state[DATA_DB]) {
@@ -283,7 +282,6 @@ export default {
     };
 
     const doUploadPost = (isWithPhotos, promises, postToUpload) => {
-      console.log('promises: ', promises);
       if(isWithPhotos) {
         Promise.all(promises).then(resArr=>{ 
           console.log('promises: ', promises);

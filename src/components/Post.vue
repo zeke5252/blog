@@ -75,7 +75,7 @@ import router from '../router/';
 import { useStore } from "vuex";
 import { useRouter, useRoute } from 'vue-router'
 import { db } from "../firebaseDB.js";
-import { GET_DB, GET_NEXT_OR_PREV_POST, DATA_DB } from "@/store/types";
+import { GET_DB_TITLE, GET_NEXT_OR_PREV_POST, DATA_DB } from "@/store/types";
 
 import Photo from "./Photo.vue";
 
@@ -98,10 +98,10 @@ export default {
     const msg= ref('');
     const contentToArr= ref([]);
 
-    const GET_DB = computed(()=> store.getters.GET_DB(props.title))
+    const GET_DB_TITLE = computed(()=> store.getters.GET_DB_TITLE(props.title))
 
     const init = () => {
-      let postData = GET_DB.value;
+      let postData = GET_DB_TITLE.value;
       if(postData){
         isPrevDisplay.value = postData.isPrevDisplay;
         isNextDisplay.value = postData.isNextDisplay;
@@ -168,7 +168,7 @@ export default {
 
     return {
       getConvertTime,
-      GET_DB,
+      GET_DB_TITLE,
       contents,
       isPrevDisplay,
       isNextDisplay,

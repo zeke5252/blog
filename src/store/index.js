@@ -1,14 +1,14 @@
 import { createStore } from "vuex";
 import { db } from "../firebaseDB.js";
-import { UPDATE_DB, GET_DB, GET_NEXT_OR_PREV_POST, DATA_DB, IS_POST_EXISTED } from "./types";
+import { UPDATE_DB, GET_DB_ALL, GET_NEXT_OR_PREV_POST, DATA_DB, IS_POST_EXISTED, GET_DB_SCROLL, GET_DB_TITLE } from "./types";
 
 export default createStore({
   state: {
     [DATA_DB]: null,
   },
   getters: {
-    [GET_DB] : (state) => (title, obj = null) => {
-      if (title && title !== "") {
+    [GET_DB_ALL] : (state) => () => state[DATA_DB],
+    [GET_DB_TITLE] : (state) => (title) => {
         let result;
         state[DATA_DB].forEach( (post,index) => { 
           if(post["title"] === title){
@@ -17,19 +17,12 @@ export default createStore({
             result = {post, isPrevDisplay, isNextDisplay};
           } })
         return result
-      } else if( obj ) {
-        console.log('obj: ', obj);
-        return state[DATA_DB] && state[DATA_DB].filter( ( post, index ) => {
-          // { obj.times: 0; obj.amount: 5 }
-          if((index >= obj.times*obj.amount) && (index < (obj.times + 1)*obj.amount)){
-            console.log('post: ', post);
-            return post
-            
-          }
-        });
-      } else {
-        return state[DATA_DB]
-      }
+    },
+    [GET_DB_SCROLL] : (state) => (obj = null) => {
+      const { times, amount } = obj;
+      return state[DATA_DB] && state[DATA_DB].filter( ( post, index ) => {
+        if((index >= times * amount) && (index < (times + 1) * amount)) return post;
+      });
     },
     [GET_NEXT_OR_PREV_POST] : (state) => (title, isNext = false) => {
       let result;

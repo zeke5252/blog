@@ -1,7 +1,7 @@
 <template>
   <div class="cover--photo">
-    <img v-if="!isLoaded" class="getPlaceholder--logo" src="../assets/logo_m.svg" />
-    <img :src="photoUtil.getPlaceholderImage(Url, Images)" @load="loadLogo($event)" :class="{ photoBorder: showBorder }" />
+    <img :src="Url" @load="loadLogo($event)" :class="{ photoBorder: showBorder }"/>
+    <img v-if="!isLoaded" class="getPlaceholder--logo" src="../assets/logo_placeholder.svg" />
     <ul class="px-4  py-3 px-sm-5  py-sm-4" v-if="photoUtil.getExif(Url, Images)!=='{}' && showExif">
     <li class ="py-1 py-sm-2" v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
       <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
@@ -34,15 +34,7 @@ export default {
   setup(props, context) {
     const { Url, Images, showExif } = toRefs(props);
     const isLoaded = ref(false);
-    const loadLogo = (e) => {
-      e.target.src= Url.value;
-
-      // When real photo is loaded, not replacement photo.
-      e.target.onload = () => {
-        isLoaded.value = true;
-      }
-    };
-
+    const loadLogo = (e) => isLoaded.value = true;
     return {
       photoUtil,
       Url,
@@ -112,12 +104,6 @@ export default {
 
   label {
     color: $color-text-grey
-  }
-
-    @keyframes photoAnimation {
-    0%    {outline: 2px}
-    50%   {outline: 8px}
-    100%  {outline: 2px}
   }
 
 </style>

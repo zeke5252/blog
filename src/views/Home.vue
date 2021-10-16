@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!GET_DB_ACCUMULATOR" class="loading"><div></div>
+  <div v-if="!postsAccumulator" class="loading"><div></div>
   </div>
   <div v-else class="home">
       <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
@@ -19,7 +19,7 @@
       <option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
     </datalist>
     <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2 ">
-      <div class="col"  v-for="(post, index) in !keyResults? GET_DB_ACCUMULATOR : keyResults" :key="post.title">
+      <div class="col"  v-for="(post, index) in !keyResults? postsAccumulator : keyResults" :key="post.title">
         <button v-if="isLogin" class="removeButton" @click="removePost(post)">
           <font-awesome-icon icon="trash" />
         </button>
@@ -35,7 +35,7 @@
         </router-link>
       </div>
     </div>
-    <div v-if="isInMoreStatus && GET_DB_ACCUMULATOR" class="more">
+    <div v-if="isInMoreStatus && postsAccumulator" class="more">
       <div class="more--box" ></div>
       <div class="more--word h7">MORE...</div>
     </div>
@@ -48,7 +48,7 @@ import { firebase } from "@firebase/app";
 import { ref, computed, watch, onBeforeUnmount, onMounted } from "vue";
 import { useStore } from "vuex";
 import { convertTime, splitContents, photoUtil } from "../utils/common.js";
-import { GET_DB } from "../store/types.js";
+import { GET_DB_ALL, GET_DB_SCROLL } from "../store/types.js";
 import _ from "lodash";
 
 import Photo from "../components/Photo.vue";
@@ -66,8 +66,8 @@ export default {
     const keyword= ref("");
     const keyResults= ref(null);
 
-    const GET_DB_ACCUMULATOR = ref([]);
-    const GET_DB_ALL = computed(()=> store.getters.GET_DB())
+    const postsAccumulator = ref([]);
+    const GET_DB_ALL = computed(()=> store.getters.GET_DB_ALL())
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user != null) {
@@ -81,19 +81,24 @@ export default {
       const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight;
-      const isMouseIn = scrollTop + getWindowHeight >= scrollHeight*4/5;
-		  if (!isInMoreStatus.value && isMouseIn) {
+      const isMouseNearAllContentBottom = scrollTop + getWindowHeight >= scrollHeight*4/5;      
+
+		  if (!isInMoreStatus.value && isMouseNearAllContentBottom) {
 		    isInMoreStatus.value = true;
-		    setTimeout( async () => {
+		    setTimeout(() => {
           let postsToAdd;
 		      isInMoreStatus.value = false;
-          postsToAdd = await store.getters.GET_DB(null, { times: postsTimes.value, amount: postsAmount.value});
-          GET_DB_ACCUMULATOR.value = GET_DB_ACCUMULATOR.value.concat(postsToAdd);
+          postsToAdd = store.getters.GET_DB_SCROLL({ times: postsTimes.value, amount: postsAmount.value});
+          postsAccumulator.value = postsAccumulator.value.concat(postsToAdd);
           postsTimes.value++;
           if(postsToAdd.length === 0) document.removeEventListener('scroll', loadMore, true)
 		    }, 1000);                
       }
     }
+
+    store.dispatch('getFirestoreDB').then(res=>{
+      loadMore();
+    });
 
     document.addEventListener('scroll', loadMore, true);
 
@@ -118,12 +123,16 @@ export default {
       .then((querySnapshot) => {
           querySnapshot.forEach((doc) => {
             posts.doc(doc.id).delete().then(() => {
-                  store.dispatch('getFirestoreDB')
-              }).then(() => {
-                  removeDBImages(post);
-              }).catch((error) => {
-                  console.error("Error removing document: ", error);
-              });
+                store.dispatch('getFirestoreDB').then(res=>{
+                  postsAccumulator.value = store.getters.GET_DB_ALL();
+                });  
+            }).then(() => {
+              console.log('removeDBImages: ', removeDBImages);
+                removeDBImages(post);
+                
+            }).catch((error) => {
+                console.error("Error removing document: ", error);
+            });
           });
       })
       .catch((error) => {
@@ -132,6 +141,8 @@ export default {
     };
 
     const removeDBImages= (post) => {
+      if(post.imageFiles===0) return;
+      console.log('not return: ');
       let imagesUrls = photoUtil.getSrc(post.imageFiles);
       // Need to use new RegExg() instead of .match(/.../) to avoid error in js
       let re = new RegExp("(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)", 'g')
@@ -154,12 +165,6 @@ export default {
       }, 500)()
     })
 
-    onMounted(()=>{
-      store.dispatch('getFirestoreDB').then(res=>{
-      loadMore();
-    });
-    });
-
     onBeforeUnmount(()=>{
       document.removeEventListener('scroll', loadMore, true)
     });
@@ -173,7 +178,7 @@ export default {
       removePost,
       getConvertTime,
       getFirstParagraph,
-      GET_DB_ACCUMULATOR,
+      postsAccumulator,
       GET_DB_ALL,
     }
   },

@@ -43,11 +43,6 @@ let photoUtil = {
     return this._parseFile(images).find( image => image.imageSrc===url )
   },
 
-  getPlaceholderImage(url= null, images){
-    let image = this._getFileInfo(url, images)
-    return `https://via.placeholder.com/${image.resolution[0]}x${image.resolution[1]}/333/333`
-  },
-
   getSrc(jsonImages, isFirstOnly = false){
     return isFirstOnly ? this._parseFile(jsonImages)[0].imageSrc : this._parseFile(jsonImages).map(image => image.imageSrc);
   },
