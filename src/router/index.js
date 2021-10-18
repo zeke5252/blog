@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { firebase } from "@firebase/app";
-require('firebase/auth');
+require("firebase/auth");
 
 const routes = [
   {
@@ -28,14 +28,14 @@ const routes = [
     name: "Form",
     component: () => import("../views/Form.vue"),
     beforeEnter: (to, from, next) => {
-      firebase.auth().onAuthStateChanged(function(user) {
+      firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
           next();
         } else {
-          next({name: "Admin"})
+          next({ name: "Admin" });
         }
       });
-    }
+    },
   },
   {
     path: "/:pathMatch(.*)*",

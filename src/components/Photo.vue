@@ -1,109 +1,119 @@
 <template>
   <div class="cover--photo">
-    <img :src="Url" @load="loadLogo($event)" :class="{ photoBorder: showBorder }"/>
-    <img v-if="!isLoaded" class="getPlaceholder--logo" src="../assets/logo_placeholder.svg" />
-    <ul class="px-4  py-3 px-sm-5  py-sm-4" v-if="PhotoAPI.getExif(Url, Images)!=='{}' && showExif">
-    <li class ="py-1 py-sm-2" v-for="info in Object.entries(PhotoAPI.getExif(Url, Images))" :key="info">
-      <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
-    </li>
+    <img
+      :src="Url"
+      @load="loadLogo($event)"
+      :class="{ photoBorder: showBorder }"
+    />
+    <img
+      v-if="!isLoaded"
+      class="getPlaceholder--logo"
+      src="../assets/logo_placeholder.svg"
+    />
+    <ul
+      class="px-4 py-3 px-sm-5 py-sm-4"
+      v-if="PhotoAPI.getExif(Url, Images) !== '{}' && showExif"
+    >
+      <li
+        class="py-1 py-sm-2"
+        v-for="info in Object.entries(PhotoAPI.getExif(Url, Images))"
+        :key="info"
+      >
+        <span style="font-weight: 400" v-text="info[0]" /> :
+        <span style="color: #999" v-text="info[1]" />
+      </li>
     </ul>
   </div>
 </template>
 
 <script>
 import { PhotoAPI } from "../utils/common.js";
-import { toRefs, ref } from "vue";
-
+import { ref } from "vue";
 
 export default {
   name: "photo-item",
-  
+
   props: {
     Url: String,
     Images: String,
     showExif: {
       type: Boolean,
-      default: true
+      default: true,
     },
     showBorder: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
 
-  setup(props, context) {
-    const { Url, Images, showExif } = toRefs(props);
+  setup() {
     const isLoaded = ref(false);
-    const loadLogo = (e) => isLoaded.value = true;
+    const loadLogo = () => (isLoaded.value = true);
     return {
       PhotoAPI,
-      Url,
-      Images,
-      showExif,
       loadLogo,
-      isLoaded
-    }  
+      isLoaded,
+    };
   },
 };
 </script>
 
 <style scoped lang="scss">
-  @import "../assets/css/app.scss";
+@import "../assets/css/app.scss";
 
-  .cover--photo {
-    position: relative;
-    display: flex;
+.cover--photo {
+  position: relative;
+  display: flex;
+  width: 100%;
+  background-color: black;
+
+  &:hover ul {
+    opacity: 1 !important;
+  }
+
+  img {
     width: 100%;
-    background-color: black;
-
-     &:hover ul {
-      opacity: 1 !important;
-    }
-
-    img {
-      width: 100%;
-      align-self: start;
-    }
-
-    .getPlaceholder--logo {
-      position: absolute;
-      width: 10%;
-      transform: translateX(450%);
-      align-self: center;
-      opacity: .15;
-    }
-
-    ul {
-      background-color: rgba(0, 0, 0, 0.5);
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      z-index: 100;
-      font-size: 9px;
-      height: auto;
-      letter-spacing: 1px;
-      pointer-events: none;
-      opacity: 0;
-
-      li{
-        list-style-type: none !important;
-      }
-    }
+    align-self: start;
   }
 
-    @media (hover:hover) {
-    .photoBorder:hover {
-      outline: white 10px solid;
+  .getPlaceholder--logo {
+    position: absolute;
+    width: 10%;
+    transform: translateX(450%);
+    align-self: center;
+    opacity: 0.15;
+  }
+
+  ul {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    font-size: 9px;
+    height: auto;
+    letter-spacing: 1px;
+    pointer-events: none;
+    opacity: 0;
+
+    li {
+      list-style-type: none !important;
     }
   }
+}
 
-  .photoBorder {
-    outline: white 0px solid;
-    transition: all .2s ease-out;
+@media (hover: hover) {
+  .photoBorder:hover {
+    outline: white 10px solid;
   }
+}
 
-  label {
-    color: $color-text-grey
-  }
+.photoBorder {
+  outline: white 0px solid;
+  transition: all 0.2s ease-out;
+}
 
+label {
+  color: $color-text-grey;
+}
 </style>

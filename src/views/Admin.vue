@@ -27,40 +27,43 @@
 </template>
 
 <script>
-import router from '../router/';
+import router from "../router/";
 import { firebase } from "@firebase/app";
-require('firebase/auth');
+require("firebase/auth");
 
 export default {
   name: "Admin",
   data() {
     return {
       email: null,
-      password: null
+      password: null,
     };
   },
   computed: {},
-    mounted() {
+  mounted() {
     this.init();
   },
   methods: {
-    init() {
-    },
+    init() {},
     loginHandler() {
-      firebase.auth().signInWithEmailAndPassword(this.email, this.password)
-      .then((userCredential) => {
-        // Signed in
-        var user = userCredential.user;
-        console.log('user: ', user);
-        alert("Login is successful!");
-        router.push("Form");
-        // ...
-      })
-      .catch((error) => {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-      });
-    }
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(this.email, this.password)
+        .then((userCredential) => {
+          // Signed in
+          var user = userCredential.user;
+          console.log("user: ", user);
+          alert("Login is successful!");
+          router.push("Form");
+          // ...
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-unused-vars
+          let errorCode = error.code;
+          // eslint-disable-next-line no-unused-vars
+          let errorMessage = error.message;
+        });
+    },
   },
 };
 </script>
