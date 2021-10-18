@@ -2,8 +2,8 @@
   <div class="cover--photo">
     <img :src="Url" @load="loadLogo($event)" :class="{ photoBorder: showBorder }"/>
     <img v-if="!isLoaded" class="getPlaceholder--logo" src="../assets/logo_placeholder.svg" />
-    <ul class="px-4  py-3 px-sm-5  py-sm-4" v-if="photoUtil.getExif(Url, Images)!=='{}' && showExif">
-    <li class ="py-1 py-sm-2" v-for="info in Object.entries(photoUtil.getExif(Url, Images))" :key="info">
+    <ul class="px-4  py-3 px-sm-5  py-sm-4" v-if="PhotoAPI.getExif(Url, Images)!=='{}' && showExif">
+    <li class ="py-1 py-sm-2" v-for="info in Object.entries(PhotoAPI.getExif(Url, Images))" :key="info">
       <span style="font-weight:400" v-text="info[0]" /> : <span style="color:#999" v-text="info[1]" />
     </li>
     </ul>
@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { photoUtil } from "../utils/common.js";
+import { PhotoAPI } from "../utils/common.js";
 import { toRefs, ref } from "vue";
 
 
@@ -36,7 +36,7 @@ export default {
     const isLoaded = ref(false);
     const loadLogo = (e) => isLoaded.value = true;
     return {
-      photoUtil,
+      PhotoAPI,
       Url,
       Images,
       showExif,

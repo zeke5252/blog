@@ -69,7 +69,7 @@
 
 <script>
 import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
-import { convertTime, splitContents } from "../utils/common.js";
+import { convertTime, ContentAPI } from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import router from '../router/';
 import { useStore } from "vuex";
@@ -108,7 +108,7 @@ export default {
         msgTitle.value= '';
         msg.value= '';
         postData.post.created = convertTime(postData.post.created);
-        contentToArr.value = splitContents(postData.post.content);
+        contentToArr.value = ContentAPI.splitContents(postData.post.content);
         contents.value = postData.post;
       } else {
         router.push('/components/NotFound.vue')

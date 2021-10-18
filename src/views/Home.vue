@@ -1,7 +1,8 @@
 <template>
-  <div v-if="!postsAccumulator" class="loading"><div></div>
+<!--v-if="!postsAccumulator"-->
+  <div class="loading">
   </div>
-  <div v-else class="home">
+  <div class="home">
       <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
         <label id="searchLabel" for="searchInput" >
           <font-awesome-icon icon="search"/>
@@ -25,12 +26,12 @@
         </button>
         <router-link :to="`/posts/${post.title}`" :class="post.imageFiles.length > 0 ? 'card styleImg border-0' : 'card styleTxt' " >
           <div v-if="post.imageFiles.length > 0" style="overflow: hidden;">
-            <Photo :Url="photoUtil.getSrc(post.imageFiles, true)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
+            <Photo :Url="PhotoAPI.getSrc(post.imageFiles, true)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
           </div>
           <div class="card-body">
             <div class="createdDate">{{getConvertTime(post.created)}}</div>
             <h5 class="card-title">{{ post.title }}</h5>
-            <p class="card-text my-2" >{{ getFirstParagraph(post.content) }}</p>
+            <p class="card-text my-2" >{{ getFirstParagraph(post.content) }} <em class="moreContent">more >> </em> </p>
           </div>
         </router-link>
       </div>
@@ -47,7 +48,7 @@ import { db, storage } from "@/firebaseDB.js";
 import { firebase } from "@firebase/app";
 import { ref, computed, watch, onBeforeUnmount, onMounted } from "vue";
 import { useStore } from "vuex";
-import { convertTime, splitContents, photoUtil } from "../utils/common.js";
+import { convertTime, ContentAPI, PhotoAPI } from "../utils/common.js";
 import { GET_DB_ALL, GET_DB_SCROLL } from "../store/types.js";
 import _ from "lodash";
 
@@ -106,7 +107,7 @@ export default {
 
     const getFirstParagraph= (content) => {
       let contentsArr;
-      contentsArr = splitContents(content);
+      contentsArr = ContentAPI.splitContents(content);
       if(!contentsArr){
         return "No contents!";
       } else if(!Array.isArray(contentsArr)){
@@ -143,7 +144,7 @@ export default {
     const removeDBImages= (post) => {
       if(post.imageFiles===0) return;
       console.log('not return: ');
-      let imagesUrls = photoUtil.getSrc(post.imageFiles);
+      let imagesUrls = PhotoAPI.getSrc(post.imageFiles);
       // Need to use new RegExg() instead of .match(/.../) to avoid error in js
       let re = new RegExp("(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)", 'g')
       let imagesToDelete = imagesUrls.map( url => url.match(re)[0]);
@@ -172,7 +173,7 @@ export default {
     return {
       isLogin,
       isInMoreStatus,
-      photoUtil,
+      PhotoAPI,
       keyword,
       keyResults,
       removePost,
@@ -213,6 +214,15 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+  }
+
+  .moreContent {
+    font-size: 10px;
+    border: $color-primary-yellow 1px dotted;
+    border-radius: 8px;
+    color: $color-primary-yellow;
+    padding: 1px 5px 2px 6px;
+    margin-top: 10px
   }
 
   .removeButton {
