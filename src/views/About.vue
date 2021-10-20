@@ -6,6 +6,7 @@
       <div>LinkedIn</div>
       <div>Facebook</div>
       <div>Instgram</div>
+      <div>Haha</div>
     </section>
   </div>
 </template>
