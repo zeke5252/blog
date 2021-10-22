@@ -27,7 +27,12 @@
         v-for="post in !keyResults ? postsAccumulator : keyResults"
         :key="post.title"
       >
-        <button v-if="isLogin" class="removeButton" @click="removePost(post)">
+        <button
+          v-if="isLogin"
+          class="removeButton"
+          style="padding: 2px 25px"
+          @click="removePost(post)"
+        >
           <font-awesome-icon icon="trash" />
         </button>
         <router-link
@@ -250,10 +255,11 @@ export default {
 .moreContent {
   font-size: 10px;
   border: $color-primary-yellow 1px dotted;
-  border-radius: 8px;
+  border-radius: 10px;
   color: $color-primary-yellow;
   padding: 1px 5px 2px 6px;
   margin-top: 10px;
+  background-color: $color-bg;
 }
 
 .removeButton {

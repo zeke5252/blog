@@ -49,10 +49,19 @@
           :key="index"
         >
           <img :src="image" />
-          <button class="m-2 mb-0 d-block" @click="copySrc(index)">
-            Copy name
+          <button class="m-0 mb-1 d-block py-1 px-2" @click="copySrc(index)">
+            Copy
           </button>
-          <button class="m-2 mb-0 d-block" @click="removeImage(index)">
+          <button
+            class="m-0 mb-1 d-block py-1 px-2"
+            @click="copySrc(index, true)"
+          >
+            Paste to content
+          </button>
+          <button
+            class="m-0 mb-1 d-block py-1 px-2 text-white bg-dark"
+            @click="removeImage(index)"
+          >
             Remove
           </button>
         </div>
@@ -283,13 +292,18 @@ export default {
       photoPool.value.splice(index, 1);
     };
 
-    const copySrc = (index) => {
+    const copySrc = (index, isPasteToContent) => {
       const el = document.createElement("textarea");
       el.value = " " + photoPool.value[index].name + " ";
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
       document.body.removeChild(el);
+      isPasteToContent && pasteSrcToTextarea(el.value);
+    };
+
+    const pasteSrcToTextarea = (str) => {
+      content.value += str;
     };
 
     const submitHandler = () => {
