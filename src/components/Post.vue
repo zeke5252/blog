@@ -37,10 +37,17 @@
       <section class="my-3">
         <template v-if="Array.isArray(contentToArr)">
           <template v-for="(el, index) in contentToArr" :key="index">
-            <div v-if="el.substring(0, 4) === 'http'" class="me-sm-0">
+            <div
+              v-if="el.substring(0, 4) === 'http' && el.includes(imageHostName)"
+              class="me-sm-0"
+            >
               <Photo :Url="el" :Images="contents.imageFiles" />
             </div>
-            <p class="section--p" v-else>{{ el }}</p>
+            <template v-else-if="el.substring(0, 4) === 'http'">
+              <font-awesome-icon icon="link" id="iconLink" class="me-2"/>
+              <a :href="el">{{ el }}</a>
+            </template>
+            <p v-else class="section--p">{{ el }}</p>
           </template>
         </template>
         <template v-else>
@@ -123,6 +130,7 @@ export default {
     const msgTitle = ref("");
     const msg = ref("");
     const contentToArr = ref([]);
+    const imageHostName = "firebasestorage.googleapis.com";
 
     const GET_DB_TITLE = computed(() =>
       store.getters.GET_DB_TITLE(props.title)
@@ -222,6 +230,7 @@ export default {
       msgTitle,
       msg,
       contentToArr,
+      imageHostName,
       doPostMsg,
     };
   },
@@ -257,6 +266,18 @@ header {
     color: #777;
     letter-spacing: 1px;
   }
+}
+
+#iconLink {
+  color: $color-primary-yellow;
+}
+
+a {
+  font-size: 18px;
+  color: $color-primary-yellow;
+  font-weight: 300;
+  text-decoration: underline;
+  text-decoration-style: dotted;
 }
 
 .u-btn {
