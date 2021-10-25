@@ -9,6 +9,10 @@ function convertTime(createdTime, isFull = true) {
   return createdTime;
 }
 
+function limitStrSize(str, maxCount) {
+  return str.length > maxCount ? str.substring(0, maxCount) + "..." : str;
+}
+
 class ContentAPI {
   static _getContentUrls(content) {
     return content.match(/\bhttps?:\/\/\S+/gi);
@@ -56,4 +60,4 @@ class PhotoAPI {
   }
 }
 
-export { convertTime, ContentAPI, PhotoAPI };
+export { convertTime, ContentAPI, PhotoAPI, limitStrSize };

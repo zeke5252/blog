@@ -37,10 +37,11 @@
         </button>
         <router-link
           :to="`/posts/${post.title}`"
+          style="color: white"
           :class="
             post.imageFiles.length > 0
               ? 'card styleImg border-0'
-              : 'card styleTxt'
+              : 'card styleImg styleTxt'
           "
         >
           <div v-if="post.imageFiles.length > 0" style="overflow: hidden">
@@ -74,7 +75,12 @@ import { db, storage } from "@/firebaseDB.js";
 import { firebase } from "@firebase/app";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
-import { convertTime, ContentAPI, PhotoAPI } from "../utils/common.js";
+import {
+  convertTime,
+  ContentAPI,
+  PhotoAPI,
+  limitStrSize,
+} from "../utils/common.js";
 import _ from "lodash";
 
 import Photo from "../components/Photo.vue";
@@ -141,12 +147,12 @@ export default {
     const getFirstParagraph = (content) => {
       let contentsArr;
       contentsArr = ContentAPI.splitContents(content);
-      if (!contentsArr) {
-        return "No contents!";
-      } else if (!Array.isArray(contentsArr)) {
-        return contentsArr;
-      } else {
-        return contentsArr.find((el) => el.substring(0, 4) !== "http");
+      if (!contentsArr) return "No contents!";
+      else if (!Array.isArray(contentsArr)) return contentsArr;
+      else {
+        let result = contentsArr.find((el) => el.substring(0, 4) !== "http");
+        limitStrSize(result, 100);
+        return limitStrSize(result, 100);
       }
     };
 
@@ -259,7 +265,6 @@ export default {
   color: $color-primary-yellow;
   padding: 1px 5px 2px 6px;
   margin-top: 10px;
-  background-color: $color-bg;
 }
 
 .removeButton {
@@ -312,14 +317,12 @@ export default {
 }
 
 .styleTxt {
-  background-color: #eee;
-  outline: $color-bg 0px solid;
+  background-color: $color-card-bg-notice;
   transition: 0.2s ease-out;
   animation: cardAnimation ease-out 0.4s;
   overflow: hidden;
   border-width: 0px;
-  border-radius: 2px;
-  color: black !important;
+  border-radius: 0px;
 
   .card-text {
     line-height: 2.1;

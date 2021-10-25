@@ -44,8 +44,8 @@
               <Photo :Url="el" :Images="contents.imageFiles" />
             </div>
             <template v-else-if="el.substring(0, 4) === 'http'">
-              <font-awesome-icon icon="link" id="iconLink" class="me-2"/>
-              <a :href="el">{{ el }}</a>
+              <font-awesome-icon icon="link" id="iconLink" class="mx-2" />
+              <a :href="el">{{ limitStrSize(el, 40) }}</a>
             </template>
             <p v-else class="section--p">{{ el }}</p>
           </template>
@@ -103,7 +103,7 @@
 
 <script>
 import { ref, computed, watch, onMounted } from "vue";
-import { convertTime, ContentAPI } from "../utils/common.js";
+import { convertTime, ContentAPI, limitStrSize } from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import { useStore } from "vuex";
 import { useRouter, useRoute } from "vue-router";
@@ -232,6 +232,7 @@ export default {
       contentToArr,
       imageHostName,
       doPostMsg,
+      limitStrSize,
     };
   },
 
@@ -273,11 +274,11 @@ header {
 }
 
 a {
-  font-size: 18px;
   color: $color-primary-yellow;
   font-weight: 300;
-  text-decoration: underline;
-  text-decoration-style: dotted;
+  padding: 10px;
+  border: 1px $color-primary-yellow dashed;
+  line-height: 40px;
 }
 
 .u-btn {
