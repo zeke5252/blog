@@ -35,14 +35,12 @@
         />
       </header>
       <section class="my-3">
-        <template v-if="Array.isArray(contentToArr)">
-          <template v-for="(el, index) in contentToArr" :key="index">
-            <ContentElement :element="el" :imageFiles="contents.imageFiles" />
-          </template>
-        </template>
-        <template v-else>
-          <p class="section--p">{{ contentToArr }}</p>
-        </template>
+        <ContentElement
+          v-for="(el, index) in contentToArr"
+          :key="index"
+          :element="el"
+          :imageFiles="contents.imageFiles"
+        />
       </section>
     </div>
   </template>
@@ -120,12 +118,12 @@ export default {
     const msgTitle = ref("");
     const msg = ref("");
     const contentToArr = ref([]);
-    const GET_DB_TITLE = computed(() =>
-      store.getters.GET_DB_TITLE(props.title)
+    const GET_DB_BY_TITLE = computed(() =>
+      store.getters.GET_DB_BY_TITLE(props.title)
     );
 
     const init = () => {
-      let postData = GET_DB_TITLE.value;
+      let postData = GET_DB_BY_TITLE.value;
       if (postData) {
         isPrevDisplay.value = postData.isPrevDisplay;
         isNextDisplay.value = postData.isNextDisplay;
@@ -208,7 +206,7 @@ export default {
 
     return {
       getConvertTime,
-      GET_DB_TITLE,
+      GET_DB_BY_TITLE,
       contents,
       isPrevDisplay,
       isNextDisplay,

@@ -7,7 +7,7 @@ import {
   DATA_DB,
   IS_POST_EXISTED,
   GET_DB_SCROLL,
-  GET_DB_TITLE,
+  GET_DB_BY_TITLE,
 } from "./types";
 
 export default createStore({
@@ -16,7 +16,7 @@ export default createStore({
   },
   getters: {
     [GET_DB_ALL]: (state) => () => state[DATA_DB],
-    [GET_DB_TITLE]: (state) => (title) => {
+    [GET_DB_BY_TITLE]: (state) => (title) => {
       let result;
       state[DATA_DB].forEach((post, index) => {
         if (post["title"] === title) {

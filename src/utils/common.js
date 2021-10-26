@@ -19,7 +19,7 @@ class ContentAPI {
   static splitContents(content) {
     let urls = this._getContentUrls(content);
     if (!urls) {
-      return content;
+      return [content];
     } else {
       urls.forEach((url) => {
         content = content.replace(url, "URLS");
