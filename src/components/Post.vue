@@ -37,17 +37,7 @@
       <section class="my-3">
         <template v-if="Array.isArray(contentToArr)">
           <template v-for="(el, index) in contentToArr" :key="index">
-            <div
-              v-if="el.substring(0, 4) === 'http' && el.includes(imageHostName)"
-              class="me-sm-0"
-            >
-              <Photo :Url="el" :Images="contents.imageFiles" />
-            </div>
-            <template v-else-if="el.substring(0, 4) === 'http'">
-              <font-awesome-icon icon="link" id="iconLink" class="mx-2" />
-              <a :href="el">{{ limitStrSize(el, 40) }}</a>
-            </template>
-            <p v-else class="section--p">{{ el }}</p>
+            <ContentElement :element="el" :imageFiles="contents.imageFiles" />
           </template>
         </template>
         <template v-else>
@@ -103,14 +93,14 @@
 
 <script>
 import { ref, computed, watch, onMounted } from "vue";
-import { convertTime, ContentAPI, limitStrSize } from "../utils/common.js";
+import { convertTime, ContentAPI } from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import { useStore } from "vuex";
 import { useRouter, useRoute } from "vue-router";
 import { db } from "../firebaseDB.js";
 import { DATA_DB } from "@/store/types";
 
-import Photo from "./Photo.vue";
+import ContentElement from "./ContentElement.vue";
 
 export default {
   name: "Post",
@@ -130,8 +120,6 @@ export default {
     const msgTitle = ref("");
     const msg = ref("");
     const contentToArr = ref([]);
-    const imageHostName = "firebasestorage.googleapis.com";
-
     const GET_DB_TITLE = computed(() =>
       store.getters.GET_DB_TITLE(props.title)
     );
@@ -230,14 +218,13 @@ export default {
       msgTitle,
       msg,
       contentToArr,
-      imageHostName,
       doPostMsg,
-      limitStrSize,
+      ContentAPI,
     };
   },
 
   components: {
-    Photo,
+    ContentElement,
   },
 };
 </script>
@@ -267,18 +254,6 @@ header {
     color: #777;
     letter-spacing: 1px;
   }
-}
-
-#iconLink {
-  color: $color-primary-yellow;
-}
-
-a {
-  color: $color-primary-yellow;
-  font-weight: 300;
-  padding: 10px;
-  border: 1px $color-primary-yellow dashed;
-  line-height: 40px;
 }
 
 .u-btn {
@@ -311,30 +286,6 @@ a {
 
 label {
   color: $color-text-grey;
-}
-
-.section--p {
-  font-size: 16px;
-  line-height: 36px;
-  letter-spacing: 1px;
-  font-weight: 300;
-  margin: 40px 10px;
-  text-indent: 10px;
-  white-space: pre-wrap;
-
-  &:first-of-type {
-    text-indent: 0px;
-  }
-
-  &:first-of-type::before {
-    content: "";
-    background-color: $color-primary-yellow;
-    position: absolute;
-    margin-top: 10px;
-    margin-left: -10px;
-    width: 2px;
-    height: 14px;
-  }
 }
 
 .msg--div__title {

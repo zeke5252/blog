@@ -9,13 +9,12 @@ function convertTime(createdTime, isFull = true) {
   return createdTime;
 }
 
-function limitStrSize(str, maxCount) {
-  return str.length > maxCount ? str.substring(0, maxCount) + "..." : str;
-}
-
 class ContentAPI {
   static _getContentUrls(content) {
     return content.match(/\bhttps?:\/\/\S+/gi);
+  }
+  static limitStrSize(str, maxCount) {
+    return str.length > maxCount ? str.substring(0, maxCount) + "..." : str;
   }
   static splitContents(content) {
     let urls = this._getContentUrls(content);
@@ -60,4 +59,4 @@ class PhotoAPI {
   }
 }
 
-export { convertTime, ContentAPI, PhotoAPI, limitStrSize };
+export { convertTime, ContentAPI, PhotoAPI };

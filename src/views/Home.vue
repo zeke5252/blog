@@ -75,12 +75,7 @@ import { db, storage } from "@/firebaseDB.js";
 import { firebase } from "@firebase/app";
 import { ref, computed, watch, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
-import {
-  convertTime,
-  ContentAPI,
-  PhotoAPI,
-  limitStrSize,
-} from "../utils/common.js";
+import { convertTime, ContentAPI, PhotoAPI } from "../utils/common.js";
 import _ from "lodash";
 
 import Photo from "../components/Photo.vue";
@@ -151,8 +146,7 @@ export default {
       else if (!Array.isArray(contentsArr)) return contentsArr;
       else {
         let result = contentsArr.find((el) => el.substring(0, 4) !== "http");
-        limitStrSize(result, 100);
-        return limitStrSize(result, 100);
+        return ContentAPI.limitStrSize(result, 100);
       }
     };
 
