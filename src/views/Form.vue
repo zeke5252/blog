@@ -387,8 +387,6 @@ export default {
           photosToUpload.value.forEach((_file) => {
             if (content.value.includes(_file.name)) {
               content.value = content.value.replace(_file.name, _file.imageSrc);
-              // content.value = content.value.replace(_file.name, JSON.stringify(_file));
-              //console.log('content.value.replace(_file.name, JSON.stringify(_file)): ', content.value.replace(_file.name, JSON.stringify(_file)));
             }
           });
           postToUpload.content = content.value;

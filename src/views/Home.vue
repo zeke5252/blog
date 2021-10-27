@@ -146,7 +146,7 @@ export default {
       else if (!Array.isArray(contentsArr)) return contentsArr;
       else {
         let result = contentsArr.find((el) => el.substring(0, 4) !== "http");
-        return ContentAPI.limitStrSize(result, 100);
+        return ContentAPI.limitStrSize(result, 150);
       }
     };
 
@@ -313,6 +313,7 @@ export default {
 .styleTxt {
   background-color: $color-card-bg-notice;
   transition: 0.2s ease-out;
+  height: 100%;
   animation: cardAnimation ease-out 0.4s;
   overflow: hidden;
   border-width: 0px;
