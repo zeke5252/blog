@@ -86,7 +86,7 @@ export default {
   setup() {
     const store = useStore();
     const isLogin = ref();
-    const postsAmount = ref(5);
+    const postsAmount = ref(6);
     const postsTimes = ref(0);
     const isInMoreStatus = ref(false);
     const keyword = ref("");
@@ -196,7 +196,7 @@ export default {
       });
     };
 
-    watch(keyword, (val) => {
+    const stopWatch = watch(keyword, (val) => {
       _.debounce(function () {
         let all = GET_DB_ALL.value;
         let results = all.filter((post) => post.title.includes(val));
@@ -205,6 +205,7 @@ export default {
     });
 
     onBeforeUnmount(() => {
+      stopWatch();
       document.removeEventListener("scroll", loadMore, true);
     });
 
@@ -232,15 +233,16 @@ export default {
 @import "../assets/css/app.scss";
 
 .createdDate {
-  height: 20px;
-  background-color: $color-card-bg;
+  font-size: 11px;
   position: absolute;
   right: 0;
-  top: -22px;
+  bottom: 0;
   text-align: center;
-  letter-spacing: 1px;
-  padding: 8px 20px 14px 20px;
-  font-weight: 700;
+  letter-spacing: 4px;
+  padding: 0 0 0 10px;
+  margin: 5px 10px 8px 5px;
+  border-left: 1px dotted $color-text-grey;
+  font-weight: 300;
   color: $color-primary-yellow;
 }
 

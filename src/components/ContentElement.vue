@@ -11,8 +11,14 @@
     <font-awesome-icon icon="link" id="iconLink" class="mx-2" />
     <a :href="element">{{ ContentAPI.limitStrSize(element, 40) }}</a>
   </template>
+  <!-- code -->
+  <template v-else-if="element.substring(0, 6) === 'codeS_'">
+    <p class="section--p section--code col-lg-10">
+      {{ ContentAPI.removeCodeMark(element) }}
+    </p>
+  </template>
   <!-- paragraph -->
-  <p v-else class="section--p">{{ element }}</p>
+  <p v-else class="section--p col-lg-10">{{ element }}</p>
 </template>
 
 <script>
@@ -58,22 +64,38 @@ a {
   border: 1px $color-primary-yellow dashed;
 }
 
-.section--p {
-  font-size: 16px;
-  line-height: 36px;
-  letter-spacing: 1px;
-  font-weight: 300;
-  margin: 40px 10px;
-  white-space: pre-wrap;
+.section {
+  &--p {
+    font-size: 16px;
+    line-height: 36px;
+    letter-spacing: 1px;
+    font-weight: 300;
+    margin: 20px 10px;
+    white-space: pre-wrap;
 
-  &:first-of-type::before {
-    content: "";
-    background-color: $color-primary-yellow;
-    position: absolute;
-    margin-top: 10px;
-    margin-left: -10px;
-    width: 2px;
-    height: 14px;
+    &:first-of-type::before {
+      content: "";
+      background-color: $color-primary-yellow;
+      position: absolute;
+      margin-top: 10px;
+      margin-left: -10px;
+      width: 2px;
+      height: 14px;
+    }
+  }
+  &--code {
+    color: #cacaca;
+    background: $color-card-bg-notice;
+    background: linear-gradient(
+      90deg,
+      $color-card-bg-notice 0%,
+      $color-card-bg 100%
+    );
+    font-size: 15px;
+    line-height: 38px;
+    font-weight: 300;
+    padding: 20px;
+    border-radius: 5px 0 0 5px;
   }
 }
 </style>

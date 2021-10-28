@@ -68,18 +68,24 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-12 col-sm-4 mb-4">
+      <div class="col-6 col-sm-4 mb-4">
         <label for="formFile" class="form-label">類別</label>
         <select
           v-model="category"
           class="form-select"
           aria-label="Default select example"
         >
-          <option value="photography">攝影</option>
-          <option value="design">設計</option>
-          <option value="programming">程式</option>
-          <option value="life">生活</option>
+          <option value="photography">Photography</option>
+          <option value="design">Design</option>
+          <option value="programming">Programming</option>
+          <option value="life">Life</option>
         </select>
+      </div>
+      <div class="col-6 col-sm-4 mb-4">
+        <label class="form-label col-12">標記</label>
+        <button @click="doMarkCode">
+          <font-awesome-icon icon="code" />
+        </button>
       </div>
     </div>
     <div class="row">
@@ -306,6 +312,16 @@ export default {
       content.value += str;
     };
 
+    const doMarkCode = () => {
+      let selectedStr = window.getSelection().toString();
+      if (selectedStr && selectedStr !== "") {
+        content.value = content.value.replace(
+          selectedStr,
+          `codeS_${selectedStr}_codeE`
+        );
+      }
+    };
+
     const submitHandler = () => {
       const isTitleExisted = store.getters.IS_POST_EXISTED(title.value);
       let uploadPhotosPromises;
@@ -405,7 +421,6 @@ export default {
           alert("Upload is successful!");
           setDraft();
           init();
-          router.push("/");
         })
         .catch((error) => {
           console.error("Error adding document: ", error);
@@ -442,6 +457,7 @@ export default {
       copySrc,
       signoutHandler,
       getImgExif,
+      doMarkCode,
     };
   },
 };
