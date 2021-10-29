@@ -90,7 +90,7 @@ export default {
     right: 0;
     bottom: 0;
     z-index: 100;
-    font-size: 9px;
+    font-size: 11px;
     height: auto;
     letter-spacing: 1px;
     pointer-events: none;

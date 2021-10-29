@@ -60,8 +60,10 @@ export default {
 a {
   color: $color-primary-yellow;
   font-weight: 300;
+  letter-spacing: 1px;
   padding: 10px;
-  border: 1px $color-primary-yellow dashed;
+  border: 1px $color-primary-yellow solid;
+  border-radius: 3px;
 }
 
 .section {
@@ -92,7 +94,7 @@ a {
       $color-card-bg 100%
     );
     font-size: 15px;
-    line-height: 38px;
+    line-height: 32px;
     font-weight: 300;
     padding: 20px;
     border-radius: 5px 0 0 5px;
