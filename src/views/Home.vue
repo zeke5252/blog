@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!postsAccumulator" class="loading"></div>
+  <Loading v-if="postsAccumulator.length === 0" />
   <div v-else class="home">
     <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
       <label id="searchLabel" for="searchInput">
@@ -27,12 +27,7 @@
         v-for="post in !keyResults ? postsAccumulator : keyResults"
         :key="post.title"
       >
-        <button
-          v-if="isLogin"
-          class="removeButton"
-          style="padding: 2px 25px"
-          @click="removePost(post)"
-        >
+        <button v-if="isLogin" class="removeButton" @click="removePost(post)">
           <font-awesome-icon icon="trash" />
         </button>
         <router-link
@@ -63,10 +58,7 @@
         </router-link>
       </div>
     </div>
-    <div v-if="isInMoreStatus && postsAccumulator" class="more">
-      <div class="more--box"></div>
-      <div class="more--word h7">MORE...</div>
-    </div>
+    <Loading v-if="isInMoreStatus && postsAccumulator.length !== 0" />
   </div>
 </template>
 
@@ -79,6 +71,7 @@ import { convertTime, ContentAPI, PhotoAPI } from "../utils/common.js";
 import _ from "lodash";
 
 import Photo from "../components/Photo.vue";
+import Loading from "../components/Loading.vue";
 
 export default {
   name: "Home",
@@ -86,7 +79,7 @@ export default {
   setup() {
     const store = useStore();
     const isLogin = ref();
-    const postsAmount = ref(6);
+    const postsAmount = ref(7);
     const postsTimes = ref(0);
     const isInMoreStatus = ref(false);
     const keyword = ref("");
@@ -104,6 +97,8 @@ export default {
     });
 
     const loadMore = () => {
+      console.log("loadMore");
+
       const getWindowHeight =
         document.documentElement.clientHeight || document.body.clientHeight;
       const scrollTop =
@@ -225,6 +220,7 @@ export default {
 
   components: {
     Photo,
+    Loading,
   },
 };
 </script>
@@ -264,8 +260,9 @@ export default {
 }
 
 .removeButton {
+  border-radius: 20px !important;
   position: relative;
-  transform: translateY(100%);
+  transform: translate(-50%, 50%);
   z-index: 1;
 }
 
@@ -386,41 +383,6 @@ export default {
   }
 }
 
-.more {
-  border-top: white 2px solid;
-  border-bottom: white 2px solid;
-  width: 80px;
-  margin: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: moreAnimation ease-out 0.3s;
-  animation-fill-mode: forwards;
-  letter-spacing: 1px;
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    background-color: white;
-    width: 12px;
-    height: 4px;
-    left: 0;
-    top: -6px;
-  }
-
-  &--box {
-    width: 2px;
-    height: 14px;
-    background-color: $color-primary-yellow;
-    animation: spin 0.5s linear infinite;
-  }
-  &--word {
-    font-weight: 500;
-    margin: 0 0 0 16px;
-  }
-}
-
 .search--input {
   height: 36px;
   background-color: $color-bg;
@@ -441,17 +403,6 @@ export default {
   }
   to {
     top: 0px;
-    opacity: 1;
-  }
-}
-
-@keyframes moreAnimation {
-  from {
-    padding: 0px 0px;
-    opacity: 0;
-  }
-  to {
-    padding: 12px 0px;
     opacity: 1;
   }
 }
