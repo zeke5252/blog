@@ -10,13 +10,17 @@ function convertTime(createdTime, isFull = true) {
 }
 
 class ContentAPI {
+  static HTTP = "http";
+  static HTTPS = "https";
+  static CODES_ = "codeS_";
+
   static _getContentMarks(content, type) {
     switch (type) {
       case "url":
         // \b 字串邊緣; s? 可以有或沒有; \/ 抓出 /; \S+ 非空白字元往下加到底
         return content.match(/\bhttps?:\/\/\S+/gi);
       case "code":
-        return content.match(/codeS_[^_]*[^c]*[^o]*[^d]*[^e]*[^E]../gi);
+        return content.match(/codeS_[^_]*[^c]*[^o]*[^d]*[^e]*[^E]*./gm);
       default:
         return content;
     }
@@ -40,10 +44,13 @@ class ContentAPI {
     } else {
       let codeArr = this._convertToArr(codes, content);
       codeArr.forEach((el) => {
-        if (el.substring(0, 6) === "codeS_") {
-          resultArr.push(el);
-        } else if (el.includes("http") || el.includes("https")) {
+        if (
+          el.substring(0, 6) !== this.CODES_ &&
+          (el.includes(this.HTTP) || el.includes(this.HTTPS))
+        ) {
           resultArr = [...resultArr, ...this._convertToArr(urls, el)];
+        } else {
+          resultArr.push(el);
         }
       });
       return resultArr;
