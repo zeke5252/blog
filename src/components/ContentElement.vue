@@ -115,7 +115,7 @@ a {
     color: $color-primary-yellow;
     font-size: 16px;
     line-height: 32px;
-    font-weight: 400;
+    font-weight: 600;
     margin: 0 2px;
   }
 }
