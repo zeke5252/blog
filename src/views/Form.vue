@@ -83,8 +83,11 @@
       </div>
       <div class="col-6 col-sm-4 mb-4">
         <label class="form-label col-12">標記</label>
-        <button @click="doMarkCode">
+        <button @click="doMark('code')">
           <font-awesome-icon icon="code" />
+        </button>
+        <button @click="doMark('bold')" class="m-1">
+          <font-awesome-icon icon="bold" />
         </button>
       </div>
     </div>
@@ -312,12 +315,12 @@ export default {
       content.value += str;
     };
 
-    const doMarkCode = () => {
+    const doMark = (style = "") => {
       let selectedStr = window.getSelection().toString();
       if (selectedStr && selectedStr !== "") {
         content.value = content.value.replace(
           selectedStr,
-          `codeS_${selectedStr}_codeE`
+          `${style}S_${selectedStr}_${style}E`
         );
       }
     };
@@ -457,7 +460,7 @@ export default {
       copySrc,
       signoutHandler,
       getImgExif,
-      doMarkCode,
+      doMark,
     };
   },
 };

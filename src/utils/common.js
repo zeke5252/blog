@@ -13,6 +13,7 @@ class ContentAPI {
   static HTTP = "http";
   static HTTPS = "https";
   static CODES_ = "codeS_";
+  static BOLDS_ = "boldS_";
 
   static _getContentMarks(content, type) {
     switch (type) {
@@ -21,6 +22,8 @@ class ContentAPI {
         return content.match(/\bhttps?:\/\/\S+/gi);
       case "code":
         return content.match(/codeS_[^_]*[^c]*[^o]*[^d]*[^e]*[^E]*./gm);
+      case "bold":
+        return content.match(/boldS_[^_]*[^b]*[^o]*[^l]*[^d]*[^E]*./gm);
       default:
         return content;
     }
@@ -28,9 +31,8 @@ class ContentAPI {
   static limitStrSize(str, maxCount) {
     return str.length > maxCount ? str.substring(0, maxCount) + "..." : str;
   }
-  static removeCodeMark(str) {
-    const codeMarkLength = 6;
-    return str.substring(codeMarkLength, str.length - codeMarkLength);
+  static removeMark(str, markType) {
+    return str.substring(markType.length, str.length - markType.length);
   }
   static splitContents(content) {
     let codes = this._getContentMarks(content, "code");
@@ -56,6 +58,17 @@ class ContentAPI {
       return resultArr;
     }
   }
+
+  static splitInline(p) {
+    let bolds = this._getContentMarks(p, "bold");
+    if (!bolds) return [p];
+    else {
+      let resultArr = this._convertToArr(bolds, p);
+      console.log("resultArr: ", resultArr);
+      return resultArr;
+    }
+  }
+
   static _convertToArr(elements, content) {
     const MARKS = "MARKS";
     elements.forEach((element) => {

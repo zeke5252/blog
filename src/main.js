@@ -13,6 +13,7 @@ import {
   faChevronRight,
   faLink,
   faCode,
+  faBold,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
@@ -25,7 +26,8 @@ library.add(
   faChevronLeft,
   faChevronRight,
   faLink,
-  faCode
+  faCode,
+  faBold
 );
 
 // Vue.component('font-awesome-icon', FontAwesomeIcon)

@@ -13,12 +13,29 @@
   </template>
   <!-- code -->
   <template v-else-if="element.substring(0, 6) === 'codeS_'">
-    <p class="section--p section--code col-lg-10">
-      {{ ContentAPI.removeCodeMark(element) }}
+    <p class="section--p section--code">
+      {{ ContentAPI.removeMark(element, "codeS_") }}
     </p>
   </template>
   <!-- paragraph -->
-  <p v-else class="section--p col-lg-10">{{ element }}</p>
+  <template v-else>
+    <p v-if="ContentAPI.splitInline(element).length === 1" class="section--p">
+      {{ element }}
+    </p>
+    <p v-else class="section--p">
+      <span
+        v-for="(el, index) in ContentAPI.splitInline(element)"
+        :class="el.substring(0, 6) === 'boldS_' ? 'section--bold' : ''"
+        :key="index"
+      >
+        {{
+          el.substring(0, 6) === "boldS_"
+            ? ContentAPI.removeMark(el, "boldS_")
+            : el
+        }}
+      </span>
+    </p>
+  </template>
 </template>
 
 <script>
@@ -86,18 +103,20 @@ a {
     }
   }
   &--code {
-    color: #cacaca;
+    color: $color-secondary-yellow;
     background: $color-card-bg-notice;
-    background: linear-gradient(
-      90deg,
-      $color-card-bg-notice 0%,
-      $color-card-bg 100%
-    );
     font-size: 15px;
     line-height: 32px;
     font-weight: 300;
     padding: 20px;
     border-radius: 5px 0 0 5px;
+  }
+  &--bold {
+    color: $color-primary-yellow;
+    font-size: 16px;
+    line-height: 32px;
+    font-weight: 400;
+    margin: 0 2px;
   }
 }
 </style>
