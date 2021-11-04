@@ -136,7 +136,7 @@ export default {
 
     const getFirstParagraph = (content) => {
       let contentsArr;
-      contentsArr = ContentAPI.splitContents(content);
+      contentsArr = ContentAPI.splitPost(content);
       if (!contentsArr) return "No contents!";
       else if (!Array.isArray(contentsArr)) return contentsArr;
       else {

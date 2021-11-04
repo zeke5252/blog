@@ -130,7 +130,7 @@ export default {
         msgTitle.value = "";
         msg.value = "";
         postData.post.created = convertTime(postData.post.created);
-        contentToArr.value = ContentAPI.splitContents(postData.post.content);
+        contentToArr.value = ContentAPI.splitPost(postData.post.content);
         contents.value = postData.post;
       } else {
         router.push("/components/NotFound.vue");

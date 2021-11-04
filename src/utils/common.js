@@ -10,19 +10,20 @@ function convertTime(createdTime, isFull = true) {
 }
 
 class ContentAPI {
+  static IMAGE_HOST_NAME = "firebasestorage.googleapis.com";
   static HTTP = "http";
-  static HTTPS = "https";
-  static CODES_ = "codeS_";
-  static BOLDS_ = "boldS_";
+  static CODES = "codeS_";
+  static BOLDS = "boldS_";
 
   static _getContentMarks(content, type) {
     switch (type) {
-      case "url":
+      case this.HTTP:
         // \b 字串邊緣; s? 可以有或沒有; \/ 抓出 /; \S+ 非空白字元往下加到底
         return content.match(/\bhttps?:\/\/\S+/gi);
-      case "code":
+
+      case this.CODES:
         return content.match(/codeS_[^_]*[^c]*[^o]*[^d]*[^e]*[^E]*./gm);
-      case "bold":
+      case this.BOLDS:
         return content.match(/boldS_[^_]*[^b]*[^o]*[^l]*[^d]*[^E]*./gm);
       default:
         return content;
@@ -34,23 +35,40 @@ class ContentAPI {
   static removeMark(str, markType) {
     return str.substring(markType.length, str.length - markType.length);
   }
-  static splitContents(content) {
-    let codes = this._getContentMarks(content, "code");
-    let urls = this._getContentMarks(content, "url");
-    let resultArr = [];
-    if (!codes && !urls) return [content];
-    else if (!codes) {
-      return this._convertToArr(urls, content);
-    } else if (!urls) {
-      return this._convertToArr(codes, content);
+  static isDisplay(str, type) {
+    switch (type) {
+      case "photo":
+        // eslint-disable-next-line prettier/prettier
+        return str.substring(0, 4) === this.HTTP && str.includes(this.IMAGE_HOST_NAME);
+      case "link":
+        return str.substring(0, 4) === this.HTTP;
+      case "code":
+        return str.substring(0, 6) === this.CODES;
+      case "p":
+        return this.splitParagraph(str).length === 1;
+      case "bold":
+        return str.substring(0, 6) === this.BOLDS;
+    }
+  }
+  static splitPost(content) {
+    let splitObj = this._getSplitObj(content, [this.HTTP, this.CODES]);
+    if (!splitObj[this.CODES] && !splitObj[this.HTTP]) return [content];
+    else if (!splitObj[this.CODES]) {
+      return this._convertToArr(splitObj[this.HTTP], content);
+    } else if (!splitObj[this.HTTP]) {
+      return this._convertToArr(splitObj[this.CODES], content);
     } else {
-      let codeArr = this._convertToArr(codes, content);
-      codeArr.forEach((el) => {
+      let results = this._convertToArr(splitObj[this.CODES], content);
+      let resultArr = [];
+      results.forEach((el) => {
         if (
-          el.substring(0, 6) !== this.CODES_ &&
+          el.substring(0, 6) !== this.CODES &&
           (el.includes(this.HTTP) || el.includes(this.HTTPS))
         ) {
-          resultArr = [...resultArr, ...this._convertToArr(urls, el)];
+          resultArr = [
+            ...resultArr,
+            ...this._convertToArr(splitObj[this.HTTP], el),
+          ];
         } else {
           resultArr.push(el);
         }
@@ -59,14 +77,22 @@ class ContentAPI {
     }
   }
 
-  static splitInline(p) {
-    let bolds = this._getContentMarks(p, "bold");
-    if (!bolds) return [p];
+  static splitParagraph(p) {
+    let splitObj = this._getSplitObj(p, [this.BOLDS]);
+    if (!splitObj[this.BOLDS]) return [p];
     else {
-      let resultArr = this._convertToArr(bolds, p);
-      console.log("resultArr: ", resultArr);
+      let resultArr = this._convertToArr(splitObj[this.BOLDS], p);
       return resultArr;
     }
+  }
+
+  static _getSplitObj(content, splitKeywords) {
+    console.log('content: ', content);
+    let splitObj = {};
+    splitKeywords.forEach((keyword) => {
+      splitObj[keyword] = this._getContentMarks(content, keyword);
+    });
+    return splitObj;
   }
 
   static _convertToArr(elements, content) {

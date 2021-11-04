@@ -1,36 +1,34 @@
 <template>
-  <!-- photo -->
-  <div
-    v-if="element.substring(0, 4) === 'http' && element.includes(imageHostName)"
-    class="me-sm-0"
-  >
+  <!--
+  目前是先分以下再弄成陣列
+  photo   純字串判斷  整行 
+  link    純字串判斷  行內
+  code    標記判斷    整行 
+  p       純字串判斷  整行  >>   bold  標記判斷    行內
+                                span  純字串判斷  行內
+  -->
+  <div v-if="ContentAPI.isDisplay(element, 'photo')" class="me-sm-0">
     <Photo :Url="element" :Images="imageFiles" />
   </div>
-  <!-- link -->
-  <template v-else-if="element.substring(0, 4) === 'http'">
-    <font-awesome-icon icon="link" id="iconLink" class="mx-2" />
-    <a :href="element">{{ ContentAPI.limitStrSize(element, 40) }}</a>
-  </template>
-  <!-- code -->
-  <template v-else-if="element.substring(0, 6) === 'codeS_'">
-    <p class="section--p section--code">
-      {{ ContentAPI.removeMark(element, "codeS_") }}
-    </p>
-  </template>
-  <!-- paragraph -->
+  <a v-else-if="ContentAPI.isDisplay(element, 'link')" :href="element">{{
+    ContentAPI.limitStrSize(element, 40)
+  }}</a>
+  <p
+    v-else-if="ContentAPI.isDisplay(element, 'code')"
+    class="section--p section--code"
+  >
+    {{ ContentAPI.removeMark(element, ContentAPI.CODES) }}
+  </p>
   <template v-else>
-    <p v-if="ContentAPI.splitInline(element).length === 1" class="section--p">
-      {{ element }}
-    </p>
-    <p v-else class="section--p">
+    <p class="section--p">
       <span
-        v-for="(el, index) in ContentAPI.splitInline(element)"
-        :class="el.substring(0, 6) === 'boldS_' ? 'section--bold' : ''"
+        v-for="(el, index) in ContentAPI.splitParagraph(element)"
+        :class="ContentAPI.isDisplay(el, 'bold') ? 'section--bold' : ''"
         :key="index"
       >
         {{
-          el.substring(0, 6) === "boldS_"
-            ? ContentAPI.removeMark(el, "boldS_")
+          ContentAPI.isDisplay(el, "bold")
+            ? ContentAPI.removeMark(el, ContentAPI.BOLDS)
             : el
         }}
       </span>
@@ -57,10 +55,8 @@ export default {
   },
 
   setup() {
-    const imageHostName = "firebasestorage.googleapis.com";
     return {
       Photo,
-      imageHostName,
       ContentAPI,
     };
   },
