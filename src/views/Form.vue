@@ -98,6 +98,7 @@
           v-model="content"
           class="form-control fs-3"
           id="area-content"
+          ref="areaContent"
           rows="15"
           cols="30"
           style="white-space: pre-wrap"
@@ -153,7 +154,8 @@ export default {
       displayImages = ref([]),
       photoPool = ref([]), // all temporarily selected files
       photosToUpload = ref([]),
-      progresses = ref([]);
+      progresses = ref([]),
+      areaContent = ref(null);
 
     onMounted(() => {
       if (!store.state[DATA_DB]) {
@@ -317,18 +319,13 @@ export default {
 
     const doMark = (style) => {
       let selectedStr;
-      if (window.getSelection().toString())
-        selectedStr = window.getSelection().toString();
-      else {
-        let mobileS = document.querySelector("#area-content").selectionStart;
-        let mobileE = document.querySelector("#area-content").selectionEnd;
-        selectedStr = content.value.slice(mobileS, mobileE);
-      }
+      let { selectionStart, selectionEnd } = areaContent.value;
+      selectedStr = content.value.slice(selectionStart, selectionEnd);
       if (selectedStr && selectedStr !== "") {
-        content.value = content.value.replace(
-          selectedStr,
-          `${style}S_${selectedStr}_${style}E`
-        );
+        content.value =
+          content.value.slice(0, selectionStart) +
+          `${style}S_${selectedStr}_${style}E` +
+          content.value.slice(selectionEnd);
       }
     };
 
@@ -477,6 +474,7 @@ export default {
       signoutHandler,
       getImgExif,
       doMark,
+      areaContent,
     };
   },
 };
