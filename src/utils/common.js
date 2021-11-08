@@ -87,7 +87,6 @@ class ContentAPI {
   }
 
   static _getSplitObj(content, splitKeywords) {
-    console.log('content: ', content);
     let splitObj = {};
     splitKeywords.forEach((keyword) => {
       splitObj[keyword] = this._getContentMarks(content, keyword);

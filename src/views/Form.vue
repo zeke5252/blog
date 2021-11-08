@@ -315,8 +315,15 @@ export default {
       content.value += str;
     };
 
-    const doMark = (style = "") => {
-      let selectedStr = window.getSelection().toString();
+    const doMark = (style) => {
+      let selectedStr;
+      if (window.getSelection().toString())
+        selectedStr = window.getSelection().toString();
+      else {
+        let mobileS = document.querySelector("#area-content").selectionStart;
+        let mobileE = document.querySelector("#area-content").selectionEnd;
+        selectedStr = content.value.slice(mobileS, mobileE);
+      }
       if (selectedStr && selectedStr !== "") {
         content.value = content.value.replace(
           selectedStr,
@@ -326,13 +333,9 @@ export default {
     };
 
     const submitHandler = () => {
-      const isTitleExisted = store.getters.IS_POST_EXISTED(title.value);
-      let uploadPhotosPromises;
+      if (!isValidated()) return;
 
-      if (isTitleExisted) {
-        alert("The title has been in use.");
-        return;
-      }
+      let uploadPhotosPromises;
       let postToUpload = {
         title: title.value,
         category: category.value,
@@ -349,6 +352,19 @@ export default {
         uploadPhotosPromises = doUploadPhotos();
       }
       doUploadPost(isPoolWithPhotos, uploadPhotosPromises, postToUpload);
+    };
+
+    const isValidated = () => {
+      const isTitleExisted = store.getters.IS_POST_EXISTED(title.value);
+      if (title.value === "") {
+        alert("Title is empty.");
+        return false;
+      } else if (isTitleExisted) {
+        alert("The title has been in use.");
+        return false;
+      } else {
+        return true;
+      }
     };
 
     const doUploadPhotos = () => {
