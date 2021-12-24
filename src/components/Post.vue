@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { convertTime, ContentAPI } from "../utils/common.js";
 import { firebase } from "@firebase/app";
 import { useStore } from "vuex";
@@ -118,12 +118,9 @@ export default {
     const msgTitle = ref("");
     const msg = ref("");
     const contentToArr = ref([]);
-    const GET_DB_BY_TITLE = computed(() =>
-      store.getters.GET_DB_BY_TITLE(props.title)
-    );
 
     const init = () => {
-      let postData = GET_DB_BY_TITLE.value;
+      let postData = store.getters.GET_DB_BY_TITLE(props.title);
       if (postData) {
         isPrevDisplay.value = postData.isPrevDisplay;
         isNextDisplay.value = postData.isNextDisplay;
@@ -206,7 +203,6 @@ export default {
 
     return {
       getConvertTime,
-      GET_DB_BY_TITLE,
       contents,
       isPrevDisplay,
       isNextDisplay,

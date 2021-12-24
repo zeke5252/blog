@@ -1,7 +1,18 @@
 <template>
-  <Loading v-if="postsAccumulator.length === 0" />
+  <Loading v-if="postsCollector.length === 0" />
   <div v-else class="home">
     <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
+      <select
+        class="search--input py-1 px-3 me-3"
+        v-model="category"
+        id="categoryLabel"
+        aria-label="categoryLabel"
+      >
+        <option value="" selected>全部分類</option>
+        <option value="photography">照相</option>
+        <option value="programming">程式</option>
+        <option value="life">生活</option>
+      </select>
       <label id="searchLabel" for="searchInput">
         <font-awesome-icon icon="search" />
       </label>
@@ -24,7 +35,7 @@
     <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2">
       <div
         class="col"
-        v-for="post in !keyResults ? postsAccumulator : keyResults"
+        v-for="post in keywordPosts.length > 0 ? keywordPosts : postsCollector"
         :key="post.title"
       >
         <button v-if="isLogin" class="removeButton" @click="removePost(post)">
@@ -58,14 +69,14 @@
         </router-link>
       </div>
     </div>
-    <Loading v-if="isInMoreStatus && postsAccumulator.length !== 0" />
+    <Loading v-if="isInMoreStatus && postsCollector.length !== 0" />
   </div>
 </template>
 
 <script>
 import { db, storage } from "@/firebaseDB.js";
 import { firebase } from "@firebase/app";
-import { ref, computed, watch, onBeforeUnmount } from "vue";
+import { ref, watch, onBeforeUnmount } from "vue";
 import { useStore } from "vuex";
 import { convertTime, ContentAPI, PhotoAPI } from "../utils/common.js";
 import _ from "lodash";
@@ -76,17 +87,23 @@ import Loading from "../components/Loading.vue";
 export default {
   name: "Home",
 
+  // 因為也沒有打 request 出去，所以可以直接使用 store getters 不至於影響效能
+  // 切換 category getters，吃回 accumulator
+  // 關鍵字也設回 accumulator
+  // 切換 category 時重設關鍵字
+
   setup() {
     const store = useStore();
     const isLogin = ref();
     const postsAmount = ref(7);
     const postsTimes = ref(0);
     const isInMoreStatus = ref(false);
+    const category = ref("");
     const keyword = ref("");
-    const keyResults = ref(null);
 
-    const postsAccumulator = ref([]);
-    const GET_DB_ALL = computed(() => store.getters.GET_DB_ALL());
+    const postsCollector = ref([]);
+    const keywordPosts = ref([]);
+    const GET_DB_ALL = ref(() => store.getters.GET_DB_ALL());
 
     firebase.auth().onAuthStateChanged(function (user) {
       if (user != null) {
@@ -95,6 +112,15 @@ export default {
         isLogin.value = false;
       }
     });
+
+    const filterPost = (posts) => {
+      if(category.value !== "") {
+        let filteredResults = posts.filter((post) => post["category"] === category.value);
+        return filteredResults;
+      } else {
+        return posts;
+      }
+    };
 
     const loadMore = () => {
       console.log("loadMore");
@@ -106,8 +132,7 @@ export default {
         document.documentElement.scrollTop ||
         document.body.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight;
-      const isMouseNearAllContentBottom =
-        scrollTop + getWindowHeight >= (scrollHeight * 4) / 5;
+      const isMouseNearAllContentBottom = scrollTop + getWindowHeight >= (scrollHeight * 4) / 5;
 
       if (!isInMoreStatus.value && isMouseNearAllContentBottom) {
         isInMoreStatus.value = true;
@@ -118,7 +143,7 @@ export default {
             times: postsTimes.value,
             amount: postsAmount.value,
           });
-          postsAccumulator.value = postsAccumulator.value.concat(postsToAdd);
+          postsCollector.value = postsCollector.value.concat(filterPost(postsToAdd));
           postsTimes.value++;
           if (postsToAdd.length === 0)
             document.removeEventListener("scroll", loadMore, true);
@@ -126,9 +151,7 @@ export default {
       }
     };
 
-    store.dispatch("getFirestoreDB").then(() => {
-      loadMore();
-    });
+    store.dispatch("getFirestoreDB").then(() => { loadMore() });
 
     document.addEventListener("scroll", loadMore, true);
 
@@ -157,12 +180,11 @@ export default {
               .delete()
               .then(() => {
                 store.dispatch("getFirestoreDB").then(() => {
-                  postsAccumulator.value = store.getters.GET_DB_ALL();
+                  postsCollector.value = GET_DB_ALL.value();
                 });
               })
               .then(() => {
-                console.log("removeDBImages: ", removeDBImages);
-                removeDBImages(post);
+                post.imageFiles.length !== 0 && removeDBImages(post);
               })
               .catch((error) => {
                 console.error("Error removing document: ", error);
@@ -176,7 +198,6 @@ export default {
 
     const removeDBImages = (post) => {
       if (post.imageFiles === 0) return;
-      console.log("not return: ");
       let imagesUrls = PhotoAPI.getSrc(post.imageFiles);
       // Need to use new RegExg() instead of .match(/.../) to avoid error in js
       let re = new RegExp("(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)", "g");
@@ -191,16 +212,22 @@ export default {
       });
     };
 
-    const stopWatch = watch(keyword, (val) => {
+    const stopWatchCategory = watch(category, () => {
+      keyword.value = "";
+      postsCollector.value = filterPost(GET_DB_ALL.value());
+    });
+
+    const stopWatchKeyword = watch(keyword, (val) => {
       _.debounce(function () {
-        let all = GET_DB_ALL.value;
-        let results = all.filter((post) => post.title.includes(val));
-        keyResults.value = results;
-      }, 500)();
+          keywordPosts.value = postsCollector.value.filter((post) =>
+          post.title.includes(val)
+          )
+      }, 300)();
     });
 
     onBeforeUnmount(() => {
-      stopWatch();
+      stopWatchKeyword();
+      stopWatchCategory();
       document.removeEventListener("scroll", loadMore, true);
     });
 
@@ -208,12 +235,13 @@ export default {
       isLogin,
       isInMoreStatus,
       PhotoAPI,
+      category,
       keyword,
-      keyResults,
       removePost,
       getConvertTime,
       getFirstParagraph,
-      postsAccumulator,
+      postsCollector,
+      keywordPosts,
       GET_DB_ALL,
     };
   },
@@ -244,7 +272,6 @@ export default {
 
 #searchLabel {
   width: 30px;
-  height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -283,6 +310,7 @@ export default {
   animation: cardAnimation ease-out 0.4s;
   overflow: hidden;
   border-radius: 0;
+  height: 100%;
 
   .card-text {
     line-height: 2.1;
@@ -388,6 +416,7 @@ export default {
   background-color: $color-bg;
   opacity: 0.8;
   color: white;
+  border-bottom: 1px white solid !important;
 }
 
 .search--img {

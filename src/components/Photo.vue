@@ -2,7 +2,7 @@
   <div class="cover--photo">
     <img
       :src="Url"
-      @load="loadLogo($event)"
+      @load="removeImgLogo($event)"
       :class="{ photoBorder: showBorder }"
     />
     <img
@@ -48,10 +48,10 @@ export default {
 
   setup() {
     const isLoaded = ref(false);
-    const loadLogo = () => (isLoaded.value = true);
+    const removeImgLogo = () => (isLoaded.value = true);
     return {
       PhotoAPI,
-      loadLogo,
+      removeImgLogo,
       isLoaded,
     };
   },

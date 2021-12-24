@@ -39,7 +39,6 @@ export default {
       password: null,
     };
   },
-  computed: {},
   mounted() {
     this.init();
   },
