@@ -1,4 +1,5 @@
 <template>
+<div>
   <template v-if="!contents">
     <div class="spinner-border" role="status">
       <span class="visually-hidden">Loading...</span>
@@ -87,6 +88,7 @@
     </li>
   </ul>
   <footer class="my-5"></footer>
+  </div>
 </template>
 
 <script>

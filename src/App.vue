@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid">
     <div class="row mt-5">
-      <main class="col-12 col-md-11 offset-md-1 vh-100 d-flex justify-content-center">
+      <main class="col-12 col-md-11 offset-md-1 vh-100 d-flex">
         <router-view />
       </main>
       <div
