@@ -274,10 +274,10 @@
 								progresses.value[i] = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
 								switch (snapshot.state) {
 									case firebase.storage.TaskState.PAUSED: // or 'paused'
-										console.log("Upload is paused");
+										// console.log("Upload is paused");
 										break;
 									case firebase.storage.TaskState.RUNNING: // or 'running'
-										console.log("Upload is running");
+										// console.log("Upload is running");
 										break;
 								}
 							},
@@ -311,7 +311,7 @@
 			const doUploadPost = (isWithPhotos, promises, postToUpload) => {
 				if (isWithPhotos) {
 					Promise.all(promises).then(() => {
-						console.log("promises: ", promises);
+						// console.log("promises: ", promises);
 						photosToUpload.value.forEach((_file) => {
 							if (content.value.includes(_file.name)) {
 								content.value = content.value.replace(_file.name, _file.imageSrc);
@@ -333,7 +333,7 @@
 						alert("Upload is successful!");
 						setDraft();
 						store.dispatch("getFirestoreDB").then(() => {
-							router.push({ path: '/' })
+							router.push({ path: "/" });
 						});
 					})
 					.catch((error) => {
@@ -347,7 +347,6 @@
 					.signOut()
 					.then(() => {
 						// Sign-out successful.
-						console.log("sign out");
 						alert("Log out!");
 						router.push("Admin");
 					})

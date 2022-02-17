@@ -94,7 +94,6 @@
 </template>
 
 <script>
-import { onMounted } from "vue";
 
 export default {
   name: "Logo",
@@ -104,11 +103,7 @@ export default {
     styleLogo: String,
     doMenu: Function,
   },
-  setup(props) {
-    onMounted(() => {
-      console.log("clipId=", props.clipId);
-    });
-
+  setup() {
     return {};
   },
 };

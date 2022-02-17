@@ -59,7 +59,7 @@ export default createStore({
 	},
 	actions: {
 		async getFirestoreDB({ commit }) {
-			console.log("do firestore");
+			// console.log("do firestore");
 			let tempData = [];
 			let postsRef = db.collection("posts").orderBy("created", "desc");
 			await postsRef.get().then((querySnapshot) => {
