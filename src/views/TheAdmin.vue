@@ -32,7 +32,7 @@ import { firebase } from "@firebase/app";
 require("firebase/auth");
 
 export default {
-  name: "Admin",
+  name: "TheAdmin",
   data() {
     return {
       email: null,
@@ -53,7 +53,7 @@ export default {
           var user = userCredential.user;
           console.log("user: ", user);
           alert("Login is successful!");
-          router.push("Form");
+          router.push({ name: "TheForm" });
           // ...
         })
         .catch((error) => {

@@ -20,7 +20,7 @@
 					<font-awesome-icon icon="chevron-right" class="u-btn__next" :style="!isNextDisplay ? { opacity: 0.3 } : { opacity: 1 }" @click="doNext" />
 				</header>
 				<section class="my-3">
-					<ContentElement v-for="(el, index) in contentToArr" :key="index" :element="el" :imageFiles="contents.imageFiles" />
+					<PostElement v-for="(el, index) in contentToArr" :key="index" :element="el" :imageFiles="contents.imageFiles" />
 				</section>
 			</div>
 		</template>
@@ -60,7 +60,7 @@
 	import { db } from "../firebaseDB.js";
 	import { DATA_DB } from "@/store/types";
 
-	import ContentElement from "./ContentElement.vue";
+	import PostElement from "../components/PostElement.vue";
 
 	export default {
 		name: "Post",
@@ -92,14 +92,14 @@
 					contentToArr.value = ContentAPI.splitPost(postData.post.content);
 					contents.value = postData.post;
 				} else {
-					router.push("/components/NotFound.vue");
+					router.push({ name: "The404" });
 				}
 			};
 
 			const getConvertTime = (time) => convertTime(time, false);
 
 			const doBack = () => {
-				router.push("/");
+				router.push({ name: "TheHome" });
 			};
 
 			const doPrev = () => {
@@ -174,7 +174,7 @@
 		},
 
 		components: {
-			ContentElement,
+			PostElement,
 		},
 	};
 </script>

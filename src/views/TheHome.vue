@@ -11,7 +11,7 @@
 			<label id="searchLabel" for="searchInput">
 				<font-awesome-icon icon="search" />
 			</label>
-			<input class="search--input p-1 mw-50" v-model="keyword" type="text" list="keywordListOptions" id="searchInput" aria-label="searchInput" />
+			<input class="search--input p-1" v-model="keyword" type="text" list="keywordListOptions" id="searchInput" aria-label="searchInput" />
 		</div>
 		<datalist id="keywordListOptions">
 			<option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
@@ -52,7 +52,7 @@
 	import Loading from "../components/Loading.vue";
 
 	export default {
-		name: "Home",
+		name: "TheHome",
 
 		setup() {
 			const store = useStore();
@@ -372,6 +372,8 @@
 	}
 
 	.search--input {
+    	width: 30%;
+		max-width: 200px;
 		height: 36px;
 		background-color: $color-bg;
 		opacity: 0.8;

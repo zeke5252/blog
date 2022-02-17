@@ -5,42 +5,42 @@ require("firebase/auth");
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: () => import("../views/Home.vue"),
+    name: "TheHome",
+    component: () => import("../views/TheHome.vue"),
   },
   {
     path: "/posts/:title",
     props: true,
-    component: () => import("../components/Post.vue"),
+    component: () => import("../views/ThePost.vue"),
   },
   {
     path: "/about",
-    name: "About",
-    component: () => import("../views/About.vue"),
+    name: "TheAbout",
+    component: () => import("../views/TheAbout.vue"),
   },
   {
     path: "/admin",
-    name: "Admin",
-    component: () => import("../views/Admin.vue"),
+    name: "TheAdmin",
+    component: () => import("../views/TheAdmin.vue"),
   },
   {
     path: "/form",
-    name: "Form",
-    component: () => import("../views/Form.vue"),
+    name: "TheForm",
+    component: () => import("../views/TheForm.vue"),
     beforeEnter: (to, from, next) => {
       firebase.auth().onAuthStateChanged(function (user) {
         if (user) {
           next();
         } else {
-          next({ name: "Admin" });
+          next({ name: "TheAdmin" });
         }
       });
     },
   },
   {
     path: "/:pathMatch(.*)*",
-    name: "NotFound",
-    component: () => import("../components/NotFound.vue"),
+    name: "The404",
+    component: () => import("../views/The404.vue"),
   },
 ];
 

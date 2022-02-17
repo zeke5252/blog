@@ -333,7 +333,7 @@
 						alert("Upload is successful!");
 						setDraft();
 						store.dispatch("getFirestoreDB").then(() => {
-							router.push({ path: "/" });
+							router.push({ name: "TheHome" });
 						});
 					})
 					.catch((error) => {
@@ -348,7 +348,7 @@
 					.then(() => {
 						// Sign-out successful.
 						alert("Log out!");
-						router.push("Admin");
+						router.push({ name: "TheAdmin" });
 					})
 					.catch(() => {
 						// An error happened.
