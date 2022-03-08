@@ -1,0 +1,34 @@
+
+// 克制化有個原則，就是不去動原本官方的定義，劃分的清楚，接手的人或我們將來觀看，才可以迅速的理解。
+// 放在最上方的這些變數，用意是取代在 bootstrap 裡面定義的 variable，為什麼可以置頂，是因為官方裡面定義的變數是 !default，代表我們沒有克制定義的
+// 話就用官方定義的，而我們現在上方有定義就用我們定義的。
+$primary: #fdcc00;
+$border-width: 0px;
+$border-radius: 0px;
+$link-color: #fff;
+$font-size-base: 0.8rem; // 12 px  ========  
+
+
+// 引入下面兩行的用意是要自定義 variables scss 裡的 theme-colors
+// 引入 fuction 是因為下方的 variables 需要用到
+// 引入 variables 是因為我們需要再更下方去取得 theme-colors 這個物件
+@import "../../../node_modules/bootstrap/scss/_functions";
+@import "../../../node_modules/bootstrap/scss/_variables";
+
+// 自定義我們要的顏色物件
+$blog-theme-colors: (
+    "blogyellow": #fdcc00
+);
+
+// 把自定義的與官方內定的合併
+$theme-colors: map-merge($blog-theme-colors, $theme-colors);
+
+
+// 這邊就會去讀取上面處理好的 $theme-colors。
+@import "../../../node_modules/bootstrap/scss/bootstrap";
+
+
+
+@import "./utils/variables";
+@import "./utils/transitions";
+@import "./base/basic";

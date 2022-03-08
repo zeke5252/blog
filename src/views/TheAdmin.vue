@@ -27,42 +27,35 @@
 </template>
 
 <script>
-import router from "../router/";
-import { firebase } from "@firebase/app";
-require("firebase/auth");
-
 export default {
-  name: "TheAdmin",
-  data() {
-    return {
-      email: null,
-      password: null,
-    };
-  },
-  mounted() {
-    this.init();
-  },
-  methods: {
-    init() {},
-    loginHandler() {
-      firebase
-        .auth()
-        .signInWithEmailAndPassword(this.email, this.password)
-        .then((userCredential) => {
-          // Signed in
-          var user = userCredential.user;
-          console.log("user: ", user);
-          alert("Login is successful!");
-          router.push({ name: "TheForm" });
-          // ...
-        })
-        .catch((error) => {
-          // eslint-disable-next-line no-unused-vars
-          let errorCode = error.code;
-          // eslint-disable-next-line no-unused-vars
-          let errorMessage = error.message;
-        });
-    },
-  },
-};
+  name: 'TheAdmin'
+}
+</script>
+
+<script setup>
+import router from '../router/'
+import { firebase } from '@firebase/app'
+import { ref } from 'vue'
+require('firebase/auth')
+const email = ref(null)
+const password = ref(null)
+
+const loginHandler = () => {
+  firebase
+    .auth()
+    .signInWithEmailAndPassword(email.value, password.value)
+    .then(userCredential => {
+      // Signed in
+      var user = userCredential.user
+      alert('Login is successful!')
+      router.push({ name: 'TheForm' })
+    })
+    .catch(error => {
+      // eslint-disable-next-line no-unused-vars
+      let errorCode = error.code
+      // eslint-disable-next-line no-unused-vars
+      let errorMessage = error.message
+    })
+}
+
 </script>

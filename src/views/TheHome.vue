@@ -1,5 +1,5 @@
 <template>
-	<Loading v-if="postsCollector.length === 0" />
+	<BaseLoading v-if="postsCollector.length === 0" />
 	<div v-else class="home">
 		<div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
 			<select class="search--input py-1 px-3 me-3" v-model="category" id="categoryLabel" aria-label="categoryLabel">
@@ -17,218 +17,182 @@
 			<option v-for="post in GET_DB_ALL" :key="post.title" :value="post.title" />
 		</datalist>
 		<div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2">
-			<div class="col" v-for="post in keywordPosts.length > 0 ? keywordPosts : postsCollector" :key="post.title">
-				<button v-if="isLogin" class="removeButton" @click="removePost(post)">
-					<font-awesome-icon icon="trash" />
-				</button>
-				<router-link :to="`/posts/${post.title}`" style="color: white" :class="post.imageFiles.length > 0 ? 'card styleImg border-0' : 'card styleImg styleTxt'">
+			<div class="position-relative" v-for="post in keywordPosts.length > 0 ? keywordPosts : postsCollector" :key="post.title">
+				<router-link :to="`/posts/${post.title}`" style="color: white" :class="post.imageFiles.length > 0 ? 'card text-decoration-none styleImg' : 'card text-decoration-none styleImg styleTxt'">
 					<div v-if="post.imageFiles.length > 0" style="overflow: hidden">
-						<Photo :Url="PhotoAPI.getSrc(post.imageFiles, true)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
+						<BasePhoto :Url="PhotoAPI.getSrc(post.imageFiles, true)" :Images="post.imageFiles" :showExif="false" :showBorder="false" />
 					</div>
-					<div class="card-body">
-						<div class="createdDate">{{ getConvertTime(post.created) }}</div>
-						<h5 class="card-title">{{ post.title }}</h5>
+					<div class="position-relative p-4">
+						<h3 class="card-title fw-normal">{{ post.title }}</h3>
 						<p class="card-text my-2">
 							{{ getFirstParagraph(post.content) }}
 							<em class="moreContent">more >> </em>
 						</p>
 					</div>
 				</router-link>
+				<button v-if="isLogin" class="btn btn-primary rounded-circle translate-middle position-absolute top-0" @click="removePost(post)">
+					<font-awesome-icon icon="trash" />
+				</button>
+				<div class="position-absolute bottom-0 end-0 px-3 m-2 fw-lighter text-primary border-start border-1 border-light" style="letter-spacing: 4px">{{ getConvertTime(post.created) }}</div>
 			</div>
 		</div>
-		<Loading v-if="isInMoreStatus && postsCollector.length !== 0" />
+		<BaseLoading v-if="isInMoreStatus && postsCollector.length !== 0" />
 	</div>
 </template>
 
 <script>
+	export default {
+		name: "TheHome",
+	};
+</script>
+
+<script setup>
 	import { db, storage } from "@/firebaseDB.js";
 	import { firebase } from "@firebase/app";
-	import { ref, watch, onBeforeUnmount, onMounted } from "vue";
+	import { ref, watch, onBeforeUnmount } from "vue";
 	import { useStore } from "vuex";
 	import { convertTime, ContentAPI, PhotoAPI } from "../utils/common.js";
 	import _ from "lodash";
 
-	import Photo from "../components/Photo.vue";
-	import Loading from "../components/Loading.vue";
+	import BasePhoto from "../components/BasePhoto.vue";
+	import BaseLoading from "../components/BaseLoading.vue";
 
-	export default {
-		name: "TheHome",
+		const store = useStore();
+		const isLogin = ref();
+		const postsAmount = ref(7);
+		const postsTimes = ref(0);
+		const isInMoreStatus = ref(false);
+		const category = ref("");
+		const keyword = ref("");
 
-		setup() {
-			const store = useStore();
-			const isLogin = ref();
-			const postsAmount = ref(7);
-			const postsTimes = ref(0);
-			const isInMoreStatus = ref(false);
-			const category = ref("");
-			const keyword = ref("");
+		const postsCollector = ref([]);
+		const keywordPosts = ref([]);
+		const GET_DB_ALL = ref(() => store.getters.GET_DB_ALL());
 
-			const postsCollector = ref([]);
-			const keywordPosts = ref([]);
-			const GET_DB_ALL = ref(() => store.getters.GET_DB_ALL());
+		firebase.auth().onAuthStateChanged(function (user) {
+			if (user != null) {
+				isLogin.value = true;
+			} else {
+				isLogin.value = false;
+			}
+		});
 
-			firebase.auth().onAuthStateChanged(function (user) {
-				if (user != null) {
-					isLogin.value = true;
-				} else {
-					isLogin.value = false;
-				}
-			});
+		const filterPost = (posts) => {
+			if (category.value !== "") {
+				let filteredResults = posts.filter((post) => post["category"] === category.value);
+				return filteredResults;
+			} else {
+				return posts;
+			}
+		};
 
-			const filterPost = (posts) => {
-				if (category.value !== "") {
-					let filteredResults = posts.filter((post) => post["category"] === category.value);
-					return filteredResults;
-				} else {
-					return posts;
-				}
-			};
+		const loadMore = () => {
+			// console.log("loadMore");
+			const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
+			const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+			const scrollHeight = document.documentElement.scrollHeight;
+			const isMouseNearAllContentBottom = scrollTop + getWindowHeight >= (scrollHeight * 4) / 5;
 
-			const loadMore = () => {
-				// console.log("loadMore");
-				const getWindowHeight = document.documentElement.clientHeight || document.body.clientHeight;
-				const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-				const scrollHeight = document.documentElement.scrollHeight;
-				const isMouseNearAllContentBottom = scrollTop + getWindowHeight >= (scrollHeight * 4) / 5;
-
-				if (!isInMoreStatus.value && isMouseNearAllContentBottom) {
-					isInMoreStatus.value = true;
-					setTimeout(() => {
-						let postsToAdd;
-						isInMoreStatus.value = false;
-						postsToAdd = store.getters.GET_DB_SCROLL({
-							times: postsTimes.value,
-							amount: postsAmount.value,
-						});
-						postsCollector.value = postsCollector.value.concat(filterPost(postsToAdd));
-						postsTimes.value++;
-						if (postsToAdd.length === 0) document.removeEventListener("scroll", loadMore, true);
-					}, 1000);
-				}
-			};
-
-			store.dispatch("getFirestoreDB").then(() => {
-				loadMore();
-			});
-
-			document.addEventListener("scroll", loadMore, true);
-
-			const getConvertTime = (time) => convertTime(time, false);
-
-			const getFirstParagraph = (content) => {
-				let contentsArr;
-				contentsArr = ContentAPI.splitPost(content);
-				if (!contentsArr) return "No contents!";
-				else if (!Array.isArray(contentsArr)) return contentsArr;
-				else {
-					let result = contentsArr.find((el) => el.substring(0, 4) !== "http");
-					return ContentAPI.limitStrSize(result, 150);
-				}
-			};
-
-			const removePost = (post) => {
-				let posts = db.collection("posts");
-				let query = posts.where("title", "==", post.title);
-				query
-					.get()
-					.then((querySnapshot) => {
-						querySnapshot.forEach((doc) => {
-							posts
-								.doc(doc.id)
-								.delete()
-								.then(() => {
-									store.dispatch("getFirestoreDB").then(() => {
-										postsCollector.value = GET_DB_ALL.value();
-									});
-								})
-								.then(() => {
-									post.imageFiles.length !== 0 && removeDBImages(post);
-								})
-								.catch((error) => {
-									console.error("Error removing document: ", error);
-								});
-						});
-					})
-					.catch((error) => {
-						console.log("Error getting documents: ", error);
+			if (!isInMoreStatus.value && isMouseNearAllContentBottom) {
+				isInMoreStatus.value = true;
+				setTimeout(() => {
+					let postsToAdd;
+					isInMoreStatus.value = false;
+					postsToAdd = store.getters.GET_DB_SCROLL({
+						times: postsTimes.value,
+						amount: postsAmount.value,
 					});
-			};
+					postsCollector.value = postsCollector.value.concat(filterPost(postsToAdd));
+					postsTimes.value++;
+					if (postsToAdd.length === 0) document.removeEventListener("scroll", loadMore, true);
+				}, 1000);
+			}
+		};
 
-			const removeDBImages = (post) => {
-				if (post.imageFiles === 0) return;
-				let imagesUrls = PhotoAPI.getSrc(post.imageFiles);
-				// Need to use new RegExg() instead of .match(/.../) to avoid error in js
-				let re = new RegExp("(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)", "g");
-				let imagesToDelete = imagesUrls.map((url) => url.match(re)[0]);
-				let filesAllPromises = imagesToDelete.map((image) => {
-					let storageRef = storage.ref();
-					storageRef.child(`${post.category}/${image}`).delete();
+		store.dispatch("getFirestoreDB").then(() => {
+			loadMore();
+		});
+
+		document.addEventListener("scroll", loadMore, true);
+
+		const getConvertTime = (time) => convertTime(time, false);
+
+		const getFirstParagraph = (content) => {
+			let contentsArr;
+			contentsArr = ContentAPI.splitPost(content);
+			if (!contentsArr) return "No contents!";
+			else if (!Array.isArray(contentsArr)) return contentsArr;
+			else {
+				let result = contentsArr.find((el) => el.substring(0, 4) !== "http");
+				result = ContentAPI.removeMarks(result);
+				return ContentAPI.limitStrSize(result, 150);
+			}
+		};
+
+		const removePost = (post) => {
+			let posts = db.collection("posts");
+			let query = posts.where("title", "==", post.title);
+			query
+				.get()
+				.then((querySnapshot) => {
+					querySnapshot.forEach((doc) => {
+						posts
+							.doc(doc.id)
+							.delete()
+							.then(() => {
+								store.dispatch("getFirestoreDB").then(() => {
+									postsCollector.value = GET_DB_ALL.value();
+								});
+							})
+							.then(() => {
+								post.imageFiles.length !== 0 && removeDBImages(post);
+							})
+							.catch((error) => {
+								console.error("Error removing document: ", error);
+							});
+					});
+				})
+				.catch((error) => {
+					console.log("Error getting documents: ", error);
 				});
+		};
 
-				Promise.all(filesAllPromises).then(() => {
-					alert("The post has been deleted!");
-				});
-			};
-
-			const stopWatchCategory = watch(category, () => {
-				keyword.value = "";
-				postsCollector.value = filterPost(GET_DB_ALL.value());
+		const removeDBImages = (post) => {
+			if (post.imageFiles === 0) return;
+			let imagesUrls = PhotoAPI.getSrc(post.imageFiles);
+			// Need to use new RegExg() instead of .match(/.../) to avoid error in js
+			let re = new RegExp("(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)", "g");
+			let imagesToDelete = imagesUrls.map((url) => url.match(re)[0]);
+			let filesAllPromises = imagesToDelete.map((image) => {
+				let storageRef = storage.ref();
+				storageRef.child(`${post.category}/${image}`).delete();
 			});
 
-			const stopWatchKeyword = watch(keyword, (val) => {
-				_.debounce(function () {
-					keywordPosts.value = postsCollector.value.filter((post) => post.title.includes(val));
-				}, 300)();
+			Promise.all(filesAllPromises).then(() => {
+				alert("The post has been deleted!");
 			});
+		};
 
-      onMounted(() => {
-				console.log("process.env.NODE_ENV=", process.env.NODE_ENV);
-			});
+		const stopWatchCategory = watch(category, () => {
+			keyword.value = "";
+			postsCollector.value = filterPost(GET_DB_ALL.value());
+		});
 
-			onBeforeUnmount(() => {
-				stopWatchKeyword();
-				stopWatchCategory();
-				document.removeEventListener("scroll", loadMore, true);
-			});
+		const stopWatchKeyword = watch(keyword, (val) => {
+			_.debounce(function () {
+				keywordPosts.value = postsCollector.value.filter((post) => post.title.includes(val));
+			}, 300)();
+		});
 
-			return {
-				isLogin,
-				isInMoreStatus,
-				PhotoAPI,
-				category,
-				keyword,
-				removePost,
-				getConvertTime,
-				getFirstParagraph,
-				postsCollector,
-				keywordPosts,
-				GET_DB_ALL,
-			};
-		},
-
-		components: {
-			Photo,
-			Loading,
-		},
-	};
+		onBeforeUnmount(() => {
+			stopWatchKeyword();
+			stopWatchCategory();
+			document.removeEventListener("scroll", loadMore, true);
+		});
 </script>
 
 <style lang="scss">
-	@import "../assets/css/app.scss";
-
-	.createdDate {
-		font-size: 11px;
-		position: absolute;
-		right: 0;
-		bottom: 0;
-		text-align: center;
-		letter-spacing: 4px;
-		padding: 0 0 0 10px;
-		margin: 5px 10px 8px 5px;
-		border-left: 1px dotted $color-text-grey;
-		font-weight: 300;
-		color: $color-primary-yellow;
-	}
+	@import "../assets/scss/app.scss";
 
 	#searchLabel {
 		width: 30px;
@@ -246,12 +210,7 @@
 		margin-top: 10px;
 	}
 
-	.removeButton {
-		border-radius: 20px !important;
-		position: relative;
-		transform: translate(-50%, 50%);
-		z-index: 1;
-	}
+
 
 	@media (hover: hover) {
 		.styleImg:hover {
@@ -298,7 +257,7 @@
 	}
 
 	.styleTxt {
-		background-color: $color-card-bg-notice;
+		background-color: $color-bg;
 		transition: 0.2s ease-out;
 		height: 100%;
 		animation: cardAnimation ease-out 0.4s;
@@ -321,11 +280,6 @@
 				height: 12px;
 			}
 		}
-	}
-
-	.card-body {
-		position: relative;
-		padding: 26px 20px 30px 20px;
 	}
 
 	.loading {

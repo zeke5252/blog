@@ -7,18 +7,12 @@
 </template>
 
 <script>
-export default {
-  name: "Loading",
-  props: {
-    styleLogo: String,
-  },
-  setup() {
-    return {};
-  },
-};
+  export default {
+    name: "BaseLoading",
+  };
 </script>
 <style lang="scss">
-@import "../assets/css/app.scss";
+@import "../assets/scss/app.scss";
 
 .more {
   border: rgba($color: #fff, $alpha: .2) 1px dotted;

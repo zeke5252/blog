@@ -7,11 +7,11 @@
 		</template>
 		<template v-else>
 			<div class="me-sm-0 me-md-5">
-				<header class="mb-5 fixed-top">
+				<header class="d-flex position-relative justify-content-center align-items-center mb-5 fixed-top">
 					<font-awesome-icon icon="chevron-left" class="u-btn__prev" :style="!isPrevDisplay ? { opacity: 0.3 } : { opacity: 1 }" @click="doPrev" />
-					<div class="header--info">
-						<h2 v-text="title" />
-						<span v-text="contents.category + '&nbsp;&nbsp;&sol;&nbsp;&nbsp;' + contents.created" />
+					<div class="d-flex flex-column align-items-center px-5">
+						<h1 class="fw-normal" v-text="props.title" />
+						<span class="fw-light fs-6 opacity-75" v-text="contents.category + '&nbsp;&nbsp;&sol;&nbsp;&nbsp;' + contents.created" />
 						<div v-if="contents.msgs" class="d-inline-flex mt-2">
 							<img src="../assets/msg.svg" class="msg me-1" />
 							<span style="color: white">{{ contents.msgs.length }}</span>
@@ -37,7 +37,7 @@
 		</div>
 		<div class="row">
 			<div class="col-sm-6 mb-6">
-				<button type="button" class="col-12 col-md-6 offset-md-6 mb-5 mt-1" style="height: 40px" v-on:click="doPostMsg">Post message</button>
+				<button type="button" class="btn btn-primary col-12 col-md-6 offset-md-6 mb-5 mt-1" v-on:click="doPostMsg">Post message</button>
 			</div>
 		</div>
 		<ul class="px-0" v-if="contents">
@@ -52,6 +52,12 @@
 </template>
 
 <script>
+	export default {
+		name: "Post",
+	};
+</script>
+
+<script setup>
 	import { ref, watch, onMounted } from "vue";
 	import { convertTime, ContentAPI } from "../utils/common.js";
 	import { firebase } from "@firebase/app";
@@ -62,150 +68,94 @@
 
 	import PostElement from "../components/PostElement.vue";
 
-	export default {
-		name: "Post",
+	// eslint-disable-next-line no-undef
+	const props = defineProps({
+		title: String,
+		})
+	const store = useStore();
+	const router = useRouter();
+	const route = useRoute();
 
-		props: {
-			title: String,
-		},
+	const contents = ref(null);
+	const isPrevDisplay = ref(null);
+	const isNextDisplay = ref(null);
+	const msgTitle = ref("");
+	const msg = ref("");
+	const contentToArr = ref([]);
 
-		setup(props) {
-			const store = useStore();
-			const router = useRouter();
-			const route = useRoute();
-
-			const contents = ref(null);
-			const isPrevDisplay = ref(null);
-			const isNextDisplay = ref(null);
-			const msgTitle = ref("");
-			const msg = ref("");
-			const contentToArr = ref([]);
-
-			const init = () => {
-				let postData = store.getters.GET_DB_BY_TITLE(props.title);
-				if (postData) {
-					isPrevDisplay.value = postData.isPrevDisplay;
-					isNextDisplay.value = postData.isNextDisplay;
-					msgTitle.value = "";
-					msg.value = "";
-					postData.post.created = convertTime(postData.post.created);
-					contentToArr.value = ContentAPI.splitPost(postData.post.content);
-					contents.value = postData.post;
-				} else {
-					router.push({ name: "The404" });
-				}
-			};
-
-			const getConvertTime = (time) => convertTime(time, false);
-
-			const doBack = () => {
-				router.push({ name: "TheHome" });
-			};
-
-			const doPrev = () => {
-				let toTitle = store.getters.GET_NEXT_OR_PREV_POST(route.params.title, false);
-				router.push(toTitle);
-			};
-
-			const doNext = () => {
-				let toTitle = store.getters.GET_NEXT_OR_PREV_POST(route.params.title, true);
-				router.push(toTitle);
-			};
-
-			const doPostMsg = () => {
-				db.collection("posts")
-					.where("title", "==", contents.value.title)
-					.get()
-					.then((posts) => {
-						posts.forEach(async (post) => {
-							const postRef = db.collection("posts").doc(post.id);
-							postRef
-								.update({
-									msgs: firebase.firestore.FieldValue.arrayUnion({
-										name: msgTitle.value,
-										comment: msg.value,
-									}),
-								})
-								.then(async () => {
-									let postGet = await postRef.get();
-									let postData = postGet.data();
-									contents.value.msgs = postData.msgs;
-									alert("留言成功！");
-									init();
-								});
-						});
-					})
-					.catch((error) => {
-						console.log("Error getting documents: ", error);
-					});
-			};
-
-			onMounted(() => {
-				if (!store.state[DATA_DB]) {
-					store.dispatch("getFirestoreDB").then(() => {
-						init();
-					});
-				} else {
-					init();
-				}
-			});
-
-			watch(
-				() => props.title,
-				() => {
-					init();
-				}
-			);
-
-			return {
-				getConvertTime,
-				contents,
-				isPrevDisplay,
-				isNextDisplay,
-				doBack,
-				doPrev,
-				doNext,
-				msgTitle,
-				msg,
-				contentToArr,
-				doPostMsg,
-				ContentAPI,
-			};
-		},
-
-		components: {
-			PostElement,
-		},
+	const init = () => {
+		let postData = store.getters.GET_DB_BY_TITLE(props.title);
+		if (postData) {
+			isPrevDisplay.value = postData.isPrevDisplay;
+			isNextDisplay.value = postData.isNextDisplay;
+			msgTitle.value = "";
+			msg.value = "";
+			postData.post.created = convertTime(postData.post.created);
+			contentToArr.value = ContentAPI.splitPost(postData.post.content);
+			contents.value = postData.post;
+		} else {
+			router.push({ name: "The404" });
+		}
 	};
+
+	const doPrev = () => {
+		let toTitle = store.getters.GET_NEXT_OR_PREV_POST(route.params.title, false);
+		router.push(toTitle);
+	};
+
+	const doNext = () => {
+		let toTitle = store.getters.GET_NEXT_OR_PREV_POST(route.params.title, true);
+		router.push(toTitle);
+	};
+
+	const doPostMsg = () => {
+		db.collection("posts")
+			.where("title", "==", contents.value.title)
+			.get()
+			.then((posts) => {
+				posts.forEach(async (post) => {
+					const postRef = db.collection("posts").doc(post.id);
+					postRef
+						.update({
+							msgs: firebase.firestore.FieldValue.arrayUnion({
+								name: msgTitle.value,
+								comment: msg.value,
+							}),
+						})
+						.then(async () => {
+							let postGet = await postRef.get();
+							let postData = postGet.data();
+							contents.value.msgs = postData.msgs;
+							alert("留言成功！");
+							init();
+						});
+				});
+			})
+			.catch((error) => {
+				console.log("Error getting documents: ", error);
+			});
+	};
+
+	onMounted(() => {
+		if (!store.state[DATA_DB]) {
+			store.dispatch("getFirestoreDB").then(() => {
+				init();
+			});
+		} else {
+			init();
+		}
+	});
+
+	watch(
+		() => props.title,
+		() => {
+			init();
+		}
+	);
 </script>
 
 <style scoped lang="scss">
-	@import "../assets/css/app.scss";
-
-	header {
-		display: flex;
-		position: relative;
-		justify-content: center;
-		align-items: center;
-
-		.header--info {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			padding: 0 15vw;
-		}
-
-		h2 {
-			letter-spacing: 3px;
-			font-weight: 500;
-		}
-
-		span {
-			font-size: 12px;
-			color: #777;
-			letter-spacing: 1px;
-		}
-	}
+	@import "../assets/scss/app.scss";
 
 	.u-btn {
 		&__next {

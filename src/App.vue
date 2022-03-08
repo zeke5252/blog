@@ -5,9 +5,10 @@
 				<router-view />
 			</main>
 			<div v-if="isMobileMenu" class="w-100 h-100 fixed-top" style="background-color: black; opacity: 0.3" @click="doMenu"></div>
+			<BaseLogo classLogo="logo--m d-block d-md-none p-0 fixed-top mt-1 mx-2" style="width: 40px; height: 40px" :doMenu="doMenu" clipId="mobile" />
 			<nav :class="!isMobileMenu ? 'd-none d-md-block col-1 p-0 fixed-top justify-content-center' : 'col-2 px-3 fixed-top h-100 mobileBg'">
 				<router-link to="/">
-					<Logo classLogo="my-4 px-sm-3 px-md-3 px-lg-4" styleLogo="width: 100%; height: 50px; margin: auto" clipId="desktop" />
+					<BaseLogo classLogo="my-4 px-sm-3 px-md-3 px-lg-4" styleLogo="width: 100%; height: 50px; margin: auto" clipId="desktop" />
 				</router-link>
 				<ul class="p-0">
 					<router-link to="/" class="mx-auto">
@@ -21,44 +22,29 @@
 					</router-link>
 				</ul>
 			</nav>
-			<Logo classLogo="logo--m d-block d-md-none p-0 fixed-top mt-1 mx-2" style="width: 40px; height: 40px" :doMenu="doMenu" clipId="mobile" />
 		</div>
 	</div>
 </template>
 
-<script>
-	import Logo from "./components/Logo.vue";
+<script setup>
+	import BaseLogo from "./components/BaseLogo.vue";
 	import { ref } from "vue";
 	import { useRoute } from "vue-router";
 
-	export default {
-		setup() {
-			const route = useRoute();
-			const isMobileMenu = ref(false);
+	const route = useRoute();
+	const isMobileMenu = ref(false);
 
-			const doMenu = () => {
-				isMobileMenu.value = !isMobileMenu.value;
-			};
-
-			const isActive = (path) => {
-				let result = route.path.split("/")[1];
-				return result !== path ? { opacity: 0.2 } : { opacity: 1 };
-			};
-
-			return {
-				isActive,
-				isMobileMenu,
-				doMenu,
-			};
-		},
-		components: {
-			Logo,
-		},
+	const doMenu = () => {
+		isMobileMenu.value = !isMobileMenu.value;
+	};
+	const isActive = (path) => {
+		let result = route.path.split("/")[1];
+		return result !== path ? { opacity: 0.2 } : { opacity: 1 };
 	};
 </script>
 
 <style lang="scss">
-	@import "./assets/css/app.scss";
+	@import "./assets/scss/app.scss";
 	html {
 		background-color: $color-bg;
 	}

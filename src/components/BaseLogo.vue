@@ -3,15 +3,15 @@
     id="logo"
     version="1.1"
     xmlns="http://www.w3.org/2000/svg"
-    :class="classLogo"
-    :style="styleLogo"
+    :class="props.classLogo"
+    :style="props.styleLogo"
     viewBox="0 0 342 131.9"
-    @click="doMenu"
+    @click="props.doMenu"
   >
-    <clipPath :id="'clipJP_1_' + clipId + '_'">
+    <clipPath :id="'clipJP_1_' + props.clipId + '_'">
       <circle id="clipJP" cx="64.3" cy="67.5" r="64.3" />
     </clipPath>
-    <g id="jpGroup" :clip-path="'url(#clipJP_1_' + clipId + '_)'">
+    <g id="jpGroup" :clip-path="'url(#clipJP_1_' + props.clipId + '_)'">
       <path
         id="P"
         class="st"
@@ -35,10 +35,10 @@
     />
     <g id="leafsGroup">
       <!-- clip id should be unique to prevent from displaying 2 logos on screen simultaneously -->
-      <clipPath :id="'clipCircle_1_' + clipId + '_'">
+      <clipPath :id="'clipCircle_1_' + props.clipId + '_'">
         <circle id="clipCircle" cx="64.3" cy="67.5" r="64.3" />
       </clipPath>
-      <g id="leafs" :clip-path="'url(#clipCircle_1_' + clipId + '_)'">
+      <g id="leafs" :clip-path="'url(#clipCircle_1_' + props.clipId + '_)'">
         <circle id="leafBg" class="st3" cx="64.3" cy="67.5" r="106.3" />
         <g id="leafSpin" transform-origin="64.3 67.5">
           <rect
@@ -94,22 +94,16 @@
 </template>
 
 <script>
-
 export default {
-  name: "Logo",
-  props: {
-    clipId: String,
-    classLogo: String,
-    styleLogo: String,
-    doMenu: Function,
-  },
-  setup() {
-    return {};
-  },
-};
+  name: 'Logo'
+}
+</script>
+<script setup>
+// eslint-disable-next-line no-undef
+const props = defineProps(['clipId', 'classLogo', 'styleLogo', 'doMenu'])
 </script>
 <style lang="scss">
-@import "../assets/css/app.scss";
+@import '../assets/scss/app.scss';
 .logo--m {
   cursor: pointer;
 }
