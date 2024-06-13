@@ -1,18 +1,32 @@
 <template>
-  <div v-if="ContentAPI.isDisplay(props.element, 'photo')" class="me-sm-0">
+  <div
+    v-if="
+      ContentAPI.isDisplay(props.element, 'photo') &&
+      props.imageFiles.length !== 0
+    "
+    class="me-sm-0"
+  >
     <BasePhoto :Url="props.element" :Images="props.imageFiles" />
   </div>
-  <a v-else-if="ContentAPI.isDisplay(props.element, 'link')" :href="props.element">
+  <a
+    v-else-if="ContentAPI.isDisplay(props.element, 'link')"
+    :href="props.element"
+  >
     {{ ContentAPI.limitStrSize(props.element, 40) }}
   </a>
-  <p v-else-if="ContentAPI.isDisplay(props.element, 'code')"
-    class="section--p fw-light lh-lg fs-5 my-4 mx-2 section--code p-4 fw-light">
+  <p
+    v-else-if="ContentAPI.isDisplay(props.element, 'code')"
+    class="section--p fw-light lh-lg fs-5 my-4 mx-2 section--code p-4 fw-light"
+  >
     {{ ContentAPI.removeMarks(props.element) }}
   </p>
   <template v-else>
     <p class="section--p fw-light lh-lg fs-5 my-4 mx-2">
-      <span v-for="(el, index) in ContentAPI.splitParagraph(props.element)"
-        :class="ContentAPI.isDisplay(el, 'bold') ? 'section--bold' : ''" :key="index">
+      <span
+        v-for="(el, index) in ContentAPI.splitParagraph(props.element)"
+        :class="ContentAPI.isDisplay(el, 'bold') ? 'section--bold' : ''"
+        :key="index"
+      >
         {{ ContentAPI.isDisplay(el, 'bold') ? ContentAPI.removeMarks(el) : el }}
       </span>
     </p>
@@ -20,18 +34,18 @@
 </template>
 
 <script setup>
-import { ContentAPI } from "../utils/common.js";
-import BasePhoto from "./BasePhoto.vue";
+import { ContentAPI } from '../utils/common.js';
+import BasePhoto from './BasePhoto.vue';
 
 // eslint-disable-next-line no-undef
 const props = defineProps({
   imageFiles: {
-    type: Array,
-    default: () => [],
+    type: String,
+    default: () => '',
   },
   element: {
     type: String,
-    default: "",
+    default: '',
   },
 });
 </script>

@@ -10,24 +10,52 @@
     <div class="row">
       <div class="col-12 col-sm-6 mb-4">
         <label for="formTitle" class="form-label">標題</label>
-        <input v-model="title" type="text" class="form-control" id="formTitle" aria-label="Title" />
+        <input
+          v-model="title"
+          type="text"
+          class="form-control"
+          id="formTitle"
+          aria-label="Title"
+        />
       </div>
     </div>
     <div class="row">
       <div class="col-12 col-sm-6 mb-4">
         <label for="formFile" class="form-label">上傳相片</label>
-        <input @change="onFileChange" class="form-control" type="file" id="formFile" multiple />
+        <input
+          @change="onFileChange"
+          class="form-control"
+          type="file"
+          id="formFile"
+          multiple
+        />
       </div>
-      <div class="group--container" :style="{ height: displayImages.length > 0 ? '30vh' : 'auto' }">
-        <div class="group--container__photo" v-for="(image, index) in displayImages" :key="index">
+      <div
+        class="group--container"
+        :style="{ height: displayImages.length > 0 ? '30vh' : 'auto' }"
+      >
+        <div
+          class="group--container__photo"
+          v-for="(image, index) in displayImages"
+          :key="index"
+        >
           <img :src="image" />
-          <button class="btn btn-primary m-0 mb-1 d-block py-1 px-2" @click="copySrc(index)">
+          <button
+            class="btn btn-primary m-0 mb-1 d-block py-1 px-2"
+            @click="copySrc(index)"
+          >
             Copy
           </button>
-          <button class="btn btn-primary m-0 mb-1 d-block py-1 px-2" @click="copySrc(index, true)">
+          <button
+            class="btn btn-primary m-0 mb-1 d-block py-1 px-2"
+            @click="copySrc(index, true)"
+          >
             Paste to content
           </button>
-          <button class="btn m-0 mb-1 d-block py-1 px-2 text-white bg-dark" @click="removeImage(index)">
+          <button
+            class="btn m-0 mb-1 d-block py-1 px-2 text-white bg-dark"
+            @click="removeImage(index)"
+          >
             Remove
           </button>
         </div>
@@ -36,11 +64,18 @@
     <div class="row">
       <div class="col-6 col-sm-6 mb-4">
         <label for="formCategory" class="form-label">類別</label>
-        <select v-model="category" class="form-select" aria-label="Default select example">
-          <option value="photography">Photography</option>
-          <option value="design">Design</option>
-          <option value="programming">Programming</option>
-          <option value="life">Life</option>
+        <select
+          v-model="category"
+          class="form-select"
+          aria-label="Default select example"
+        >
+          <option
+            v-for="category in categories"
+            :key="category.name"
+            :value="category.value"
+          >
+            {{ category.name }}
+          </option>
         </select>
       </div>
       <div class="col-6 col-sm-4 mb-4">
@@ -56,17 +91,34 @@
     <div class="row">
       <div class="col-12 col-sm-10 mb-4">
         <label for="area-content" class="form-label">貼文內容</label>
-        <textarea v-model="content" class="form-control fs-3" id="area-content" ref="areaContent" rows="15" cols="30"
-          style="white-space: pre-wrap"></textarea>
+        <textarea
+          v-model="content"
+          class="form-control fs-3"
+          id="area-content"
+          ref="areaContent"
+          rows="15"
+          cols="30"
+          style="white-space: pre-wrap"
+        ></textarea>
       </div>
     </div>
     <button class="btn col-12 col-sm-2 mb-3 me-2" @click="setDraft(content)">
       Save draft
     </button>
-    <button type="submit" class="btn btn-primary btn col-12 col-sm-2 mb-3" @click="submitHandler">
+    <button
+      type="submit"
+      class="btn btn-primary btn col-12 col-sm-2 mb-3"
+      @click="submitHandler"
+    >
       Submit
     </button>
-    <span v-for="progress in progresses" v-show="progress > 0" class="p-2" :key="progress">{{ progress }}</span>
+    <span
+      v-for="progress in progresses"
+      v-show="progress > 0"
+      class="p-2"
+      :key="progress"
+      >{{ progress }}</span
+    >
   </form>
 </template>
 
@@ -76,7 +128,7 @@ import { db } from '@/firebaseDB.js';
 import { storage } from '../firebaseDB.js';
 import { useStore } from 'vuex';
 import router from '../router/';
-import { defineComponent, ref, onMounted } from 'vue';
+import { ref, computed, defineComponent, onMounted } from 'vue';
 import { DATA_DB } from '@/store/types';
 
 export default defineComponent({
@@ -92,15 +144,28 @@ export default defineComponent({
       progresses = ref([]),
       areaContent = ref(null);
 
-    onMounted(() => {
-      if (!store.state[DATA_DB]) {
-        store.dispatch('getFirestoreDB').then(() => {
-          init();
-        });
-      } else {
-        init();
-      }
-    });
+    const categories = computed(() => [
+      {
+        name: '照相',
+        value: 'photography',
+      },
+      {
+        name: '程式',
+        value: 'programming',
+      },
+      {
+        name: '生活',
+        value: 'life',
+      },
+      {
+        name: '設計',
+        value: 'Design',
+      },
+    ]);
+
+    const isPostExisted = computed(() =>
+      store.getters.IS_POST_EXISTED(title.value)
+    );
 
     const init = () => {
       title.value = '';
@@ -113,45 +178,38 @@ export default defineComponent({
       getDraft();
     };
 
-    const getDraft = () => {
-      var docRef = db.collection('draft').doc('normal');
-      docRef
-        .get()
-        .then((doc) => {
-          if (doc.exists) {
-            const data = doc.data();
-            if (data && data.content) {
-              content.value = data.content;
-            }
-          }
-        })
-        .catch((error) => {
-          console.error('Error getting document:', error);
-        });
+    const getDraft = async () => {
+      try {
+        const docRef = db.collection('draft').doc('normal');
+        const doc = await docRef.get();
+        if (doc.exists && doc.data() && doc.data().content) {
+          content.value = doc.data().content;
+        }
+      } catch (error) {
+        console.error('Error getting document:', error);
+      }
     };
 
-    const setDraft = (val = '') => {
+    const setDraft = async (val = '') => {
       if (!val) {
         console.error('Draft value cannot be empty');
         return;
       }
-      let docRef = db.collection('draft').doc('normal');
-      docRef
-        .set({
+      try {
+        let docRef = db.collection('draft').doc('normal');
+        await docRef.set({
           content: val,
-        })
-        .then(() => {
-          if (val !== '') alert('Draft saved.');
-        })
-        .catch((error) => {
-          console.error('Error setting document:', error);
         });
+        alert('Draft saved.');
+      } catch (error) {
+        alert('Error setting document: ' + error.message);
+      }
     };
 
     const onFileChange = (e) => {
       var localFiles = e.target.files || e.dataTransfer.files;
       if (!localFiles.length) return;
-      localFiles.forEach((file, index) => {
+      Array.from(localFiles).forEach((file, index) => {
         file.index = index;
         readFile(file);
       });
@@ -191,12 +249,10 @@ export default defineComponent({
       image.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        const afterW = 1600;
-        const afterH = (image.height / image.width) * afterW;
+        canvas.width = 1600;
+        canvas.height = (image.height / image.width) * canvas.width;
 
-        canvas.width = afterW;
-        canvas.height = afterH;
-        ctx.drawImage(image, 0, 0, afterW, afterH);
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
         const data = canvas.toDataURL('image/jpeg', 0.9);
         if (!displayImages?.value || !photoPool?.value) {
@@ -300,7 +356,7 @@ export default defineComponent({
         title: title.value,
         category: category.value,
         created: firebase.firestore.FieldValue.serverTimestamp(),
-        imageFiles: [],
+        imageFiles: '',
         content: content.value,
       };
       const isPoolWithPhotos = photoPool.value.length > 0;
@@ -315,24 +371,30 @@ export default defineComponent({
     };
 
     const isValidated = () => {
-      if (title.value === '') {
+      if (title.value.trim() === '') {
         alert('Title is empty.');
         return false;
-      } else {
-        const isTitleExisted = store.getters.IS_POST_EXISTED(title.value);
-        if (isTitleExisted) {
+      }
+
+      try {
+        if (isPostExisted.value) {
           alert('The title has been in use.');
           return false;
         }
+      } catch (error) {
+        console.error('Error checking if post exists:', error);
+        // Handle the error appropriately, e.g., show a generic error message to the user
+        return false;
       }
+
       return true;
     };
 
     const doUploadPhotos = () => {
       return photosToUpload.value.map((file, i) => {
-        let storageRef = storage.ref();
-        var uploadTask = storageRef
-          .child('photography/' + photosToUpload.value[i].name)
+        const storageRef = storage.ref();
+        const uploadTask = storageRef
+          .child(`photography/${photosToUpload.value[i].name}`)
           .put(photosToUpload.value[i], { contentType: 'image/png' });
         return new Promise((resolve) => {
           uploadTask.on(
@@ -347,6 +409,8 @@ export default defineComponent({
                 case firebase.storage.TaskState.RUNNING: // or 'running'
                   // console.log("Upload is running");
                   break;
+                default:
+                // Handle unexpected state
               }
             },
             (error) => {
@@ -359,54 +423,55 @@ export default defineComponent({
                   break;
                 // ...
                 case 'storage/unknown':
-                  // Unknown error occurred, inspect error.serverResponse
+                  console.error('Unknown error occurred:', error);
+                  console.error('Server response:', error.serverResponse);
                   break;
               }
             },
-            getPhotoUrls.bind(this, uploadTask, i, resolve)
+            handlePhotoUrls.bind(this, uploadTask, i, resolve)
           );
         });
       });
     };
 
-    const getPhotoUrls = (uploadTask, i, resolve) => {
-      uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+    const handlePhotoUrls = async (uploadTask, i, resolve) => {
+      try {
+        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
         photosToUpload.value[i].imageSrc = downloadURL;
-        resolve(true);
-      });
-    };
-
-    const doUploadPost = (isWithPhotos, promises, postToUpload) => {
-      if (isWithPhotos) {
-        Promise.all(promises).then(() => {
-          // console.log("promises: ", promises);
-          photosToUpload.value.forEach((_file) => {
-            if (content.value.includes(_file.name)) {
-              content.value = content.value.replace(_file.name, _file.imageSrc);
-            }
-          });
-          postToUpload.content = content.value;
-          postToUpload.imageFiles = JSON.stringify(photosToUpload.value);
-          doUploadPostProto(postToUpload);
-        });
-      } else {
-        doUploadPostProto(postToUpload);
+      } catch (error) {
+        console.error('Error getting download URL:', error);
       }
+      resolve(true);
     };
 
-    const doUploadPostProto = (postToUpload) => {
-      db.collection('posts')
-        .add(postToUpload)
-        .then(() => {
-          alert('Upload is successful!');
-          setDraft();
-          store.dispatch('getFirestoreDB').then(() => {
-            router.push({ name: 'TheHome' });
-          });
-        })
-        .catch((error) => {
-          console.error('Error adding document: ', error);
+    const doUploadPost = async (isWithPhotos, promises, postToUpload) => {
+      if (isWithPhotos) {
+        await Promise.all(promises);
+        photosToUpload.value.forEach((_file) => {
+          if (content.value.includes(_file.name)) {
+            content.value = content.value.replace(_file.name, _file.imageSrc);
+          }
         });
+        postToUpload.content = content.value;
+      }
+      postToUpload.imageFiles = JSON.stringify(photosToUpload.value);
+      doUploadPostProto(postToUpload);
+    };
+
+    const doUploadPostProto = async (postToUpload) => {
+      try {
+        await db.collection('posts').add(postToUpload);
+        alert('Upload is successful!');
+        setDraft();
+        store.dispatch('getFirestoreDB').then(() => {
+          router.push({ name: 'TheHome' });
+        });
+      } catch (error) {
+        alert(
+          'An error occurred while uploading the post. Please try again later.'
+        );
+        console.error('Error adding document: ', error);
+      }
     };
 
     const signOutHandler = () => {
@@ -418,10 +483,19 @@ export default defineComponent({
           alert('Log out!');
           router.push({ name: 'TheAdmin' });
         })
-        .catch(() => {
-          // An error happened.
+        .catch((error) => {
+          console.error('An error occurred:', error);
+          alert('An error occurred. Please try again.');
         });
     };
+
+    onMounted(async () => {
+      if (!store.state[DATA_DB]) {
+        await store.dispatch('getFirestoreDB');
+      }
+      init();
+    });
+
     return {
       title,
       content,
@@ -438,6 +512,7 @@ export default defineComponent({
       doMark,
       submitHandler,
       signOutHandler,
+      categories,
     };
   },
 });
