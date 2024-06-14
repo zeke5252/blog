@@ -85,7 +85,14 @@
 <script>
 import { db, storage } from '@/firebaseDB.js';
 import { firebase } from '@firebase/app';
-import { ref, computed, watch, onBeforeUnmount, defineComponent } from 'vue';
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+  defineComponent,
+} from 'vue';
 import { useStore } from 'vuex';
 import { convertTime, ContentAPI, PhotoAPI } from '../utils/common.js';
 import _ from 'lodash';
@@ -140,8 +147,7 @@ export default defineComponent({
       return results.map((post) => {
         return {
           ...post,
-          isPhotoExisted:
-            post.imageFiles !== '[]' && post.imageFiles.length !== 0,
+          isPhotoExisted: post.imageFiles !== '[]',
         };
       });
     });
@@ -160,7 +166,22 @@ export default defineComponent({
         : posts;
     };
 
-    const loadMore = () => {
+    const loadMore = _.debounce(() => {
+      const postsToAdd = store.getters.GET_DB_SCROLL({
+        times: postsTimes.value,
+        amount: postsAmount.value,
+      });
+      postsCollector.value = postsCollector.value.concat(
+        filterPost(postsToAdd)
+      );
+      postsTimes.value++;
+      if (postsToAdd.length === 0) {
+        document.removeEventListener('scroll', calcCursorPosition);
+      }
+      isInMoreStatus.value = false;
+    }, 1000);
+
+    const calcCursorPosition = () => {
       const { clientHeight, scrollTop, scrollHeight } =
         document.documentElement;
       const isScrollNearBottom =
@@ -168,26 +189,11 @@ export default defineComponent({
 
       if (!isInMoreStatus.value && isScrollNearBottom) {
         isInMoreStatus.value = true;
-        setTimeout(() => {
-          const postsToAdd = store.getters.GET_DB_SCROLL({
-            times: postsTimes.value,
-            amount: postsAmount.value,
-          });
-          postsCollector.value = postsCollector.value.concat(
-            filterPost(postsToAdd)
-          );
-          postsTimes.value++;
-          if (postsToAdd.length === 0) {
-            document.removeEventListener('scroll', loadMore);
-          }
-          isInMoreStatus.value = false;
-        }, 1000);
+        loadMore();
       }
     };
 
-    store.dispatch('getFirestoreDB').then(loadMore);
-
-    document.addEventListener('scroll', loadMore, true);
+    store.dispatch('getFirestoreDB').then(calcCursorPosition);
 
     const getConvertTime = (time) => convertTime(time, false);
 
@@ -201,45 +207,38 @@ export default defineComponent({
         : 'No contents!';
     };
 
-    const removePost = (post) => {
-      const query = db.collection('posts').where('title', '==', post.title);
-      query
-        .get()
-        .then((querySnapshot) => {
-          const batch = db.batch();
-          querySnapshot.forEach((doc) => {
-            batch.delete(doc.ref);
-          });
-          return batch.commit();
-        })
-        .then(() => {
-          return store.dispatch('getFirestoreDB');
-        })
-        .then(() => {
-          postsCollector.value = GET_DB_ALL.value();
-          post.imageFiles.length !== 0 && removeDBImages(post);
-        })
-        .catch((error) => {
-          console.error('Error removing document: ', error);
+    const removePost = async (post) => {
+      try {
+        const query = db.collection('posts').where('title', '==', post.title);
+        const querySnapshot = await query.get();
+        const batch = db.batch();
+        querySnapshot.forEach((doc) => {
+          batch.delete(doc.ref);
         });
+        await batch.commit();
+        await store.dispatch('getFirestoreDB');
+        postsCollector.value = GET_DB_ALL.value();
+        post.imageFiles.length !== 0 && removeDBImages(post);
+      } catch (error) {
+        console.error('Error removing document: ', error);
+      }
     };
 
-    const removeDBImages = (post) => {
-      if (post.imageFiles.length === 0) return;
-
+    const removeDBImages = async (post) => {
+      if (post.imageFiles === 0 || post.imageFiles === '[]') return;
       const imagesUrls = PhotoAPI.getSrc(post.imageFiles);
-      const imagesToDelete = imagesUrls.map(
-        (url) => url.match(/(?<=%2F).*(?=,|$)/)[0]
-      );
-
-      const deletePromises = imagesToDelete.map((image) => {
-        const storageRef = storage.ref();
-        return storageRef.child(`${post.category}/${image}`).delete();
-      });
-
-      Promise.all(deletePromises).then(() => {
+      // Need to use new RegExg() instead of .match(/.../) to avoid error in js
+      const re = new RegExp('(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)', 'g');
+      const imagesToDelete = imagesUrls.map((url) => url.match(re)[0]);
+      try {
+        let storageRef = storage.ref();
+        for (let image of imagesToDelete) {
+          await storageRef.child(`${post.category}/${image}`).delete();
+        }
         alert('The post has been deleted!');
-      });
+      } catch (error) {
+        console.log('Error deleting images: ', error);
+      }
     };
 
     const stopWatchCategory = watch(category, () => {
@@ -255,10 +254,14 @@ export default defineComponent({
       }, 300)();
     });
 
+    onMounted(() => {
+      document.addEventListener('scroll', calcCursorPosition);
+    });
+
     onBeforeUnmount(() => {
       stopWatchKeyword();
       stopWatchCategory();
-      document.removeEventListener('scroll', loadMore, true);
+      document.removeEventListener('scroll', calcCursorPosition, true);
     });
 
     return {
@@ -454,3 +457,6 @@ export default defineComponent({
   }
 }
 </style>
+
+https://firebasestorage.googleapis.com/v0/b/zekeblog-e6bd3.appspot.com/o/photography%2FDSC_2449.JPG?alt=media&token=04002731-bcf4-44f5-8928-ca45108c24b9
+https://firebasestorage.googleapis.com/v0/b/zekeblog-e6bd3.appspot.com/o/photography/DSC_2449.JPG?alt=media&token=04002731-bcf4-44f5-8928-ca45108c24b9
