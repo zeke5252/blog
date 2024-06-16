@@ -1,51 +1,81 @@
 <template>
-  <div
-    v-if="
-      ContentAPI.isDisplay(props.element, 'photo') &&
-      props.imageFiles.length !== 0
-    "
-    class="me-sm-0"
-  >
-    <BasePhoto :Url="props.element" :Images="props.imageFiles" />
+  <div v-if="elementType === ELEMENT_TYPE_PHOTO" class="me-sm-0">
+    <BasePhoto :Url="element" :Images="imageFiles" />
   </div>
-  <a
-    v-else-if="ContentAPI.isDisplay(props.element, 'link')"
-    :href="props.element"
-  >
-    {{ ContentAPI.limitStrSize(props.element, 40) }}
+  <a v-else-if="elementType === ELEMENT_TYPE_LINK" :href="element">
+    {{ elementContents[ELEMENT_TYPE_LINK] }}
   </a>
   <p
-    v-else-if="ContentAPI.isDisplay(props.element, 'code')"
+    v-else-if="elementType === ELEMENT_TYPE_CODE"
     class="section--p fw-light lh-lg fs-5 my-4 mx-2 section--code p-4 fw-light"
   >
-    {{ ContentAPI.removeMarks(props.element) }}
+    {{ elementContents[ELEMENT_TYPE_CODE] }}
   </p>
-  <template v-else>
-    <p class="section--p fw-light lh-lg fs-5 my-4 mx-2">
-      <span
-        v-for="(el, index) in ContentAPI.splitParagraph(props.element)"
-        :class="ContentAPI.isDisplay(el, 'bold') ? 'section--bold' : ''"
-        :key="index"
-      >
-        {{ ContentAPI.isDisplay(el, 'bold') ? ContentAPI.removeMarks(el) : el }}
-      </span>
-    </p>
-  </template>
+  <p v-else class="section--p fw-light lh-lg fs-5 my-4 mx-2">
+    <span
+      v-for="(el, index) in elementContents[ELEMENT_TYPE_PARAGRAPH]"
+      :key="index"
+      :class="el.isBold ? 'section--bold' : ''"
+    >
+      {{ el.content }}
+    </span>
+  </p>
 </template>
 
-<script setup>
+<script>
+import { computed, defineComponent } from 'vue';
 import { ContentAPI } from '../utils/common.js';
 import BasePhoto from './BasePhoto.vue';
 
-// eslint-disable-next-line no-undef
-const props = defineProps({
-  imageFiles: {
-    type: String,
-    default: () => '',
+const ELEMENT_TYPE_PHOTO = 'photo';
+const ELEMENT_TYPE_LINK = 'link';
+const ELEMENT_TYPE_CODE = 'code';
+const ELEMENT_TYPE_BOLD = 'bold';
+const ELEMENT_TYPE_PARAGRAPH = 'p';
+
+export default defineComponent({
+  name: 'PostElement',
+  components: {
+    BasePhoto,
   },
-  element: {
-    type: String,
-    default: '',
+  props: {
+    imageFiles: {
+      type: String,
+      default: () => '',
+    },
+    element: {
+      type: String,
+      default: '',
+    },
+  },
+  setup(props) {
+    const elementType = computed(() => ContentAPI.isTypeOf(props.element));
+    const elementContents = computed(() => {
+      return {
+        link: ContentAPI.limitStrSize(props.element, 40),
+        code: ContentAPI.removeMarks(props.element),
+        p: ContentAPI.splitParagraph(props.element).map((el) => {
+          return {
+            content:
+              ContentAPI.isTypeOf(el) === ELEMENT_TYPE_BOLD
+                ? ContentAPI.removeMarks(el)
+                : el,
+            isBold: ContentAPI.isTypeOf(el) === ELEMENT_TYPE_BOLD,
+          };
+        }),
+      };
+    });
+
+    return {
+      ContentAPI,
+      elementType,
+      elementContents,
+      ELEMENT_TYPE_PHOTO,
+      ELEMENT_TYPE_LINK,
+      ELEMENT_TYPE_CODE,
+      ELEMENT_TYPE_BOLD,
+      ELEMENT_TYPE_PARAGRAPH,
+    };
   },
 });
 </script>
