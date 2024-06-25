@@ -47,7 +47,6 @@
           type="text"
           class="form-control mb-2 border-0"
           id="formTitle"
-          aria-label="Title"
           placeholder="大名"
         />
       </div>
@@ -93,9 +92,8 @@ import { ref, computed, watch, onMounted, defineComponent } from 'vue';
 import { convertTime, ContentAPI } from '../utils/common.js';
 import { firebase } from '@firebase/app';
 import { useStore } from 'vuex';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { db } from '../firebaseDB.js';
-import { DATA_DB } from '@/store/types';
 
 import PostElement from '../components/PostElement.vue';
 
@@ -104,12 +102,10 @@ export default defineComponent({
   components: {
     PostElement,
   },
-  props: {
-    title: String,
-  },
-  setup(props) {
+  setup() {
     const store = useStore();
     const router = useRouter();
+    const route = useRoute();
 
     const contents = ref(null);
     const isPrevDisplay = ref(null);
@@ -118,12 +114,13 @@ export default defineComponent({
     const msg = ref('');
     const contentToArr = ref([]);
 
+    const title = computed(() => route.params.title);
     const postCaption = computed(
       () => `${contents.value.category} / ${contents.value.created}`
     );
 
     const init = () => {
-      const postData = store.getters.GET_DB_BY_TITLE(props.title);
+      const postData = store.getters.postByTitle(title.value);
       msgTitle.value = '';
       msg.value = '';
       if (postData) {
@@ -142,12 +139,12 @@ export default defineComponent({
     };
 
     const doPrev = () => {
-      const toTitle = store.getters.GET_NEXT_OR_PREV_POST(props.title, false);
+      const toTitle = store.getters.nextOrPrevPost(title.value, false);
       router.push(toTitle);
     };
 
     const doNext = () => {
-      const toTitle = store.getters.GET_NEXT_OR_PREV_POST(props.title, true);
+      const toTitle = store.getters.nextOrPrevPost(title.value, true);
       router.push(toTitle);
     };
 
@@ -182,20 +179,21 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      if (!store.state[DATA_DB]) {
-        await store.dispatch('getFirestoreDB');
+      if (!store.state.posts) {
+        await store.dispatch('fetchAllPosts');
       }
       init();
     });
 
     watch(
-      () => props.title,
+      () => title.value,
       () => {
         init();
       }
     );
 
     return {
+      title,
       contents,
       isPrevDisplay,
       isNextDisplay,

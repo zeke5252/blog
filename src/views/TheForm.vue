@@ -15,7 +15,6 @@
           type="text"
           class="form-control"
           id="formTitle"
-          aria-label="Title"
         />
       </div>
     </div>
@@ -64,11 +63,7 @@
     <div class="row">
       <div class="col-6 col-sm-6 mb-4">
         <label for="formCategory" class="form-label">類別</label>
-        <select
-          v-model="category"
-          class="form-select"
-          aria-label="Default select example"
-        >
+        <select v-model="category" class="form-select">
           <option
             v-for="category in categories"
             :key="category.name"
@@ -129,7 +124,6 @@ import { storage } from '../firebaseDB.js';
 import { useStore } from 'vuex';
 import router from '../router/';
 import { ref, computed, defineComponent, onMounted } from 'vue';
-import { DATA_DB } from '@/store/types';
 
 export default defineComponent({
   name: 'TheForm',
@@ -164,7 +158,7 @@ export default defineComponent({
     ]);
 
     const isPostExisted = computed(() =>
-      store.getters.IS_POST_EXISTED(title.value)
+      store.getters.isPostExisted(title.value)
     );
 
     const init = () => {
@@ -462,10 +456,8 @@ export default defineComponent({
       try {
         await db.collection('posts').add(postToUpload);
         alert('Upload is successful!');
-        setDraft();
-        store.dispatch('getFirestoreDB').then(() => {
-          router.push({ name: 'TheHome' });
-        });
+        setDraft(content.value);
+        router.push({ name: 'TheHome' });
       } catch (error) {
         alert(
           'An error occurred while uploading the post. Please try again later.'
@@ -490,8 +482,8 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      if (!store.state[DATA_DB]) {
-        await store.dispatch('getFirestoreDB');
+      if (!store.state.posts) {
+        await store.dispatch('fetchAllPosts');
       }
       init();
     });

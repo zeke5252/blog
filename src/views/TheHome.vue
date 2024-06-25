@@ -1,13 +1,8 @@
 <template>
-  <BaseLoading v-if="postsCollector.length === 0" />
+  <BaseLoading v-if="!filteredPosts?.length" />
   <div v-else class="home">
     <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
-      <select
-        class="search--input py-1 px-3 me-3"
-        v-model="category"
-        id="categoryLabel"
-        aria-label="categoryLabel"
-      >
+      <select v-model="category" class="search--input py-1 px-3 me-3">
         <option
           v-for="category in categories"
           :key="category.name"
@@ -26,23 +21,26 @@
         type="text"
         list="keywordListOptions"
         id="searchInput"
-        aria-label="searchInput"
       />
     </div>
-    <datalist id="keywordListOptions">
+    <datalist v-if="keyword !== ''" id="keywordListOptions">
       <option
-        v-for="post in GET_DB_ALL"
+        v-for="post in filteredPosts"
         :key="post.title"
         :value="post.title"
       />
     </datalist>
     <div class="row row-cols-1 row-cols-md-3 g-4 pe-sm-0 pe-md-2">
-      <div class="position-relative" v-for="post in posts" :key="post.title">
+      <div
+        class="position-relative"
+        v-for="post in filteredPosts"
+        :key="post.title"
+      >
         <router-link
           :to="`/posts/${post.title}`"
           style="color: white"
           :class="
-            post.imageFiles.length > 0
+            post.imageFiles !== '[]'
               ? 'card text-decoration-none styleImg'
               : 'card text-decoration-none styleImg styleTxt'
           "
@@ -58,7 +56,7 @@
           <div class="position-relative p-4">
             <h3 class="card-title fw-normal">{{ post.title }}</h3>
             <p class="card-text my-2">
-              {{ getFirstParagraph(post.content) }}
+              {{ post.brief }}
               <em class="moreContent">more >> </em>
             </p>
           </div>
@@ -74,11 +72,11 @@
           class="position-absolute bottom-0 end-0 px-3 m-2 fw-lighter text-primary border-start border-1 border-light"
           style="letter-spacing: 4px"
         >
-          {{ getConvertTime(post.created) }}
+          {{ post.convertedTime }}
         </div>
       </div>
     </div>
-    <BaseLoading v-if="isInMoreStatus && postsCollector.length !== 0" />
+    <BaseLoading v-if="isInMoreStatus && postsCollector?.length" />
   </div>
 </template>
 
@@ -88,7 +86,6 @@ import { firebase } from '@firebase/app';
 import {
   ref,
   computed,
-  watch,
   onMounted,
   onBeforeUnmount,
   defineComponent,
@@ -107,6 +104,10 @@ export default defineComponent({
     BaseLoading,
   },
   setup() {
+    firebase.auth().onAuthStateChanged((user) => {
+      isLogin.value = user !== null;
+    });
+
     const store = useStore();
     const isLogin = ref();
     const postsAmount = ref(7);
@@ -114,6 +115,21 @@ export default defineComponent({
     const isInMoreStatus = ref(false);
     const category = ref('');
     const keyword = ref('');
+    const postsCollector = ref([]);
+    const keywordPosts = ref([]);
+
+    const loadMore = _.debounce(() => {
+      const postsToAdd = store.getters.extraPosts({
+        times: postsTimes.value,
+        amount: postsAmount.value,
+      });
+      postsCollector.value = postsCollector.value?.concat(postsToAdd);
+      postsTimes.value++;
+      if (postsToAdd.length === 0) {
+        document.removeEventListener('scroll', calcCursorPosition);
+      }
+      isInMoreStatus.value = false;
+    }, 1000);
 
     const categories = computed(() => [
       {
@@ -139,49 +155,28 @@ export default defineComponent({
       },
     ]);
 
-    const posts = computed(() => {
-      const results =
-        keywordPosts.value.length > 0
-          ? keywordPosts.value
-          : postsCollector.value;
-      return results.map((post) => {
-        return {
-          ...post,
-          isPhotoExisted: post.imageFiles !== '[]',
-        };
-      });
+    const filteredPosts = computed(() => {
+      return postsCollector.value
+        ?.filter((post) => {
+          if (category.value !== '' && keyword.value !== '') {
+            return (
+              post.category === category.value &&
+              post.title.includes(keyword.value)
+            );
+          } else if (category.value !== '') {
+            return post.category === category.value;
+          } else if (keyword.value !== '') {
+            return post.title.includes(keyword.value);
+          } else {
+            return post;
+          }
+        })
+        .map((post) => {
+          return formatPost(post);
+        });
     });
 
-    const postsCollector = ref([]);
-    const keywordPosts = ref([]);
-    const GET_DB_ALL = ref(() => store.getters.GET_DB_ALL());
-
-    firebase.auth().onAuthStateChanged((user) => {
-      isLogin.value = user !== null;
-    });
-
-    const filterPost = (posts) => {
-      return category.value !== ''
-        ? posts.filter((post) => post['category'] === category.value)
-        : posts;
-    };
-
-    const loadMore = _.debounce(() => {
-      const postsToAdd = store.getters.GET_DB_SCROLL({
-        times: postsTimes.value,
-        amount: postsAmount.value,
-      });
-      postsCollector.value = postsCollector.value.concat(
-        filterPost(postsToAdd)
-      );
-      postsTimes.value++;
-      if (postsToAdd.length === 0) {
-        document.removeEventListener('scroll', calcCursorPosition);
-      }
-      isInMoreStatus.value = false;
-    }, 1000);
-
-    const calcCursorPosition = () => {
+    function calcCursorPosition() {
       const { clientHeight, scrollTop, scrollHeight } =
         document.documentElement;
       const isScrollNearBottom =
@@ -191,41 +186,30 @@ export default defineComponent({
         isInMoreStatus.value = true;
         loadMore();
       }
-    };
+    }
 
-    store.dispatch('getFirestoreDB').then(calcCursorPosition);
-
-    const getConvertTime = (time) => convertTime(time, false);
-
-    const getFirstParagraph = (content) => {
-      const contentsArr = ContentAPI.splitPost(content);
-      if (!contentsArr || !Array.isArray(contentsArr))
-        return contentsArr || 'No contents!';
-      const result = contentsArr.find((el) => el.substring(0, 4) !== 'http');
-      return result
-        ? ContentAPI.limitStrSize(ContentAPI.removeMarks(result), 150)
-        : 'No contents!';
-    };
-
-    const removePost = async (post) => {
+    async function removePost(post) {
       try {
-        const query = db.collection('posts').where('title', '==', post.title);
-        const querySnapshot = await query.get();
+        const postCollection = db
+          .collection('posts')
+          .where('title', '==', post.title);
+        const querySnapshot = await postCollection.get();
         const batch = db.batch();
         querySnapshot.forEach((doc) => {
           batch.delete(doc.ref);
         });
         await batch.commit();
-        await store.dispatch('getFirestoreDB');
-        postsCollector.value = GET_DB_ALL.value();
-        post.imageFiles.length !== 0 && removeDBImages(post);
+        await store.dispatch('fetchAllPosts');
+        postsCollector.value = store.state.posts;
+        if (post.imageFiles !== '[]') {
+          removePostImages(post);
+        }
       } catch (error) {
         console.error('Error removing document: ', error);
       }
-    };
+    }
 
-    const removeDBImages = async (post) => {
-      if (post.imageFiles === 0 || post.imageFiles === '[]') return;
+    async function removePostImages(post) {
       const imagesUrls = PhotoAPI.getSrc(post.imageFiles);
       // Need to use new RegExg() instead of .match(/.../) to avoid error in js
       const re = new RegExp('(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)', 'g');
@@ -239,28 +223,34 @@ export default defineComponent({
       } catch (error) {
         console.log('Error deleting images: ', error);
       }
-    };
+    }
 
-    const stopWatchCategory = watch(category, () => {
-      keyword.value = '';
-      postsCollector.value = filterPost(GET_DB_ALL.value());
-    });
+    function formatPost(post) {
+      return {
+        ...post,
+        isPhotoExisted: post.imageFiles !== '[]',
+        convertedTime: convertTime(post.created, false),
+        brief: getBrief(post.content),
+      };
+    }
 
-    const stopWatchKeyword = watch(keyword, (val) => {
-      _.debounce(() => {
-        keywordPosts.value = postsCollector.value.filter((post) =>
-          post.title.includes(val)
-        );
-      }, 300)();
-    });
+    function getBrief(content) {
+      const contentsArr = ContentAPI.splitPost(content);
+      if (!contentsArr || !Array.isArray(contentsArr))
+        return contentsArr || 'No contents!';
+      const result = contentsArr.find((el) => el.substring(0, 4) !== 'http');
+      return result
+        ? ContentAPI.limitStrSize(ContentAPI.removeMarks(result), 150)
+        : 'No contents!';
+    }
 
-    onMounted(() => {
+    onMounted(async () => {
+      await store.dispatch('fetchAllPosts');
+      loadMore();
       document.addEventListener('scroll', calcCursorPosition);
     });
 
     onBeforeUnmount(() => {
-      stopWatchKeyword();
-      stopWatchCategory();
       document.removeEventListener('scroll', calcCursorPosition, true);
     });
 
@@ -270,14 +260,11 @@ export default defineComponent({
       postsCollector,
       category,
       keyword,
-      GET_DB_ALL,
       keywordPosts,
       isInMoreStatus,
-      getConvertTime,
-      getFirstParagraph,
       removePost,
       categories,
-      posts,
+      filteredPosts,
     };
   },
 });
@@ -457,6 +444,3 @@ export default defineComponent({
   }
 }
 </style>
-
-https://firebasestorage.googleapis.com/v0/b/zekeblog-e6bd3.appspot.com/o/photography%2FDSC_2449.JPG?alt=media&token=04002731-bcf4-44f5-8928-ca45108c24b9
-https://firebasestorage.googleapis.com/v0/b/zekeblog-e6bd3.appspot.com/o/photography/DSC_2449.JPG?alt=media&token=04002731-bcf4-44f5-8928-ca45108c24b9
