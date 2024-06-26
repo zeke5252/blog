@@ -128,17 +128,24 @@ export default defineComponent({
           contents.value.postCaption = `${postData.category} / ${convertTime(postData.created)}`;
           contents.value.postElements = ContentAPI.splitPost(postData.content);
         });
-        contents.value.nextPost = await store.getters.adjacentPost(
-          contents.value.created
-        );
-        contents.value.prevPost = await store.getters.adjacentPost(
-          contents.value.created,
-          false
-        );
+
+        await handleAdjacentPosts(contents.value.created);
       } catch (error) {
         console.log('Error getting documents: ', error);
         router.replace({ name: 'The404' });
       }
+    }
+
+    async function handleAdjacentPosts(created) {
+      await store.dispatch('fetchAdjacentPost', {
+        created,
+      });
+      await store.dispatch('fetchAdjacentPost', {
+        created,
+        isNext: false,
+      });
+      contents.value.nextPost = store.state.nextPost;
+      contents.value.prevPost = store.state.prevPost;
     }
 
     function doPrev() {

@@ -4,6 +4,8 @@ import { db } from '../firebaseDB.js';
 export default createStore({
   state: {
     posts: null,
+    prevPost: null,
+    nextPost: null,
   },
   getters: {
     extraPosts:
@@ -18,29 +20,6 @@ export default createStore({
           })
         );
       },
-    adjacentPost:
-      () =>
-      async (currentPost, isNext = true) => {
-        if (!currentPost) return false;
-        try {
-          const querySnapshot = await db
-            .collection('posts')
-            .orderBy('created', `${isNext ? 'asc' : 'desc'}`)
-            .startAfter(currentPost)
-            .limit(1)
-            .get();
-
-          const [doc] = querySnapshot.docs.map((doc) => {
-            return {
-              exists: doc.exists,
-              data: doc.data(),
-            };
-          });
-          return doc;
-        } catch (error) {
-          console.log('Error getting documents: ', error);
-        }
-      },
     isPostExisted: (state) => (title) => {
       return state.posts.find((post) => {
         return post.title === title;
@@ -48,9 +27,33 @@ export default createStore({
     },
   },
   mutations: {
-    updatePost: (state, p) => (state.posts = p),
+    updatePosts: (state, posts) => (state.posts = posts),
+    updateAdjacentPost: (state, { post, isNext = true }) => {
+      isNext ? (state.nextPost = post) : (state.prevPost = post);
+    },
   },
   actions: {
+    async fetchAdjacentPost({ commit }, { created, isNext = true }) {
+      if (!created) return false;
+      try {
+        const querySnapshot = await db
+          .collection('posts')
+          .orderBy('created', `${isNext ? 'asc' : 'desc'}`)
+          .startAfter(created)
+          .limit(1)
+          .get();
+
+        const [post] = querySnapshot.docs.map((doc) => {
+          return {
+            exists: doc.exists,
+            data: doc.data(),
+          };
+        });
+        commit('updateAdjacentPost', { post, isNext });
+      } catch (error) {
+        console.log('Error getting documents: ', error);
+      }
+    },
     async fetchAllPosts({ commit }) {
       let resultPosts = [];
       let postCollection = db.collection('posts').orderBy('created', 'desc');
@@ -59,7 +62,7 @@ export default createStore({
           resultPosts.push(doc.data());
         });
       });
-      commit('updatePost', resultPosts);
+      commit('updatePosts', resultPosts);
     },
   },
   modules: {},
