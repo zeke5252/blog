@@ -9,13 +9,14 @@
       >
         <font-awesome-icon
           icon="chevron-left"
-          class="u-btn__prev"
-          :style="{ opacity: !isPrevDisplay ? 0.3 : 1 }"
+          :class="`u-btn u-btn__prev ${!contents.prevPost?.exists ? 'u-btn__grey' : ''}`"
           @click="doPrev"
         />
         <div class="d-flex flex-column align-items-center px-5">
           <h1 class="fw-normal" v-text="title" />
-          <span class="fw-light fs-6 opacity-75" v-text="postCaption" />
+          <span class="fw-light fs-6 opacity-75">{{
+            contents.postCaption
+          }}</span>
           <div v-if="contents.msgs" class="d-inline-flex mt-2">
             <img src="../assets/msg.svg" class="msg me-1" />
             <span style="color: white">
@@ -25,14 +26,13 @@
         </div>
         <font-awesome-icon
           icon="chevron-right"
-          class="u-btn__next"
-          :style="{ opacity: !isNextDisplay ? 0.3 : 1 }"
+          :class="`u-btn u-btn__next ${!contents.nextPost?.exists ? 'u-btn__grey' : ''}`"
           @click="doNext"
         />
       </header>
       <section class="my-3">
         <PostElement
-          v-for="(element, index) in contentToArr"
+          v-for="(element, index) in contents.postElements"
           :key="index"
           :element="element"
           :imageFiles="contents.imageFiles"
@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { ref, computed, watch, onMounted, defineComponent } from 'vue';
+import { ref, computed, watch, defineComponent } from 'vue';
 import { convertTime, ContentAPI } from '../utils/common.js';
 import { firebase } from '@firebase/app';
 import { useStore } from 'vuex';
@@ -108,47 +108,52 @@ export default defineComponent({
     const route = useRoute();
 
     const contents = ref(null);
-    const isPrevDisplay = ref(null);
-    const isNextDisplay = ref(null);
     const msgTitle = ref('');
     const msg = ref('');
-    const contentToArr = ref([]);
 
     const title = computed(() => route.params.title);
-    const postCaption = computed(
-      () => `${contents.value.category} / ${contents.value.created}`
-    );
 
-    const init = () => {
-      const postData = store.getters.postByTitle(title.value);
-      msgTitle.value = '';
-      msg.value = '';
-      if (postData) {
-        handlePostData(postData);
-      } else {
+    async function init() {
+      contents.value = null;
+
+      try {
+        const querySnapshot = await db
+          .collection('posts')
+          .where('title', '==', title.value)
+          .get();
+
+        querySnapshot.forEach((doc) => {
+          const postData = doc.data();
+          contents.value = postData;
+          contents.value.postCaption = `${postData.category} / ${convertTime(postData.created)}`;
+          contents.value.postElements = ContentAPI.splitPost(postData.content);
+        });
+        contents.value.nextPost = await store.getters.adjacentPost(
+          contents.value.created
+        );
+        contents.value.prevPost = await store.getters.adjacentPost(
+          contents.value.created,
+          false
+        );
+      } catch (error) {
+        console.log('Error getting documents: ', error);
         router.replace({ name: 'The404' });
       }
-    };
+    }
 
-    const handlePostData = (postData) => {
-      isPrevDisplay.value = postData.isPrevDisplay;
-      isNextDisplay.value = postData.isNextDisplay;
-      postData.post.created = convertTime(postData.post.created);
-      contentToArr.value = ContentAPI.splitPost(postData?.post?.content);
-      contents.value = postData.post;
-    };
+    function doPrev() {
+      if (contents.value.prevPost?.data?.title) {
+        router.push(contents.value.prevPost.data.title);
+      }
+    }
 
-    const doPrev = () => {
-      const toTitle = store.getters.nextOrPrevPost(title.value, false);
-      router.push(toTitle);
-    };
+    function doNext() {
+      if (contents.value.nextPost?.data?.title) {
+        router.push(contents.value.nextPost.data.title);
+      }
+    }
 
-    const doNext = () => {
-      const toTitle = store.getters.nextOrPrevPost(title.value, true);
-      router.push(toTitle);
-    };
-
-    const doPostMsg = async () => {
+    async function doPostMsg() {
       try {
         const posts = await db
           .collection('posts')
@@ -176,31 +181,21 @@ export default defineComponent({
         // Display user-friendly error message
         alert('An error occurred while posting the message. Please try again.');
       }
-    };
-
-    onMounted(async () => {
-      if (!store.state.posts) {
-        await store.dispatch('fetchAllPosts');
-      }
-      init();
-    });
+    }
 
     watch(
-      () => title.value,
+      title,
       () => {
         init();
-      }
+      },
+      { immediate: true }
     );
 
     return {
       title,
       contents,
-      isPrevDisplay,
-      isNextDisplay,
       msgTitle,
       msg,
-      contentToArr,
-      postCaption,
       doPrev,
       doNext,
       doPostMsg,
@@ -213,25 +208,22 @@ export default defineComponent({
 @import '../assets/scss/app.scss';
 
 .u-btn {
+  position: absolute;
+  color: white;
+  width: 40px;
+  height: 40px;
+  padding: 12px;
+  margin: 0;
+  cursor: pointer;
   &__next {
-    position: absolute;
-    color: white;
-    width: 40px;
-    height: 40px;
-    padding: 12px;
-    margin: 0;
     right: 0;
-    cursor: pointer;
   }
   &__prev {
-    position: absolute;
-    color: white;
-    width: 40px;
-    height: 40px;
-    padding: 12px;
-    margin: 0;
     left: 0;
-    cursor: pointer;
+  }
+  &__grey {
+    opacity: 0.3;
+    cursor: default;
   }
 }
 

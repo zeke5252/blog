@@ -6,17 +6,6 @@ export default createStore({
     posts: null,
   },
   getters: {
-    postByTitle: (state) => (title) => {
-      let result;
-      state.posts.forEach((post, index) => {
-        if (post['title'] === title) {
-          let isPrevDisplay = index !== 0 ? true : false;
-          let isNextDisplay = index !== state.posts.length - 1 ? true : false;
-          result = { post, isPrevDisplay, isNextDisplay };
-        }
-      });
-      return result;
-    },
     extraPosts:
       (state) =>
       (obj = null) => {
@@ -29,26 +18,28 @@ export default createStore({
           })
         );
       },
-    nextOrPrevPost:
-      (state) =>
-      (title, isNext = false) => {
-        let result;
-        state.posts.forEach((post, index) => {
-          if (post['title'] === title) {
-            let indexP;
-            if (isNext) {
-              indexP = index + 1;
-              result =
-                index !== state.posts.length - 1
-                  ? indexP
-                  : state.posts.length - 1;
-            } else {
-              indexP = index - 1;
-              result = index !== 0 ? indexP : 0;
-            }
-          }
-        });
-        return state.posts[result].title;
+    adjacentPost:
+      () =>
+      async (currentPost, isNext = true) => {
+        if (!currentPost) return false;
+        try {
+          const querySnapshot = await db
+            .collection('posts')
+            .orderBy('created', `${isNext ? 'asc' : 'desc'}`)
+            .startAfter(currentPost)
+            .limit(1)
+            .get();
+
+          const [doc] = querySnapshot.docs.map((doc) => {
+            return {
+              exists: doc.exists,
+              data: doc.data(),
+            };
+          });
+          return doc;
+        } catch (error) {
+          console.log('Error getting documents: ', error);
+        }
       },
     isPostExisted: (state) => (title) => {
       return state.posts.find((post) => {
