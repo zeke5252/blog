@@ -1,6 +1,6 @@
 <template>
   <div v-if="elementType === ELEMENT_TYPE_PHOTO" class="me-sm-0">
-    <BasePhoto :Url="element" :Images="imageFiles" />
+    <BasePhoto :url="element" :Images="imageFiles" />
   </div>
   <a v-else-if="elementType === ELEMENT_TYPE_LINK" :href="element">
     {{ elementContents[ELEMENT_TYPE_LINK] }}
@@ -24,7 +24,7 @@
 
 <script>
 import { computed, defineComponent } from 'vue';
-import { ContentAPI } from '../utils/common.js';
+import { useContent } from '../composables/useContent.js';
 import BasePhoto from './BasePhoto.vue';
 
 const ELEMENT_TYPE_PHOTO = 'photo';
@@ -49,25 +49,24 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const elementType = computed(() => ContentAPI.isTypeOf(props.element));
+    const { limitStrSize, removeMarks, splitParagraph, isTypeOf } =
+      useContent();
+
+    const elementType = computed(() => isTypeOf(props.element));
     const elementContents = computed(() => {
       return {
-        link: ContentAPI.limitStrSize(props.element, 40),
-        code: ContentAPI.removeMarks(props.element),
-        p: ContentAPI.splitParagraph(props.element).map((el) => {
+        link: limitStrSize(props.element, 40),
+        code: removeMarks(props.element),
+        p: splitParagraph(props.element).map((el) => {
           return {
-            content:
-              ContentAPI.isTypeOf(el) === ELEMENT_TYPE_BOLD
-                ? ContentAPI.removeMarks(el)
-                : el,
-            isBold: ContentAPI.isTypeOf(el) === ELEMENT_TYPE_BOLD,
+            content: isTypeOf(el) === ELEMENT_TYPE_BOLD ? removeMarks(el) : el,
+            isBold: isTypeOf(el) === ELEMENT_TYPE_BOLD,
           };
         }),
       };
     });
 
     return {
-      ContentAPI,
       elementType,
       elementContents,
       ELEMENT_TYPE_PHOTO,

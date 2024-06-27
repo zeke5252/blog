@@ -47,7 +47,7 @@
         >
           <div v-if="post.isPhotoExisted" style="overflow: hidden">
             <BasePhoto
-              :Url="PhotoAPI.getSrc(post.imageFiles, true)"
+              :url="getSrc(post.imageFiles, true)"
               :Images="post.imageFiles"
               :showExif="false"
               :showBorder="false"
@@ -81,8 +81,15 @@
 </template>
 
 <script>
+import _ from 'lodash';
 import { db, storage } from '@/firebaseDB.js';
 import { firebase } from '@firebase/app';
+import { useStore } from 'vuex';
+import { usePhoto } from '../composables/usePhoto.js';
+import { useContent } from '../composables/useContent.js';
+import { useTime } from '../composables/useTime.js';
+import BasePhoto from '../components/BasePhoto.vue';
+import BaseLoading from '../components/BaseLoading.vue';
 import {
   ref,
   computed,
@@ -90,12 +97,6 @@ import {
   onBeforeUnmount,
   defineComponent,
 } from 'vue';
-import { useStore } from 'vuex';
-import { convertTime, ContentAPI, PhotoAPI } from '../utils/common.js';
-import _ from 'lodash';
-
-import BasePhoto from '../components/BasePhoto.vue';
-import BaseLoading from '../components/BaseLoading.vue';
 
 export default defineComponent({
   name: 'Home',
@@ -109,6 +110,10 @@ export default defineComponent({
     });
 
     const store = useStore();
+    const { convertTime } = useTime();
+    const { splitPost, limitStrSize, removeMarks } = useContent();
+    const { getSrc } = usePhoto();
+
     const isLogin = ref();
     const postsAmount = ref(7);
     const postsTimes = ref(0);
@@ -210,7 +215,7 @@ export default defineComponent({
     }
 
     async function removePostImages(post) {
-      const imagesUrls = PhotoAPI.getSrc(post.imageFiles);
+      const imagesUrls = getSrc(post.imageFiles);
       // Need to use new RegExg() instead of .match(/.../) to avoid error in js
       const re = new RegExp('(?<=%2F).*(?=,)|(?<=%2F).*(?=\\?)', 'g');
       const imagesToDelete = imagesUrls.map((url) => url.match(re)[0]);
@@ -235,13 +240,11 @@ export default defineComponent({
     }
 
     function getBrief(content) {
-      const contentsArr = ContentAPI.splitPost(content);
+      const contentsArr = splitPost(content);
       if (!contentsArr || !Array.isArray(contentsArr))
         return contentsArr || 'No contents!';
       const result = contentsArr.find((el) => el.substring(0, 4) !== 'http');
-      return result
-        ? ContentAPI.limitStrSize(ContentAPI.removeMarks(result), 150)
-        : 'No contents!';
+      return result ? limitStrSize(removeMarks(result), 150) : 'No contents!';
     }
 
     onMounted(async () => {
@@ -256,7 +259,6 @@ export default defineComponent({
 
     return {
       isLogin,
-      PhotoAPI,
       postsCollector,
       category,
       keyword,
@@ -265,6 +267,7 @@ export default defineComponent({
       removePost,
       categories,
       filteredPosts,
+      getSrc,
     };
   },
 });

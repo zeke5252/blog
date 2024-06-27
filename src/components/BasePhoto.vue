@@ -1,9 +1,9 @@
 <template>
   <div class="cover--photo">
     <img
-      :src="Url"
+      :src="url"
       @load="removeImgLogo($event)"
-      :class="{ photoBorder: props.showBorder }"
+      :class="{ photoBorder: showBorder }"
     />
     <img
       v-if="!isLoaded"
@@ -12,15 +12,11 @@
     />
     <ul
       class="px-4 py-3 px-sm-5 py-sm-4"
-      v-if="
-        PhotoAPI.getExif(props.Url, props.Images) !== '{}' && props.showExif
-      "
+      v-if="getExif(url, Images) !== '{}' && showExif"
     >
       <li
         class="py-1 py-sm-2"
-        v-for="info in Object.entries(
-          PhotoAPI.getExif(props.Url, props.Images)
-        )"
+        v-for="info in Object.entries(getExif(url, Images))"
         :key="info"
       >
         <span style="font-weight: 400" v-text="info[0]" /> :
@@ -29,24 +25,38 @@
     </ul>
   </div>
 </template>
-<script setup>
-import { PhotoAPI } from '../utils/common.js';
-import { ref } from 'vue';
+<script>
+import { usePhoto } from '../composables/usePhoto.js';
+import { ref, defineComponent } from 'vue';
 // eslint-disable-next-line no-undef
-const props = defineProps({
-  Url: String,
-  Images: String,
-  showExif: {
-    type: Boolean,
-    default: true,
+export default defineComponent({
+  name: 'BasePhoto',
+  props: {
+    url: String,
+    Images: String,
+    showExif: {
+      type: Boolean,
+      default: true,
+    },
+    showBorder: {
+      type: Boolean,
+      default: true,
+    },
   },
-  showBorder: {
-    type: Boolean,
-    default: true,
+  setup() {
+    const isLoaded = ref(false);
+
+    const { getSrc, getExif } = usePhoto();
+
+    const removeImgLogo = () => (isLoaded.value = true);
+    return {
+      isLoaded,
+      getSrc,
+      getExif,
+      removeImgLogo,
+    };
   },
 });
-const isLoaded = ref(false);
-const removeImgLogo = () => (isLoaded.value = true);
 </script>
 
 <style scoped lang="scss">

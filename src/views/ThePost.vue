@@ -89,7 +89,9 @@
 
 <script>
 import { ref, computed, watch, defineComponent } from 'vue';
-import { convertTime, ContentAPI } from '../utils/common.js';
+import { useContent } from '../composables/useContent.js';
+import { usePhoto } from '../composables/usePhoto.js';
+import { useTime } from '../composables/useTime.js';
 import { firebase } from '@firebase/app';
 import { useStore } from 'vuex';
 import { useRouter, useRoute } from 'vue-router';
@@ -106,6 +108,9 @@ export default defineComponent({
     const store = useStore();
     const router = useRouter();
     const route = useRoute();
+    const { convertTime } = useTime();
+    const { splitPost } = useContent();
+    const { getSrc } = usePhoto();
 
     const contents = ref(null);
     const msgTitle = ref('');
@@ -114,24 +119,19 @@ export default defineComponent({
     const title = computed(() => route.params.title);
 
     async function init() {
-      contents.value = null;
-
       try {
-        const querySnapshot = await db
-          .collection('posts')
-          .where('title', '==', title.value)
-          .get();
-
-        querySnapshot.forEach((doc) => {
-          const postData = doc.data();
-          contents.value = postData;
-          contents.value.postCaption = `${postData.category} / ${convertTime(postData.created)}`;
-          contents.value.postElements = ContentAPI.splitPost(postData.content);
+        await store.dispatch('fetchPost', {
+          title: title.value,
         });
-
+        const postData = store.state.post;
+        contents.value = postData;
+        contents.value.postCaption = `${postData.category} / ${convertTime(postData.created)}`;
+        contents.value.postElements = splitPost(postData.content);
         await handleAdjacentPosts(contents.value.created);
+        contents.value.nextPost = store.state.nextPost;
+        contents.value.prevPost = store.state.prevPost;
       } catch (error) {
-        console.log('Error getting documents: ', error);
+        console.log('init Error getting documents: ', error);
         router.replace({ name: 'The404' });
       }
     }
@@ -144,8 +144,6 @@ export default defineComponent({
         created,
         isNext: false,
       });
-      contents.value.nextPost = store.state.nextPost;
-      contents.value.prevPost = store.state.prevPost;
     }
 
     function doPrev() {
@@ -206,6 +204,7 @@ export default defineComponent({
       doPrev,
       doNext,
       doPostMsg,
+      getSrc,
     };
   },
 });

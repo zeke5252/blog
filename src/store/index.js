@@ -4,6 +4,7 @@ import { db } from '../firebaseDB.js';
 export default createStore({
   state: {
     posts: null,
+    post: null,
     prevPost: null,
     nextPost: null,
   },
@@ -28,11 +29,26 @@ export default createStore({
   },
   mutations: {
     updatePosts: (state, posts) => (state.posts = posts),
+    updatePost: (state, { post }) => (state.post = post),
     updateAdjacentPost: (state, { post, isNext = true }) => {
       isNext ? (state.nextPost = post) : (state.prevPost = post);
     },
   },
   actions: {
+    async fetchPost({ commit }, { title }) {
+      try {
+        const querySnapshot = await db
+          .collection('posts')
+          .where('title', '==', title)
+          .get();
+        const [data] = querySnapshot.docs.map((doc) => {
+          return doc.data();
+        });
+        commit('updatePost', { post: data });
+      } catch (error) {
+        console.log('fetchPost Error getting documents: ', error);
+      }
+    },
     async fetchAdjacentPost({ commit }, { created, isNext = true }) {
       if (!created) return false;
       try {
