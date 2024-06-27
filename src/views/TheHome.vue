@@ -1,5 +1,5 @@
 <template>
-  <BaseLoading v-if="!filteredPosts?.length" />
+  <BaseLoading v-if="loading" />
   <div v-else class="home">
     <div class="d-flex justify-content-end fixed-top pe-3 pe-md-4 mt-1">
       <select v-model="category" class="search--input py-1 px-3 me-3">
@@ -123,6 +123,8 @@ export default defineComponent({
     const postsCollector = ref([]);
     const keywordPosts = ref([]);
 
+    const loading = ref(true);
+
     const loadMore = _.debounce(() => {
       const postsToAdd = store.getters.extraPosts({
         times: postsTimes.value,
@@ -133,6 +135,7 @@ export default defineComponent({
       if (postsToAdd.length === 0) {
         document.removeEventListener('scroll', calcCursorPosition);
       }
+      loading.value = false;
       isInMoreStatus.value = false;
     }, 1000);
 
@@ -268,6 +271,7 @@ export default defineComponent({
       categories,
       filteredPosts,
       getSrc,
+      loading,
     };
   },
 });
